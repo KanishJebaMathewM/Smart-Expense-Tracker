@@ -598,6 +598,48 @@ class ExpenseTracker {
         const expenses = this.getTotalMonthlyExpensesForMonth(month, year);
         return income > 0 || expenses > 0;
     }
+
+    // All-time totals calculation methods
+    getAllTimeIncome() {
+        const allIncomes = this.getAllIncomes();
+        return Object.values(allIncomes).reduce((total, income) => total + parseFloat(income), 0);
+    }
+
+    getAllTimeExpenses() {
+        let total = 0;
+        Object.keys(this.expenses).forEach(dateKey => {
+            this.expenses[dateKey].forEach(expense => {
+                total += parseFloat(expense.amount);
+            });
+        });
+        return total;
+    }
+
+    getAllTimeSavings() {
+        return this.getAllTimeIncome() - this.getAllTimeExpenses();
+    }
+
+    // Update all-time totals display
+    updateAllTimeTotals() {
+        const totalIncome = this.getAllTimeIncome();
+        const totalExpenses = this.getAllTimeExpenses();
+        const totalSavings = this.getAllTimeSavings();
+
+        // Update all-time totals display
+        document.getElementById('allTimeIncome').textContent = `₹${totalIncome.toLocaleString()}`;
+        document.getElementById('allTimeExpenses').textContent = `₹${totalExpenses.toLocaleString()}`;
+
+        const savingsElement = document.getElementById('allTimeSavings');
+        savingsElement.textContent = `₹${totalSavings.toLocaleString()}`;
+
+        // Apply color classes based on total savings
+        savingsElement.classList.remove('positive-balance', 'negative-balance');
+        if (totalSavings >= 0) {
+            savingsElement.classList.add('positive-balance');
+        } else {
+            savingsElement.classList.add('negative-balance');
+        }
+    }
     
     // Chart Methods
     renderCharts() {
