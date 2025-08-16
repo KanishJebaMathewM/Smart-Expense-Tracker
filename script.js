@@ -591,6 +591,13 @@ class ExpenseTracker {
         });
         return total;
     }
+
+    // Helper method to check if a month has meaningful data
+    hasMonthData(month = this.currentMonth, year = this.currentYear) {
+        const income = this.getIncome(month, year);
+        const expenses = this.getTotalMonthlyExpensesForMonth(month, year);
+        return income > 0 || expenses > 0;
+    }
     
     // Chart Methods
     renderCharts() {
