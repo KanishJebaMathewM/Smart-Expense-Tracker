@@ -1517,6 +1517,348 @@ body {
     }
 }
 
+/* Month Comparison Section */
+.month-comparison-section {
+    margin: var(--spacing-8) 0;
+}
+
+.month-comparison {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-6);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.month-comparison::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-500), var(--secondary-500), var(--success-500));
+}
+
+.comparison-header {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-contrast);
+    margin-bottom: var(--spacing-5);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.comparison-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.comparison-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+}
+
+.comparison-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.comparison-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.comparison-value {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    text-align: right;
+}
+
+.comparison-value.positive {
+    color: var(--success-600);
+    text-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+.comparison-value.negative {
+    color: var(--error-600);
+    text-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
+}
+
+.comparison-performance {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.comparison-performance.better {
+    background: linear-gradient(135deg, var(--success-100), var(--success-200));
+    color: var(--success-700);
+    border: 1px solid var(--success-300);
+}
+
+.comparison-performance.worse {
+    background: linear-gradient(135deg, var(--warning-100), var(--warning-200));
+    color: var(--warning-700);
+    border: 1px solid var(--warning-300);
+}
+
+.comparison-message {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: var(--spacing-6);
+    font-size: var(--font-size-base);
+}
+
+/* Responsive design for comparison section */
+@media (max-width: 768px) {
+    .month-comparison {
+        padding: var(--spacing-4);
+    }
+
+    .comparison-stats {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-3);
+    }
+
+    .comparison-item {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-2);
+    }
+
+    .comparison-value {
+        text-align: center;
+    }
+}
+
+/* All-Time Totals Section */
+.all-time-totals-section {
+    background: linear-gradient(135deg, var(--neutral-900) 0%, var(--neutral-800) 50%, var(--neutral-900) 100%);
+    padding: var(--spacing-10) 0;
+    margin-top: var(--spacing-10);
+    border-top: 3px solid var(--primary-500);
+    position: relative;
+}
+
+.all-time-totals-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.05) 0%,
+        rgba(16, 185, 129, 0.05) 50%,
+        rgba(139, 92, 246, 0.05) 100%);
+    pointer-events: none;
+}
+
+.all-time-title {
+    text-align: center;
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-inverse);
+    margin-bottom: var(--spacing-8);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.all-time-title::after {
+    content: '';
+    position: absolute;
+    bottom: -var(--spacing-3);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
+    border-radius: var(--border-radius-full);
+}
+
+.all-time-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.all-time-card {
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-2xl);
+    padding: var(--spacing-8);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-6);
+    transition: all 0.3s var(--bounce);
+    position: relative;
+    overflow: hidden;
+}
+
+.all-time-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg,
+        rgba(59, 130, 246, 0.1) 0%,
+        rgba(16, 185, 129, 0.1) 50%,
+        rgba(139, 92, 246, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.all-time-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.all-time-card:hover::before {
+    opacity: 1;
+}
+
+.all-time-card .card-icon {
+    min-width: 80px;
+    min-height: 80px;
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    border-radius: var(--border-radius-2xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.all-time-card.income-card .card-icon {
+    background: linear-gradient(135deg, var(--success-500), var(--success-600));
+    box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+}
+
+.all-time-card.expense-card .card-icon {
+    background: linear-gradient(135deg, var(--error-500), var(--error-600));
+    box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+}
+
+.all-time-card.savings-card .card-icon {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+
+.all-time-card .card-content {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.all-time-card .card-content h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: var(--spacing-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.all-time-card .card-amount {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-inverse);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    display: block;
+    line-height: var(--line-height-tight);
+}
+
+/* Responsive design for all-time totals */
+@media (max-width: 1024px) {
+    .all-time-cards {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-5);
+    }
+}
+
+@media (max-width: 768px) {
+    .all-time-totals-section {
+        padding: var(--spacing-8) 0;
+    }
+
+    .all-time-title {
+        font-size: var(--font-size-2xl);
+        margin-bottom: var(--spacing-6);
+    }
+
+    .all-time-cards {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-4);
+    }
+
+    .all-time-card {
+        padding: var(--spacing-6);
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-4);
+    }
+
+    .all-time-card .card-icon {
+        min-width: 70px;
+        min-height: 70px;
+        font-size: 2rem;
+    }
+
+    .all-time-card .card-amount {
+        font-size: var(--font-size-2xl);
+    }
+}
+
+@media (max-width: 480px) {
+    .all-time-card {
+        padding: var(--spacing-5);
+    }
+
+    .all-time-card .card-icon {
+        min-width: 60px;
+        min-height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .all-time-card .card-amount {
+        font-size: var(--font-size-xl);
+    }
+}
+
 /* Dark Mode Support (Optional Enhancement) */
 @media (prefers-color-scheme: dark) {
     :root {

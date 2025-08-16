@@ -9,7 +9,7 @@ class ExpenseTracker {
         
         // Data storage keys
         this.STORAGE_KEYS = {
-            INCOME: 'monthlyIncome',
+            INCOME: 'monthlyIncomes', // Changed to plural for month-specific storage
             EXPENSES: 'expenses'
         };
         
@@ -117,13 +117,23 @@ class ExpenseTracker {
         });
     }
     
-    getIncome() {
-        return parseFloat(localStorage.getItem(this.STORAGE_KEYS.INCOME)) || 0;
+    getIncome(month = this.currentMonth, year = this.currentYear) {
+        const incomes = this.getAllIncomes();
+        const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+        return parseFloat(incomes[key]) || 0;
     }
-    
-    setIncome(amount) {
-        localStorage.setItem(this.STORAGE_KEYS.INCOME, amount.toString());
+
+    setIncome(amount, month = this.currentMonth, year = this.currentYear) {
+        const incomes = this.getAllIncomes();
+        const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+        incomes[key] = amount;
+        localStorage.setItem(this.STORAGE_KEYS.INCOME, JSON.stringify(incomes));
         this.income = amount;
+    }
+
+    getAllIncomes() {
+        const incomes = localStorage.getItem(this.STORAGE_KEYS.INCOME);
+        return incomes ? JSON.parse(incomes) : {};
     }
     
     getExpenses() {
@@ -469,22 +479,22 @@ class ExpenseTracker {
         const income = this.getIncome();
         const totalSpent = this.getTotalMonthlyExpenses();
         const balance = income - totalSpent;
-        
+
         // Update dashboard cards
         document.getElementById('monthlyIncome').textContent = `₹${income.toLocaleString()}`;
         document.getElementById('totalSpent').textContent = `₹${totalSpent.toLocaleString()}`;
         document.getElementById('remainingBalance').textContent = `₹${balance.toLocaleString()}`;
-        
+
         // Update header balance
         const headerBalance = document.getElementById('headerBalance');
         headerBalance.textContent = `₹${balance.toLocaleString()}`;
-        
+
         // Apply color classes based on balance
         const balanceElements = [
             document.getElementById('remainingBalance'),
             headerBalance
         ];
-        
+
         balanceElements.forEach(element => {
             element.classList.remove('positive-balance', 'negative-balance');
             if (balance >= 0) {
@@ -493,6 +503,145 @@ class ExpenseTracker {
                 element.classList.add('negative-balance');
             }
         });
+
+        // Update month comparison
+        this.updateMonthComparison();
+
+        // Update all-time totals
+        this.updateAllTimeTotals();
+    }
+
+    updateMonthComparison() {
+        const comparisonElement = document.getElementById('monthComparison');
+        if (!comparisonElement) return;
+
+        // Get current month data
+        const currentIncome = this.getIncome();
+        const currentSpent = this.getTotalMonthlyExpenses();
+        const currentSavings = currentIncome - currentSpent;
+
+        // Get previous month data
+        let prevMonth = this.currentMonth - 1;
+        let prevYear = this.currentYear;
+        if (prevMonth < 0) {
+            prevMonth = 11;
+            prevYear = this.currentYear - 1;
+        }
+
+        const prevIncome = this.getIncome(prevMonth, prevYear);
+        const prevSpent = this.getTotalMonthlyExpensesForMonth(prevMonth, prevYear);
+        const prevSavings = prevIncome - prevSpent;
+
+        // Check if both months have meaningful data
+        const currentHasData = currentIncome > 0 || currentSpent > 0;
+        const prevHasData = prevIncome > 0 || prevSpent > 0;
+
+        // Calculate comparison
+        let comparisonHTML = '';
+
+        if (!prevHasData && !currentHasData) {
+            comparisonHTML = '<div class="comparison-message">No data available for comparison</div>';
+        } else if (!prevHasData) {
+            comparisonHTML = '<div class="comparison-message">No previous month data to compare</div>';
+        } else if (!currentHasData) {
+            comparisonHTML = '<div class="comparison-message">No current month data yet - start adding expenses or set income to see comparison</div>';
+        } else {
+            const savingsChange = currentSavings - prevSavings;
+            const spendingChange = currentSpent - prevSpent;
+            const savingsPercentage = prevSavings !== 0 ? ((savingsChange / Math.abs(prevSavings)) * 100) : 0;
+
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const prevMonthName = monthNames[prevMonth];
+            const currentMonthName = monthNames[this.currentMonth];
+
+            comparisonHTML = `
+                <div class="comparison-header">vs ${prevMonthName} ${prevYear}</div>
+                <div class="comparison-stats">
+                    <div class="comparison-item">
+                        <span class="comparison-label">Savings Change:</span>
+                        <span class="comparison-value ${savingsChange >= 0 ? 'positive' : 'negative'}">
+                            ${savingsChange >= 0 ? '+' : ''}₹${savingsChange.toLocaleString()}
+                        </span>
+                    </div>
+                    <div class="comparison-item">
+                        <span class="comparison-label">Spending Change:</span>
+                        <span class="comparison-value ${spendingChange <= 0 ? 'positive' : 'negative'}">
+                            ${spendingChange >= 0 ? '+' : ''}₹${spendingChange.toLocaleString()}
+                        </span>
+                    </div>
+                    <div class="comparison-item">
+                        <span class="comparison-label">Performance:</span>
+                        <span class="comparison-performance ${currentSavings >= prevSavings ? 'better' : 'worse'}">
+                            ${currentSavings >= prevSavings ? '📈 Better' : '📉 Needs Improvement'}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        comparisonElement.innerHTML = comparisonHTML;
+    }
+
+    getTotalMonthlyExpensesForMonth(month, year) {
+        let total = 0;
+        Object.keys(this.expenses).forEach(dateKey => {
+            const [expenseYear, expenseMonth] = dateKey.split('-');
+            if (parseInt(expenseYear) === year && parseInt(expenseMonth) === month + 1) {
+                this.expenses[dateKey].forEach(expense => {
+                    total += parseFloat(expense.amount);
+                });
+            }
+        });
+        return total;
+    }
+
+    // Helper method to check if a month has meaningful data
+    hasMonthData(month = this.currentMonth, year = this.currentYear) {
+        const income = this.getIncome(month, year);
+        const expenses = this.getTotalMonthlyExpensesForMonth(month, year);
+        return income > 0 || expenses > 0;
+    }
+
+    // All-time totals calculation methods
+    getAllTimeIncome() {
+        const allIncomes = this.getAllIncomes();
+        return Object.values(allIncomes).reduce((total, income) => total + parseFloat(income), 0);
+    }
+
+    getAllTimeExpenses() {
+        let total = 0;
+        Object.keys(this.expenses).forEach(dateKey => {
+            this.expenses[dateKey].forEach(expense => {
+                total += parseFloat(expense.amount);
+            });
+        });
+        return total;
+    }
+
+    getAllTimeSavings() {
+        return this.getAllTimeIncome() - this.getAllTimeExpenses();
+    }
+
+    // Update all-time totals display
+    updateAllTimeTotals() {
+        const totalIncome = this.getAllTimeIncome();
+        const totalExpenses = this.getAllTimeExpenses();
+        const totalSavings = this.getAllTimeSavings();
+
+        // Update all-time totals display
+        document.getElementById('allTimeIncome').textContent = `₹${totalIncome.toLocaleString()}`;
+        document.getElementById('allTimeExpenses').textContent = `₹${totalExpenses.toLocaleString()}`;
+
+        const savingsElement = document.getElementById('allTimeSavings');
+        savingsElement.textContent = `₹${totalSavings.toLocaleString()}`;
+
+        // Apply color classes based on total savings
+        savingsElement.classList.remove('positive-balance', 'negative-balance');
+        if (totalSavings >= 0) {
+            savingsElement.classList.add('positive-balance');
+        } else {
+            savingsElement.classList.add('negative-balance');
+        }
     }
     
     // Chart Methods
@@ -504,16 +653,18 @@ class ExpenseTracker {
     renderCategoryChart() {
         const canvas = document.getElementById('categoryChart');
         const ctx = canvas.getContext('2d');
-        
-        // Clear canvas
+
+        // Clear canvas completely
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Get category data for current month
+
+        // Get category data for current month ONLY
         const categoryTotals = this.getCategoryTotals();
         const categories = Object.keys(categoryTotals);
-        
+
         if (categories.length === 0) {
             this.drawNoDataMessage(ctx, canvas, 'No expenses this month');
+            // Also clear the legend when no data
+            this.drawHTMLLegend([], {});
             return;
         }
         
@@ -559,14 +710,14 @@ class ExpenseTracker {
     renderDailyChart() {
         const canvas = document.getElementById('dailyChart');
         const ctx = canvas.getContext('2d');
-        
-        // Clear canvas
+
+        // Clear canvas completely
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Get daily data for current month
+
+        // Get daily data for current month ONLY
         const dailyTotals = this.getDailyTotals();
         const days = Object.keys(dailyTotals).sort();
-        
+
         if (days.length === 0) {
             this.drawNoDataMessage(ctx, canvas, 'No daily expenses to show');
             return;
