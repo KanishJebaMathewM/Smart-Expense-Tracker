@@ -83,9 +83,16 @@
                 <section class="charts-section">
                     <div class="chart-container">
                         <h3>Spending Overview</h3>
-                        <canvas id="categoryChart" width="300" height="300"></canvas>
+                        <div class="chart-with-legend">
+                            <div class="chart-area">
+                                <canvas id="categoryChart" width="280" height="280"></canvas>
+                            </div>
+                            <div class="legend-area" id="categoryLegend">
+                                <div class="legend-title">Categories</div>
+                            </div>
+                        </div>
                     </div>
-                    
+
                     <div class="chart-container">
                         <h3>Daily Spending</h3>
                         <canvas id="dailyChart" width="300" height="200"></canvas>
