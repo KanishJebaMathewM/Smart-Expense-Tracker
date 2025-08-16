@@ -479,22 +479,22 @@ class ExpenseTracker {
         const income = this.getIncome();
         const totalSpent = this.getTotalMonthlyExpenses();
         const balance = income - totalSpent;
-        
+
         // Update dashboard cards
         document.getElementById('monthlyIncome').textContent = `₹${income.toLocaleString()}`;
         document.getElementById('totalSpent').textContent = `₹${totalSpent.toLocaleString()}`;
         document.getElementById('remainingBalance').textContent = `₹${balance.toLocaleString()}`;
-        
+
         // Update header balance
         const headerBalance = document.getElementById('headerBalance');
         headerBalance.textContent = `₹${balance.toLocaleString()}`;
-        
+
         // Apply color classes based on balance
         const balanceElements = [
             document.getElementById('remainingBalance'),
             headerBalance
         ];
-        
+
         balanceElements.forEach(element => {
             element.classList.remove('positive-balance', 'negative-balance');
             if (balance >= 0) {
@@ -503,6 +503,85 @@ class ExpenseTracker {
                 element.classList.add('negative-balance');
             }
         });
+
+        // Update month comparison
+        this.updateMonthComparison();
+    }
+
+    updateMonthComparison() {
+        const comparisonElement = document.getElementById('monthComparison');
+        if (!comparisonElement) return;
+
+        // Get current month data
+        const currentIncome = this.getIncome();
+        const currentSpent = this.getTotalMonthlyExpenses();
+        const currentSavings = currentIncome - currentSpent;
+
+        // Get previous month data
+        let prevMonth = this.currentMonth - 1;
+        let prevYear = this.currentYear;
+        if (prevMonth < 0) {
+            prevMonth = 11;
+            prevYear = this.currentYear - 1;
+        }
+
+        const prevIncome = this.getIncome(prevMonth, prevYear);
+        const prevSpent = this.getTotalMonthlyExpensesForMonth(prevMonth, prevYear);
+        const prevSavings = prevIncome - prevSpent;
+
+        // Calculate comparison
+        let comparisonHTML = '';
+
+        if (prevIncome === 0 && prevSpent === 0) {
+            comparisonHTML = '<div class="comparison-message">No previous month data to compare</div>';
+        } else {
+            const savingsChange = currentSavings - prevSavings;
+            const spendingChange = currentSpent - prevSpent;
+            const savingsPercentage = prevSavings !== 0 ? ((savingsChange / Math.abs(prevSavings)) * 100) : 0;
+
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const prevMonthName = monthNames[prevMonth];
+            const currentMonthName = monthNames[this.currentMonth];
+
+            comparisonHTML = `
+                <div class="comparison-header">vs ${prevMonthName} ${prevYear}</div>
+                <div class="comparison-stats">
+                    <div class="comparison-item">
+                        <span class="comparison-label">Savings Change:</span>
+                        <span class="comparison-value ${savingsChange >= 0 ? 'positive' : 'negative'}">
+                            ${savingsChange >= 0 ? '+' : ''}₹${savingsChange.toLocaleString()}
+                        </span>
+                    </div>
+                    <div class="comparison-item">
+                        <span class="comparison-label">Spending Change:</span>
+                        <span class="comparison-value ${spendingChange <= 0 ? 'positive' : 'negative'}">
+                            ${spendingChange >= 0 ? '+' : ''}₹${spendingChange.toLocaleString()}
+                        </span>
+                    </div>
+                    <div class="comparison-item">
+                        <span class="comparison-label">Performance:</span>
+                        <span class="comparison-performance ${currentSavings >= prevSavings ? 'better' : 'worse'}">
+                            ${currentSavings >= prevSavings ? '📈 Better' : '📉 Needs Improvement'}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        comparisonElement.innerHTML = comparisonHTML;
+    }
+
+    getTotalMonthlyExpensesForMonth(month, year) {
+        let total = 0;
+        Object.keys(this.expenses).forEach(dateKey => {
+            const [expenseYear, expenseMonth] = dateKey.split('-');
+            if (parseInt(expenseYear) === year && parseInt(expenseMonth) === month + 1) {
+                this.expenses[dateKey].forEach(expense => {
+                    total += parseFloat(expense.amount);
+                });
+            }
+        });
+        return total;
     }
     
     // Chart Methods
