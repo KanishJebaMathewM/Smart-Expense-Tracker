@@ -506,6 +506,9 @@ class ExpenseTracker {
 
         // Update month comparison
         this.updateMonthComparison();
+
+        // Update all-time totals
+        this.updateAllTimeTotals();
     }
 
     updateMonthComparison() {
