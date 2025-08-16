@@ -529,11 +529,19 @@ class ExpenseTracker {
         const prevSpent = this.getTotalMonthlyExpensesForMonth(prevMonth, prevYear);
         const prevSavings = prevIncome - prevSpent;
 
+        // Check if both months have meaningful data
+        const currentHasData = currentIncome > 0 || currentSpent > 0;
+        const prevHasData = prevIncome > 0 || prevSpent > 0;
+
         // Calculate comparison
         let comparisonHTML = '';
 
-        if (prevIncome === 0 && prevSpent === 0) {
+        if (!prevHasData && !currentHasData) {
+            comparisonHTML = '<div class="comparison-message">No data available for comparison</div>';
+        } else if (!prevHasData) {
             comparisonHTML = '<div class="comparison-message">No previous month data to compare</div>';
+        } else if (!currentHasData) {
+            comparisonHTML = '<div class="comparison-message">No current month data yet - start adding expenses or set income to see comparison</div>';
         } else {
             const savingsChange = currentSavings - prevSavings;
             const spendingChange = currentSpent - prevSpent;
