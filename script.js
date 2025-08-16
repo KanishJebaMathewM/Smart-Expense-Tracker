@@ -9,7 +9,7 @@ class ExpenseTracker {
         
         // Data storage keys
         this.STORAGE_KEYS = {
-            INCOME: 'monthlyIncome',
+            INCOME: 'monthlyIncomes', // Changed to plural for month-specific storage
             EXPENSES: 'expenses'
         };
         
@@ -117,13 +117,23 @@ class ExpenseTracker {
         });
     }
     
-    getIncome() {
-        return parseFloat(localStorage.getItem(this.STORAGE_KEYS.INCOME)) || 0;
+    getIncome(month = this.currentMonth, year = this.currentYear) {
+        const incomes = this.getAllIncomes();
+        const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+        return parseFloat(incomes[key]) || 0;
     }
-    
-    setIncome(amount) {
-        localStorage.setItem(this.STORAGE_KEYS.INCOME, amount.toString());
+
+    setIncome(amount, month = this.currentMonth, year = this.currentYear) {
+        const incomes = this.getAllIncomes();
+        const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+        incomes[key] = amount;
+        localStorage.setItem(this.STORAGE_KEYS.INCOME, JSON.stringify(incomes));
         this.income = amount;
+    }
+
+    getAllIncomes() {
+        const incomes = localStorage.getItem(this.STORAGE_KEYS.INCOME);
+        return incomes ? JSON.parse(incomes) : {};
     }
     
     getExpenses() {
