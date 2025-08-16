@@ -1517,6 +1517,141 @@ body {
     }
 }
 
+/* Month Comparison Section */
+.month-comparison-section {
+    margin: var(--spacing-8) 0;
+}
+
+.month-comparison {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-6);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.month-comparison::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-500), var(--secondary-500), var(--success-500));
+}
+
+.comparison-header {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-contrast);
+    margin-bottom: var(--spacing-5);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.comparison-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.comparison-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+}
+
+.comparison-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.comparison-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.comparison-value {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    text-align: right;
+}
+
+.comparison-value.positive {
+    color: var(--success-600);
+    text-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+.comparison-value.negative {
+    color: var(--error-600);
+    text-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
+}
+
+.comparison-performance {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.comparison-performance.better {
+    background: linear-gradient(135deg, var(--success-100), var(--success-200));
+    color: var(--success-700);
+    border: 1px solid var(--success-300);
+}
+
+.comparison-performance.worse {
+    background: linear-gradient(135deg, var(--warning-100), var(--warning-200));
+    color: var(--warning-700);
+    border: 1px solid var(--warning-300);
+}
+
+.comparison-message {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: var(--spacing-6);
+    font-size: var(--font-size-base);
+}
+
+/* Responsive design for comparison section */
+@media (max-width: 768px) {
+    .month-comparison {
+        padding: var(--spacing-4);
+    }
+
+    .comparison-stats {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-3);
+    }
+
+    .comparison-item {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-2);
+    }
+
+    .comparison-value {
+        text-align: center;
+    }
+}
+
 /* Dark Mode Support (Optional Enhancement) */
 @media (prefers-color-scheme: dark) {
     :root {
