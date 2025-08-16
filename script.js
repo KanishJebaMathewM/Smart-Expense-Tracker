@@ -601,16 +601,18 @@ class ExpenseTracker {
     renderCategoryChart() {
         const canvas = document.getElementById('categoryChart');
         const ctx = canvas.getContext('2d');
-        
-        // Clear canvas
+
+        // Clear canvas completely
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Get category data for current month
+
+        // Get category data for current month ONLY
         const categoryTotals = this.getCategoryTotals();
         const categories = Object.keys(categoryTotals);
-        
+
         if (categories.length === 0) {
             this.drawNoDataMessage(ctx, canvas, 'No expenses this month');
+            // Also clear the legend when no data
+            this.drawHTMLLegend([], {});
             return;
         }
         
@@ -656,14 +658,14 @@ class ExpenseTracker {
     renderDailyChart() {
         const canvas = document.getElementById('dailyChart');
         const ctx = canvas.getContext('2d');
-        
-        // Clear canvas
+
+        // Clear canvas completely
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Get daily data for current month
+
+        // Get daily data for current month ONLY
         const dailyTotals = this.getDailyTotals();
         const days = Object.keys(dailyTotals).sort();
-        
+
         if (days.length === 0) {
             this.drawNoDataMessage(ctx, canvas, 'No daily expenses to show');
             return;
