@@ -1859,6 +1859,9 @@ body {
     }
 }
 
+/* Import Enhanced Features */
+@import url('css/enhanced-features.css');
+
 /* Dark Mode Support (Optional Enhancement) */
 @media (prefers-color-scheme: dark) {
     :root {
