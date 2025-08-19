@@ -747,7 +747,7 @@ body {
 /* Fallback for browsers that don't support background-clip: text */
 @supports not (-webkit-background-clip: text) {
     .month-title {
-        color: var(--primary-700) !important;
+        color: var(--primary-400) !important;
         background: none !important;
         -webkit-text-fill-color: unset !important;
     }
