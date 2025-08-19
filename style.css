@@ -872,9 +872,10 @@ body {
 }
 
 .calendar-date.has-expenses {
-    background: linear-gradient(135deg, var(--success-50), var(--success-100));
-    border-color: var(--success-300);
+    background: linear-gradient(135deg, var(--success-700), var(--success-600));
+    border-color: var(--success-400);
     box-shadow: var(--shadow-sm);
+    color: var(--text-inverse);
 }
 
 .calendar-date.has-expenses:hover {
