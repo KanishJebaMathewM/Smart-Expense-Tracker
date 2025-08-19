@@ -656,7 +656,7 @@ class SmartExpenseTracker {
                     </div>
                     <div class="expense-amount">₹${parseFloat(expense.amount).toFixed(2)}</div>
                     <div class="expense-actions">
-                        <button class="edit-btn" onclick="tracker.editExpense('${expense.id}')" title="Edit">✏��</button>
+                        <button class="edit-btn" onclick="tracker.editExpense('${expense.id}')" title="Edit">✏️</button>
                         <button class="delete-btn" onclick="tracker.deleteExpense('${expense.id}')" title="Delete">🗑️</button>
                     </div>
                 </div>
@@ -1095,16 +1095,27 @@ class SmartExpenseTracker {
             const today = new Date();
             let streak = 0;
             let currentDate = new Date(today);
+            let foundExpenseToday = false;
+
+            // Check if there are expenses today first
+            const todayExpenses = this.getTotalExpensesForDate(currentDate);
+            if (todayExpenses <= 0) {
+                return 0; // No streak if no expenses today
+            }
 
             // Go back day by day until we find a day without expenses
             while (currentDate.getMonth() === this.currentMonth && currentDate.getFullYear() === this.currentYear) {
                 const totalForDate = this.getTotalExpensesForDate(currentDate);
                 if (totalForDate > 0) {
                     streak++;
-                } else {
-                    break;
+                    foundExpenseToday = true;
+                } else if (foundExpenseToday) {
+                    break; // Stop at first day without expenses after finding expenses
                 }
                 currentDate.setDate(currentDate.getDate() - 1);
+
+                // Prevent infinite loop - max 31 days
+                if (streak > 31) break;
             }
 
             return streak;
@@ -1273,7 +1284,7 @@ class SmartExpenseTracker {
                 if (barHeight > 20) {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = 'bold 10px Inter';
-                    ctx.fillText(`₹${amount.toFixed(0)}`, x + barWidth / 2, y + 15);
+                    ctx.fillText(`��${amount.toFixed(0)}`, x + barWidth / 2, y + 15);
                 }
             });
         } catch (error) {
