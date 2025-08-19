@@ -1354,8 +1354,8 @@ body {
 }
 
 .form-group select option {
-    background: #FFFFFF !important;
-    color: #1E293B !important;
+    background: rgba(30, 41, 59, 0.95) !important;
+    color: var(--text-primary) !important;
 }
 
 .input-hint {
