@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#3B82F6">
-    <title>Smart Expense Tracker - Advanced Financial Management</title>
-    <meta name="description" content="Comprehensive expense tracking with budgets, goals, analytics, and advanced reporting">
+    <title>Smart Expense Tracker - Financial Management</title>
+    <meta name="description" content="Smart expense tracking with budgets, analytics, and comprehensive reporting">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Notification Container will be injected by JS -->
 </head>
 <body class="theme-light">
     <!-- Loading Screen -->
@@ -44,24 +42,15 @@
                 </div>
                 
                 <div class="header-right">
-                    <div class="header-search">
-                        <input type="text" id="headerSearchInput" placeholder="Quick search..." class="search-input">
-                        <button id="headerSearchBtn" class="search-btn">🔍</button>
-                    </div>
-                    
                     <div class="header-actions">
                         <button id="quickAddExpense" class="action-btn" title="Quick Add Expense (Ctrl+E)">
                             <span>➕</span>
                             <span class="btn-text">Add Expense</span>
                         </button>
                         
-                        <button id="notificationsBtn" class="action-btn" title="Notifications">
-                            <span>🔔</span>
-                            <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
-                        </button>
-                        
-                        <button id="settingsBtn" class="action-btn" title="Settings (Ctrl+S)">
-                            <span>⚙️</span>
+                        <button id="setIncomeBtn" class="action-btn" title="Set Income (Ctrl+I)">
+                            <span>💰</span>
+                            <span class="btn-text">Set Income</span>
                         </button>
                     </div>
                 </div>
@@ -74,14 +63,6 @@
                         <span class="tab-icon">🏠</span>
                         <span class="tab-text">Dashboard</span>
                     </button>
-                    <button class="nav-tab" data-section="budget">
-                        <span class="tab-icon">🎯</span>
-                        <span class="tab-text">Budgets</span>
-                    </button>
-                    <button class="nav-tab" data-section="goals">
-                        <span class="tab-icon">🏆</span>
-                        <span class="tab-text">Goals</span>
-                    </button>
                     <button class="nav-tab" data-section="analytics">
                         <span class="tab-icon">📊</span>
                         <span class="tab-text">Analytics</span>
@@ -90,16 +71,6 @@
                         <span class="tab-icon">📋</span>
                         <span class="tab-text">Reports</span>
                     </button>
-                    <button class="nav-tab" data-section="recurring">
-                        <span class="tab-icon">🔄</span>
-                        <span class="tab-text">Recurring</span>
-                    </button>
-                </div>
-                
-                <div class="nav-actions">
-                    <button id="searchBtn" class="nav-action-btn" title="Advanced Search">🔍</button>
-                    <button id="exportBtn" class="nav-action-btn" title="Export Data">📤</button>
-                    <button id="helpBtn" class="nav-action-btn" title="Help & Shortcuts">❓</button>
                 </div>
             </nav>
         </div>
@@ -120,7 +91,7 @@
                                 <span id="monthlyIncome" class="card-amount">₹0</span>
                             </div>
                             <div class="card-action">
-                                <button id="setIncomeBtn" class="card-btn">Set Income</button>
+                                <button id="setIncomeBtn2" class="card-btn" onclick="tracker?.showIncomeModal()">Set Income</button>
                             </div>
                         </div>
                         
@@ -130,7 +101,6 @@
                                 <h3>Total Spent</h3>
                                 <span id="totalSpent" class="card-amount">₹0</span>
                             </div>
-                            <div class="card-trend" id="spentTrend"></div>
                         </div>
                         
                         <div class="dashboard-card balance-card">
@@ -138,11 +108,6 @@
                             <div class="card-content">
                                 <h3>Remaining</h3>
                                 <span id="remainingBalance" class="card-amount">₹0</span>
-                            </div>
-                            <div class="card-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="balanceProgress"></div>
-                                </div>
                             </div>
                         </div>
                         
@@ -152,43 +117,17 @@
                                 <h3>Savings Rate</h3>
                                 <span id="savingsRate" class="card-amount">0%</span>
                             </div>
-                            <div class="card-status" id="savingsStatus">Good</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Month Comparison Section -->
                 <section class="month-comparison-section">
+                    <h2 class="section-title">Month Comparison</h2>
                     <div id="monthComparison" class="month-comparison">
                         <div class="comparison-message">Loading comparison...</div>
                     </div>
                 </section>
-
-                <!-- Quick Actions Bar -->
-                <div class="quick-actions-bar">
-                    <div class="quick-actions">
-                        <button class="quick-action-btn" onclick="window.expenseTracker.showIncomeModal()">
-                            <span class="action-icon">💰</span>
-                            <span class="action-text">Set Income</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="window.expenseTracker.budgetManager?.showBudgetModal()">
-                            <span class="action-icon">🎯</span>
-                            <span class="action-text">Manage Budget</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="window.expenseTracker.goalsManager?.showGoalsModal()">
-                            <span class="action-icon">🏆</span>
-                            <span class="action-text">Set Goals</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="window.expenseTracker.recurringManager?.showRecurringModal()">
-                            <span class="action-icon">🔄</span>
-                            <span class="action-text">Recurring</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="window.expenseTracker.reportsManager?.showReportsModal()">
-                            <span class="action-icon">📊</span>
-                            <span class="action-text">Reports</span>
-                        </button>
-                    </div>
-                </div>
 
                 <!-- Calendar and Charts Container -->
                 <div class="content-grid">
@@ -217,7 +156,7 @@
                     <!-- Charts Section -->
                     <section class="charts-section">
                         <div class="chart-container">
-                            <h3>Spending Overview</h3>
+                            <h3>Spending by Category</h3>
                             <div class="chart-with-legend">
                                 <div class="chart-area">
                                     <canvas id="categoryChart" width="280" height="280"></canvas>
@@ -232,36 +171,7 @@
                             <h3>Daily Spending</h3>
                             <canvas id="dailyChart" width="300" height="200"></canvas>
                         </div>
-                        
-                        <div class="chart-container">
-                            <h3>Trends</h3>
-                            <canvas id="trendChart" width="300" height="200"></canvas>
-                        </div>
                     </section>
-                </div>
-            </section>
-
-            <!-- Budget Section -->
-            <section id="budgetSection" class="app-section">
-                <div class="section-header">
-                    <h2>📊 Budget Management</h2>
-                    <button id="budgetBtn" class="btn btn-primary">Manage Budgets</button>
-                </div>
-                <div id="budgetOverview" class="budget-overview-content">
-                    <!-- Budget content will be dynamically loaded -->
-                    <div class="loading-placeholder">Loading budget information...</div>
-                </div>
-            </section>
-
-            <!-- Goals Section -->
-            <section id="goalsSection" class="app-section">
-                <div class="section-header">
-                    <h2>🏆 Financial Goals</h2>
-                    <button id="goalsBtn" class="btn btn-primary">Manage Goals</button>
-                </div>
-                <div id="goalsOverview" class="goals-overview-content">
-                    <!-- Goals content will be dynamically loaded -->
-                    <div class="loading-placeholder">Loading goals information...</div>
                 </div>
             </section>
 
@@ -269,35 +179,48 @@
             <section id="analyticsSection" class="app-section">
                 <div class="section-header">
                     <h2>📈 Analytics & Insights</h2>
-                    <button id="analyticsBtn" class="btn btn-primary">Advanced Analytics</button>
+                    <p class="section-description">Detailed analysis of your spending patterns and financial trends</p>
                 </div>
-                <div id="analyticsOverview" class="analytics-overview-content">
-                    <!-- Analytics content will be dynamically loaded -->
-                    <div class="loading-placeholder">Loading analytics...</div>
+                <div class="analytics-overview-content">
+                    <div class="analytics-cards">
+                        <div class="analytics-card">
+                            <h4>Average Daily Spending</h4>
+                            <div class="analytics-value" id="avgDailySpending">₹0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Highest Expense Category</h4>
+                            <div class="analytics-value" id="topCategory">N/A</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Days with Expenses</h4>
+                            <div class="analytics-value" id="expenseDays">0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Spending Streak</h4>
+                            <div class="analytics-value" id="spendingStreak">0 days</div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- Reports Section -->
             <section id="reportsSection" class="app-section">
                 <div class="section-header">
-                    <h2>📋 Reports & Documents</h2>
-                    <button id="reportsBtn" class="btn btn-primary">Generate Report</button>
+                    <h2>📋 Reports & Summary</h2>
+                    <p class="section-description">Comprehensive financial reports and summaries</p>
                 </div>
-                <div id="reportsOverview" class="reports-overview-content">
-                    <!-- Reports content will be dynamically loaded -->
-                    <div class="loading-placeholder">Loading reports...</div>
-                </div>
-            </section>
-
-            <!-- Recurring Section -->
-            <section id="recurringSection" class="app-section">
-                <div class="section-header">
-                    <h2>🔄 Recurring Expenses</h2>
-                    <button id="recurringBtn" class="btn btn-primary">Manage Recurring</button>
-                </div>
-                <div id="recurringOverview" class="recurring-overview-content">
-                    <!-- Recurring content will be dynamically loaded -->
-                    <div class="loading-placeholder">Loading recurring expenses...</div>
+                <div class="reports-overview-content">
+                    <div class="reports-actions">
+                        <button class="btn btn-primary" onclick="tracker?.generateMonthlyReport()">
+                            📊 Generate Monthly Report
+                        </button>
+                        <button class="btn btn-secondary" onclick="tracker?.exportData()">
+                            📤 Export Data
+                        </button>
+                    </div>
+                    <div id="reportContent" class="report-content">
+                        <p class="report-placeholder">Click "Generate Monthly Report" to see detailed analysis</p>
+                    </div>
                 </div>
             </section>
         </div>
@@ -324,7 +247,7 @@
                     </div>
                     
                     <div class="all-time-card savings-card">
-                        <div class="card-icon">���</div>
+                        <div class="card-icon">💰</div>
                         <div class="card-content">
                             <h3>Total Savings</h3>
                             <span id="allTimeSavings" class="card-amount">₹0</span>
@@ -340,18 +263,18 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Set Monthly Income</h3>
-                <button id="closeIncomeModal" class="close-btn">&times;</button>
+                <button class="close-btn" onclick="tracker?.hideIncomeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="incomeAmount">Monthly Income (<span class="currency-symbol">₹</span>)</label>
-                    <input type="number" id="incomeAmount" placeholder="Enter your monthly income" min="0" step="0.01">
+                    <label for="incomeAmount">Monthly Income (₹)</label>
+                    <input type="number" id="incomeAmount" placeholder="Enter your monthly income" min="0" step="0.01" required>
                     <div class="input-hint">Set your income for the current month</div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button id="saveIncome" class="btn btn-primary">Save Income</button>
-                <button id="closeIncomeModal" class="btn btn-secondary">Cancel</button>
+                <button class="btn btn-secondary" onclick="tracker?.hideIncomeModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -361,17 +284,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="expenseModalTitle">Add Expense</h3>
-                <button id="closeExpenseModal" class="close-btn">&times;</button>
+                <button class="close-btn" onclick="tracker?.hideExpenseModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
                     <label for="expenseName">Expense Name</label>
-                    <input type="text" id="expenseName" placeholder="e.g., Groceries, Transportation">
+                    <input type="text" id="expenseName" placeholder="e.g., Groceries, Transportation" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="expenseCategory">Category</label>
-                    <select id="expenseCategory">
+                    <select id="expenseCategory" required>
                         <option value="Food">🍔 Food</option>
                         <option value="Transportation">🚗 Transportation</option>
                         <option value="Entertainment">🎬 Entertainment</option>
@@ -384,8 +307,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="expenseAmount">Amount (<span class="currency-symbol">₹</span>)</label>
-                    <input type="number" id="expenseAmount" placeholder="0.00" min="0" step="0.01">
+                    <label for="expenseAmount">Amount (₹)</label>
+                    <input type="number" id="expenseAmount" placeholder="0.00" min="0" step="0.01" required>
                 </div>
 
                 <div id="expensesList" class="expenses-list"></div>
@@ -393,7 +316,7 @@
             <div class="modal-footer">
                 <button id="saveExpense" class="btn btn-primary">Add Expense</button>
                 <button id="updateExpense" class="btn btn-secondary" style="display: none;">Update Expense</button>
-                <button id="closeExpenseModal" class="btn btn-secondary">Cancel</button>
+                <button class="btn btn-secondary" onclick="tracker?.hideExpenseModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -401,68 +324,10 @@
     <!-- Overlay -->
     <div id="overlay" class="overlay"></div>
 
-    <!-- Keyboard Shortcuts Help -->
-    <div id="keyboardHelp" class="help-popup" style="display: none;">
-        <div class="help-content">
-            <h4>⌨️ Keyboard Shortcuts</h4>
-            <div class="shortcuts-list">
-                <div class="shortcut-item">
-                    <kbd>Ctrl + I</kbd>
-                    <span>Set Income</span>
-                </div>
-                <div class="shortcut-item">
-                    <kbd>Ctrl + E</kbd>
-                    <span>Add Expense</span>
-                </div>
-                <div class="shortcut-item">
-                    <kbd>Ctrl + B</kbd>
-                    <span>Manage Budget</span>
-                </div>
-                <div class="shortcut-item">
-                    <kbd>Ctrl + S</kbd>
-                    <span>Settings</span>
-                </div>
-                <div class="shortcut-item">
-                    <kbd>Ctrl + R</kbd>
-                    <span>Reports</span>
-                </div>
-                <div class="shortcut-item">
-                    <kbd>Esc</kbd>
-                    <span>Close Modals</span>
-                </div>
-            </div>
-            <button class="btn btn-secondary" onclick="this.parentElement.parentElement.style.display='none'">Close</button>
-        </div>
-    </div>
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
 
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => console.log('SW registered'))
-                    .catch(error => console.log('SW registration failed'));
-            });
-        }
-    </script>
-
-    <!-- Load all JavaScript modules -->
-    <script src="js/modules/data-manager.js"></script>
-    <script src="js/modules/notification-manager.js"></script>
-    <script src="js/modules/settings-manager.js"></script>
-    <script src="js/modules/budget-manager.js"></script>
-    <script src="js/modules/data-export-import.js"></script>
-    <script src="js/modules/recurring-expenses.js"></script>
-    <script src="js/modules/analytics-manager.js"></script>
-    <script src="js/modules/search-manager.js"></script>
-    <script src="js/modules/goals-manager.js"></script>
-    <script src="js/modules/chart-manager.js"></script>
-    <script src="js/modules/reports-manager.js"></script>
-    
-    <!-- Core application -->
-    <script src="js/core/app.js"></script>
-    
-    <!-- Legacy script for compatibility -->
-    <script src="script.js"></script>
+    <!-- Main JavaScript Application -->
+    <script src="app.js"></script>
 </body>
 </html>
