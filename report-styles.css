@@ -1,0 +1,57 @@
+/* Report Styles */
+.report-summary h3 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-6);
+    text-align: center;
+    padding-bottom: var(--spacing-3);
+    border-bottom: 2px solid var(--primary-500);
+}
+
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-6);
+    margin-top: var(--spacing-6);
+}
+
+.report-card {
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-accent));
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-6);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.report-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.report-card h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.report-card p {
+    margin-bottom: var(--spacing-2);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+}
+
+.report-card p:last-child {
+    margin-bottom: 0;
+}
+
+.report-card strong {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+}
