@@ -1999,6 +1999,6 @@ body {
     }
     
     body {
-        background: white !important;
+        background: var(--bg-primary) !important;
     }
 }
