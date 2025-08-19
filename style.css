@@ -466,11 +466,11 @@ body {
 }
 
 .dashboard-card {
-    background: var(--bg-card);
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-6);
-    box-shadow: var(--shadow-xl);
-    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(96, 165, 250, 0.2);
+    border: 1px solid var(--border-accent);
     transition: var(--transition);
     display: flex;
     align-items: center;
@@ -618,7 +618,9 @@ body {
 
 /* Month Comparison */
 .month-comparison-section {
-    background: var(--bg-card);
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+    border: 1px solid var(--border-accent);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-8);
     box-shadow: var(--shadow-lg);
@@ -700,7 +702,9 @@ body {
 
 /* Enhanced Calendar Styles */
 .calendar-section {
-    background: var(--bg-card);
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+    border: 1px solid var(--border-accent);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-8);
     box-shadow: var(--shadow-lg);
@@ -910,7 +914,9 @@ body {
 
 /* Enhanced Charts Styles */
 .charts-section {
-    background: var(--bg-card);
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+    border: 1px solid var(--border-accent);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-8);
     box-shadow: var(--shadow-lg);
@@ -1049,7 +1055,9 @@ body {
 }
 
 .analytics-card {
-    background: var(--bg-card);
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+    border: 1px solid var(--border-accent);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-6);
     box-shadow: var(--shadow-sm);
@@ -1125,7 +1133,9 @@ body {
 }
 
 .all-time-card {
-    background: var(--bg-card);
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+    border: 1px solid var(--border-accent);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-8);
     box-shadow: var(--shadow-lg);
