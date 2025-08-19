@@ -525,6 +525,7 @@ class SmartExpenseTracker {
                     this.clearExpenseForm();
                     this.renderExpensesList(this.selectedDate);
                     this.updateDashboard();
+                    this.updateAnalytics();
                     this.renderCalendar();
                     this.renderCharts();
                     this.showSuccess('Expense added successfully!');
