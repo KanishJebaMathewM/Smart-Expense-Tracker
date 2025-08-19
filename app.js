@@ -1055,7 +1055,64 @@ class SmartExpenseTracker {
             console.error('Error updating month comparison:', error);
         }
     }
-    
+
+    // Analytics Methods
+    updateAnalytics() {
+        try {
+            const categoryTotals = this.getCategoryTotals();
+            const dailyTotals = this.getDailyTotals();
+            const totalSpent = this.getTotalMonthlyExpenses();
+
+            // Calculate average daily spending
+            const daysWithExpenses = Object.keys(dailyTotals).length;
+            const avgDailySpending = daysWithExpenses > 0 ? totalSpent / daysWithExpenses : 0;
+
+            // Find top category
+            const topCategory = Object.keys(categoryTotals).length > 0 ?
+                Object.keys(categoryTotals).reduce((a, b) =>
+                    categoryTotals[a] > categoryTotals[b] ? a : b
+                ) : 'N/A';
+
+            // Calculate spending streak (consecutive days with expenses)
+            const spendingStreak = this.calculateSpendingStreak();
+
+            // Update analytics display
+            this.updateElement('avgDailySpending', `₹${avgDailySpending.toFixed(0)}`);
+            this.updateElement('topCategory', topCategory);
+            this.updateElement('expenseDays', daysWithExpenses.toString());
+            this.updateElement('spendingStreak', `${spendingStreak} days`);
+
+            console.log('Analytics updated successfully');
+        } catch (error) {
+            this.showError('Failed to update analytics: ' + error.message);
+            console.error('Error updating analytics:', error);
+        }
+    }
+
+    calculateSpendingStreak() {
+        try {
+            const today = new Date();
+            let streak = 0;
+            let currentDate = new Date(today);
+
+            // Go back day by day until we find a day without expenses
+            while (currentDate.getMonth() === this.currentMonth && currentDate.getFullYear() === this.currentYear) {
+                const totalForDate = this.getTotalExpensesForDate(currentDate);
+                if (totalForDate > 0) {
+                    streak++;
+                } else {
+                    break;
+                }
+                currentDate.setDate(currentDate.getDate() - 1);
+            }
+
+            return streak;
+        } catch (error) {
+            console.error('Error calculating spending streak:', error);
+            return 0;
+        }
+    }
+
     updateAllTimeTotals() {
         try {
             const totalIncome = this.getAllTimeIncome();
