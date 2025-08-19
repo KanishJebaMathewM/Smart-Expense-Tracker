@@ -922,6 +922,7 @@ class SmartExpenseTracker {
             this.loadData();
             this.renderCalendar();
             this.updateDashboard();
+            this.updateAnalytics();
             this.renderCharts();
         } catch (error) {
             this.showError('Failed to refresh display: ' + error.message);
