@@ -217,7 +217,7 @@ body {
 
 .progress-fill {
     height: 100%;
-    background: white;
+    background: linear-gradient(90deg, var(--primary-400), var(--secondary-400));
     border-radius: 2px;
     width: 100%;
     animation: loading-progress 2s ease-in-out;
