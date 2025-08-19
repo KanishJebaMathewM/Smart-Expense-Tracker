@@ -622,6 +622,7 @@ class SmartExpenseTracker {
                 if (this.deleteExpenseForDate(this.selectedDate, expenseId)) {
                     this.renderExpensesList(this.selectedDate);
                     this.updateDashboard();
+                    this.updateAnalytics();
                     this.renderCalendar();
                     this.renderCharts();
                     this.showSuccess('Expense deleted successfully!');
@@ -771,7 +772,7 @@ class SmartExpenseTracker {
         if (balance < 0) {
             insights.push('<p>⚠️ You\'re spending more than your income. Consider reducing expenses.</p>');
         } else if (balance / income < 0.1) {
-            insights.push('<p>⚠️ Low savings rate. Try to save at least 10% of your income.</p>');
+            insights.push('<p>⚠�� Low savings rate. Try to save at least 10% of your income.</p>');
         } else if (balance / income > 0.3) {
             insights.push('<p>✅ Great savings rate! You\'re saving over 30% of your income.</p>');
         }
