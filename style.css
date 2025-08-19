@@ -1114,9 +1114,10 @@ body {
 
 /* All-Time Totals Section */
 .all-time-totals-section {
-    background: linear-gradient(135deg, var(--primary-50), var(--secondary-50));
+    background: linear-gradient(135deg, rgba(15, 22, 41, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
     padding: var(--spacing-16) 0;
     margin-top: var(--spacing-16);
+    border-top: 2px solid var(--border-accent);
 }
 
 .all-time-title {
