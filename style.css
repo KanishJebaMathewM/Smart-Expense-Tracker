@@ -302,12 +302,12 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-3);
-    background: rgba(255, 255, 255, 0.15);
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.3));
     padding: var(--spacing-3) var(--spacing-5);
     border-radius: var(--border-radius-lg);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: var(--shadow-md);
+    border: 2px solid var(--border-accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: var(--transition);
 }
 
