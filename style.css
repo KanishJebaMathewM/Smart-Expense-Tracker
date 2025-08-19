@@ -616,7 +616,7 @@ body {
 
 /* Month Comparison */
 .month-comparison-section {
-    background: var(--bg-primary);
+    background: var(--bg-card);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-8);
     box-shadow: var(--shadow-lg);
@@ -698,7 +698,7 @@ body {
 
 /* Enhanced Calendar Styles */
 .calendar-section {
-    background: var(--bg-primary);
+    background: var(--bg-card);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-8);
     box-shadow: var(--shadow-lg);
@@ -907,7 +907,7 @@ body {
 
 /* Enhanced Charts Styles */
 .charts-section {
-    background: var(--bg-primary);
+    background: var(--bg-card);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-8);
     box-shadow: var(--shadow-lg);
@@ -1046,7 +1046,7 @@ body {
 }
 
 .analytics-card {
-    background: var(--bg-primary);
+    background: var(--bg-card);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-6);
     box-shadow: var(--shadow-sm);
@@ -1083,7 +1083,7 @@ body {
 }
 
 .report-content {
-    background: var(--bg-primary);
+    background: var(--bg-card);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-8);
     box-shadow: var(--shadow-sm);
@@ -1122,7 +1122,7 @@ body {
 }
 
 .all-time-card {
-    background: var(--bg-primary);
+    background: var(--bg-card);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-8);
     box-shadow: var(--shadow-lg);
