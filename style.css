@@ -754,8 +754,8 @@ body {
 }
 
 .nav-btn {
-    background: linear-gradient(135deg, var(--bg-accent), var(--neutral-200));
-    border: 1px solid var(--border-color);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    border: 2px solid var(--border-accent);
     width: 48px;
     height: 48px;
     border-radius: var(--border-radius-lg);
@@ -766,8 +766,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-secondary);
-    box-shadow: var(--shadow-sm);
+    color: var(--text-inverse);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .nav-btn:hover {
