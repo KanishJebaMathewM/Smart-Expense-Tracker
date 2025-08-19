@@ -44,6 +44,7 @@ class SmartExpenseTracker {
             this.loadData();
             this.renderCalendar();
             this.updateDashboard();
+            this.updateAnalytics();
             this.renderCharts();
             this.checkFirstTimeSetup();
             this.showSuccess('Application loaded successfully!');
