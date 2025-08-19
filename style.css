@@ -879,7 +879,7 @@ body {
 }
 
 .calendar-date.has-expenses:hover {
-    background: linear-gradient(135deg, var(--success-100), var(--success-200));
+    background: linear-gradient(135deg, var(--success-600), var(--success-500));
     border-color: var(--success-400);
 }
 
