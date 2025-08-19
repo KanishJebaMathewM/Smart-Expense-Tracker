@@ -76,6 +76,7 @@ class SmartExpenseTracker {
         try {
             // Income modal events
             this.safeAddEventListener('setIncomeBtn', 'click', () => this.showIncomeModal());
+            this.safeAddEventListener('setIncomeBtn2', 'click', () => this.showIncomeModal());
             this.safeAddEventListener('closeIncomeModal', 'click', () => this.hideIncomeModal());
             this.safeAddEventListener('saveIncome', 'click', () => this.saveIncome());
             
@@ -655,7 +656,7 @@ class SmartExpenseTracker {
                     </div>
                     <div class="expense-amount">₹${parseFloat(expense.amount).toFixed(2)}</div>
                     <div class="expense-actions">
-                        <button class="edit-btn" onclick="tracker.editExpense('${expense.id}')" title="Edit">✏️</button>
+                        <button class="edit-btn" onclick="tracker.editExpense('${expense.id}')" title="Edit">✏��</button>
                         <button class="delete-btn" onclick="tracker.deleteExpense('${expense.id}')" title="Delete">🗑️</button>
                     </div>
                 </div>
