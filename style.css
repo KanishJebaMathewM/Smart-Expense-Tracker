@@ -233,7 +233,7 @@ body {
 
 /* Enhanced Header Styles */
 .header {
-    background: linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-500) 50%, var(--primary-700) 100%);
+    background: var(--bg-header);
     color: var(--text-inverse);
     padding: var(--spacing-6) 0;
     box-shadow: var(--shadow-lg);
