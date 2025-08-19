@@ -821,12 +821,13 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: var(--transition);
-    background: var(--bg-primary);
+    background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(71, 85, 105, 0.8) 100%);
     position: relative;
     min-height: 70px;
     border-radius: var(--border-radius);
     overflow: hidden;
-    color: var(--text-contrast);
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .calendar-date::before {
