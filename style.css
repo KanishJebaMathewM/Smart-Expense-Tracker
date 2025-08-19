@@ -464,10 +464,10 @@ body {
 }
 
 .dashboard-card {
-    background: var(--bg-primary);
+    background: var(--bg-card);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-6);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-xl);
     border: 1px solid var(--border-color);
     transition: var(--transition);
     display: flex;
@@ -475,6 +475,7 @@ body {
     gap: var(--spacing-4);
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(10px);
 }
 
 .dashboard-card::before {
