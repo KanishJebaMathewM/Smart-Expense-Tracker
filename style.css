@@ -1199,7 +1199,7 @@ body {
 }
 
 .modal-content {
-    background: var(--bg-primary);
+    background: var(--bg-modal);
     border-radius: var(--border-radius-xl);
     box-shadow: var(--shadow-2xl);
     max-width: 540px;
