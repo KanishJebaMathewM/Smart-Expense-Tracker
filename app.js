@@ -76,7 +76,6 @@ class SmartExpenseTracker {
         try {
             // Income modal events
             this.safeAddEventListener('setIncomeBtn', 'click', () => this.showIncomeModal());
-            this.safeAddEventListener('setIncomeBtn2', 'click', () => this.showIncomeModal());
             this.safeAddEventListener('closeIncomeModal', 'click', () => this.hideIncomeModal());
             this.safeAddEventListener('saveIncome', 'click', () => this.saveIncome());
             
@@ -1284,7 +1283,7 @@ class SmartExpenseTracker {
                 if (barHeight > 20) {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = 'bold 10px Inter';
-                    ctx.fillText(`��${amount.toFixed(0)}`, x + barWidth / 2, y + 15);
+                    ctx.fillText(`₹${amount.toFixed(0)}`, x + barWidth / 2, y + 15);
                 }
             });
         } catch (error) {
