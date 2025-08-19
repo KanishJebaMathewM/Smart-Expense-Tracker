@@ -668,6 +668,129 @@ class SmartExpenseTracker {
         div.textContent = text;
         return div.innerHTML;
     }
+
+    // Export data functionality
+    exportData() {
+        try {
+            const data = {
+                incomes: this.getAllIncomes(),
+                expenses: this.getExpenses(),
+                exportDate: new Date().toISOString(),
+                appVersion: '2.0.0'
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `expense-tracker-export-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+            this.showSuccess('Data exported successfully!');
+        } catch (error) {
+            this.showError('Failed to export data: ' + error.message);
+            console.error('Export error:', error);
+        }
+    }
+
+    // Generate monthly report
+    generateMonthlyReport() {
+        try {
+            const income = this.getIncome();
+            const totalSpent = this.getTotalMonthlyExpenses();
+            const balance = income - totalSpent;
+            const categoryTotals = this.getCategoryTotals();
+            const dailyTotals = this.getDailyTotals();
+
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+
+            const reportContent = document.getElementById('reportContent');
+            if (!reportContent) return;
+
+            const topCategory = Object.keys(categoryTotals).reduce((a, b) =>
+                categoryTotals[a] > categoryTotals[b] ? a : b, 'None');
+
+            const avgDailySpending = Object.keys(dailyTotals).length > 0 ?
+                totalSpent / Object.keys(dailyTotals).length : 0;
+
+            const savingsRate = income > 0 ? ((balance / income) * 100).toFixed(1) : 0;
+
+            reportContent.innerHTML = `
+                <div class="report-summary">
+                    <h3>📊 Monthly Report - ${monthNames[this.currentMonth]} ${this.currentYear}</h3>
+
+                    <div class="report-grid">
+                        <div class="report-card">
+                            <h4>💰 Financial Summary</h4>
+                            <p><strong>Income:</strong> ₹${income.toLocaleString()}</p>
+                            <p><strong>Expenses:</strong> ₹${totalSpent.toLocaleString()}</p>
+                            <p><strong>Balance:</strong> <span class="${balance >= 0 ? 'positive-balance' : 'negative-balance'}">₹${balance.toLocaleString()}</span></p>
+                            <p><strong>Savings Rate:</strong> ${savingsRate}%</p>
+                        </div>
+
+                        <div class="report-card">
+                            <h4>📈 Spending Analysis</h4>
+                            <p><strong>Top Category:</strong> ${topCategory}</p>
+                            <p><strong>Category Amount:</strong> ₹${(categoryTotals[topCategory] || 0).toLocaleString()}</p>
+                            <p><strong>Avg Daily Spending:</strong> ₹${avgDailySpending.toFixed(0)}</p>
+                            <p><strong>Days with Expenses:</strong> ${Object.keys(dailyTotals).length}</p>
+                        </div>
+
+                        <div class="report-card">
+                            <h4>📋 Category Breakdown</h4>
+                            ${Object.entries(categoryTotals).map(([category, amount]) =>
+                                `<p><strong>${category}:</strong> ₹${amount.toLocaleString()}</p>`
+                            ).join('')}
+                        </div>
+
+                        <div class="report-card">
+                            <h4>💡 Insights & Tips</h4>
+                            ${this.generateInsights(income, totalSpent, balance, categoryTotals)}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            this.showSuccess('Monthly report generated successfully!');
+        } catch (error) {
+            this.showError('Failed to generate report: ' + error.message);
+            console.error('Report generation error:', error);
+        }
+    }
+
+    // Generate insights based on spending patterns
+    generateInsights(income, totalSpent, balance, categoryTotals) {
+        const insights = [];
+
+        if (balance < 0) {
+            insights.push('<p>⚠️ You\'re spending more than your income. Consider reducing expenses.</p>');
+        } else if (balance / income < 0.1) {
+            insights.push('<p>⚠️ Low savings rate. Try to save at least 10% of your income.</p>');
+        } else if (balance / income > 0.3) {
+            insights.push('<p>✅ Great savings rate! You\'re saving over 30% of your income.</p>');
+        }
+
+        const topCategory = Object.keys(categoryTotals).reduce((a, b) =>
+            categoryTotals[a] > categoryTotals[b] ? a : b, '');
+
+        if (topCategory && categoryTotals[topCategory] / totalSpent > 0.4) {
+            insights.push(`<p>💡 ${topCategory} takes up ${((categoryTotals[topCategory] / totalSpent) * 100).toFixed(1)}% of your spending. Consider if this aligns with your priorities.</p>`);
+        }
+
+        if (totalSpent > income * 0.8) {
+            insights.push('<p>💡 You\'re spending over 80% of your income. Consider creating a budget to track expenses better.</p>');
+        }
+
+        if (insights.length === 0) {
+            insights.push('<p>✅ Your spending patterns look healthy! Keep up the good work.</p>');
+        }
+
+        return insights.join('');
+    }
     
     // Calendar Methods
     renderCalendar() {
