@@ -166,85 +166,12 @@ body {
     padding: 0 var(--spacing-6);
 }
 
-<<<<<<< HEAD
 /* --- Improved Button Styles --- */
 .btn,
 .set-income-btn,
 .nav-btn,
 .close-btn {
     background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
-=======
-/* Loading Screen */
-.loading-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1E3A8A, #0F172A);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    transition: opacity 0.5s ease-out;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-}
-
-.loading-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    animation: pulse 2s infinite;
-}
-
-.loading-text {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 2rem;
-}
-
-.loading-progress {
-    width: 300px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    overflow: hidden;
-    margin: 0 auto;
-}
-
-.progress-bar {
-    height: 100%;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    position: relative;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary-400), var(--secondary-400));
-    border-radius: 2px;
-    width: 100%;
-    animation: loading-progress 2s ease-in-out;
-}
-
-@keyframes loading-progress {
-    0% { width: 0%; }
-    100% { width: 100%; }
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-/* Enhanced Header Styles */
-.header {
-    background: var(--bg-header);
->>>>>>> 602380ce9235d651b865371dd4a93f22d52741c0
     color: var(--text-inverse);
     border: none;
     border-radius: var(--border-radius-xl);
@@ -371,46 +298,26 @@ body {
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-bold);
     margin: 0;
-<<<<<<< HEAD
     letter-spacing: 0.01em;
     color: #fff;
     text-shadow: 0 2px 8px rgba(0,0,0,0.13);
     filter: drop-shadow(0 2px 8px rgba(59,130,246,0.10));
-=======
-    color: #FFD700;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.6);
-    letter-spacing: -0.025em;
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
->>>>>>> 602380ce9235d651b865371dd4a93f22d52741c0
 }
 
 .header-balance {
     display: flex;
     align-items: center;
     gap: var(--spacing-3);
-<<<<<<< HEAD
     background: rgba(255, 255, 255, 0.18);
     padding: var(--spacing-3) var(--spacing-5);
     border-radius: var(--border-radius-xl);
     backdrop-filter: blur(12px);
     border: 1.5px solid rgba(255, 255, 255, 0.22);
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.10);
-=======
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.3));
-    padding: var(--spacing-3) var(--spacing-5);
-    border-radius: var(--border-radius-lg);
-    backdrop-filter: blur(20px);
-    border: 2px solid var(--border-accent);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
->>>>>>> 602380ce9235d651b865371dd4a93f22d52741c0
     transition: var(--transition);
 }
 
 .header-balance:hover {
-<<<<<<< HEAD
     background: rgba(255, 255, 255, 0.28);
     transform: translateY(-1px) scale(1.03);
     box-shadow: 0 4px 16px rgba(59, 130, 246, 0.13);
@@ -425,107 +332,6 @@ body {
     .header-title {
         font-size: var(--font-size-xl);
     }
-=======
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.4), rgba(59, 130, 246, 0.4));
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.balance-label {
-    font-size: var(--font-size-sm);
-    color: #E2E8F0;
-    font-weight: var(--font-weight-medium);
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.balance-amount {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: #FFD700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-4);
-}
-
-.header-actions {
-    display: flex;
-    gap: var(--spacing-3);
-}
-
-.action-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-inverse);
-    padding: var(--spacing-3) var(--spacing-4);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition: var(--transition);
-    backdrop-filter: blur(10px);
-}
-
-.action-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-.action-btn span:first-child {
-    font-size: 1.2em;
-}
-
-/* Navigation */
-.main-navigation {
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    padding-top: var(--spacing-4);
-    position: relative;
-    z-index: 1;
-}
-
-.nav-tabs {
-    display: flex;
-    gap: var(--spacing-2);
-}
-
-.nav-tab {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-inverse);
-    padding: var(--spacing-3) var(--spacing-4);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition: var(--transition);
-    opacity: 0.7;
-}
-
-.nav-tab:hover {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.nav-tab.active {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: var(--shadow-md);
-}
-
-.tab-icon {
-    font-size: 1.1em;
->>>>>>> 602380ce9235d651b865371dd4a93f22d52741c0
 }
 
 /* Enhanced Main Content */
@@ -2108,7 +1914,6 @@ body {
         break-inside: avoid;
         box-shadow: none;
     }
-<<<<<<< HEAD
 }
 
 /* Month Comparison Section */
@@ -2470,9 +2275,6 @@ body {
         --border-color-hover: var(--neutral-600);
     }
 
-=======
-    
->>>>>>> 602380ce9235d651b865371dd4a93f22d52741c0
     body {
         background: var(--bg-primary) !important;
     }
