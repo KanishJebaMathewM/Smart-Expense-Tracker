@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Smart Expense Tracker - Main JavaScript File
 class ExpenseTracker {
     constructor() {
@@ -856,3 +857,7 @@ const expenseTracker = new ExpenseTracker();
 
 // Make expenseTracker globally available for onclick handlers
 window.expenseTracker = expenseTracker;
+=======
+// This file is no longer used - functionality moved to app.js
+console.log('Legacy script.js loaded - all functionality is now in app.js');
+>>>>>>> 602380ce9235d651b865371dd4a93f22d52741c0

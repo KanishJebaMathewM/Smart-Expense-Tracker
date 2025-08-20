@@ -3,21 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Expense Tracker</title>
+    <meta name="theme-color" content="#3B82F6">
+    <title>Smart Expense Tracker - Financial Management</title>
+    <meta name="description" content="Smart expense tracking with budgets, analytics, and comprehensive reporting">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">\n    <link rel="stylesheet" href="report-styles.css">
 </head>
-<body>
+<body class="theme-light">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-icon">💰</div>
+            <div class="loading-text">Loading Smart Expense Tracker...</div>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="loadingProgress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="container">
-            <h1 class="header-title">Smart Expense Tracker</h1>
-            <div class="header-balance">
-                <span class="balance-label">Balance:</span>
-                <span id="headerBalance" class="balance-amount">₹0</span>
+            <div class="header-main">
+                <div class="header-left">
+                    <div class="app-logo">
+                        <span class="logo-icon">💰</span>
+                        <h1 class="header-title">Smart Expense Tracker</h1>
+                    </div>
+                    <div class="header-balance">
+                        <span class="balance-label">Balance:</span>
+                        <span id="headerBalance" class="balance-amount">₹0</span>
+                    </div>
+                </div>
+                
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button id="quickAddExpense" class="action-btn" title="Quick Add Expense (Ctrl+E)">
+                            <span>➕</span>
+                            <span class="btn-text">Add Expense</span>
+                        </button>
+                        
+                        <button id="setIncomeBtn" class="action-btn" title="Set Income (Ctrl+I)">
+                            <span>💰</span>
+                            <span class="btn-text">Set Income</span>
+                        </button>
+                    </div>
+                </div>
             </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="main-navigation">
+                <div class="nav-tabs">
+                    <button class="nav-tab active" data-section="dashboard">
+                        <span class="tab-icon">🏠</span>
+                        <span class="tab-text">Dashboard</span>
+                    </button>
+                    <button class="nav-tab" data-section="analytics">
+                        <span class="tab-icon">📊</span>
+                        <span class="tab-text">Analytics</span>
+                    </button>
+                    <button class="nav-tab" data-section="reports">
+                        <span class="tab-icon">📋</span>
+                        <span class="tab-text">Reports</span>
+                    </button>
+                </div>
+            </nav>
         </div>
     </header>
 
@@ -25,36 +80,99 @@
     <main class="main">
         <div class="container">
             <!-- Dashboard Section -->
-            <section class="dashboard">
-                <div class="dashboard-cards">
-                    <div class="dashboard-card income-card">
-                        <div class="card-icon">💰</div>
-                        <div class="card-content">
-                            <h3>Monthly Income</h3>
-                            <span id="monthlyIncome" class="card-amount">₹0</span>
+            <section id="dashboardSection" class="app-section active">
+                <!-- Dashboard Cards -->
+                <div class="dashboard">
+                    <div class="dashboard-cards">
+                        <div class="dashboard-card income-card">
+                            <div class="card-icon">💰</div>
+                            <div class="card-content">
+                                <h3>Monthly Income</h3>
+                                <span id="monthlyIncome" class="card-amount">₹0</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="dashboard-card spent-card">
-                        <div class="card-icon">💸</div>
-                        <div class="card-content">
-                            <h3>Total Spent</h3>
-                            <span id="totalSpent" class="card-amount">₹0</span>
+                        
+                        <div class="dashboard-card spent-card">
+                            <div class="card-icon">💸</div>
+                            <div class="card-content">
+                                <h3>Total Spent</h3>
+                                <span id="totalSpent" class="card-amount">₹0</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="dashboard-card balance-card">
-                        <div class="card-icon">💳</div>
-                        <div class="card-content">
-                            <h3>Remaining</h3>
-                            <span id="remainingBalance" class="card-amount">₹0</span>
+                        
+                        <div class="dashboard-card balance-card">
+                            <div class="card-icon">💳</div>
+                            <div class="card-content">
+                                <h3>Remaining</h3>
+                                <span id="remainingBalance" class="card-amount">₹0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card savings-card">
+                            <div class="card-icon">📈</div>
+                            <div class="card-content">
+                                <h3>Savings Rate</h3>
+                                <span id="savingsRate" class="card-amount">0%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <button id="setIncomeBtn" class="set-income-btn">Set Monthly Income</button>
+                <!-- Month Comparison Section -->
+                <section class="month-comparison-section">
+                    <h2 class="section-title">Month Comparison</h2>
+                    <div id="monthComparison" class="month-comparison">
+                        <div class="comparison-message">Loading comparison...</div>
+                    </div>
+                </section>
+
+                <!-- Calendar and Charts Container -->
+                <div class="content-grid">
+                    <!-- Calendar Section -->
+                    <section class="calendar-section">
+                        <div class="calendar-header">
+                            <button id="prevMonth" class="nav-btn">‹</button>
+                            <h2 id="currentMonth" class="month-title">January 2024</h2>
+                            <button id="nextMonth" class="nav-btn">›</button>
+                        </div>
+                        
+                        <div class="calendar">
+                            <div class="calendar-weekdays">
+                                <div class="weekday">Sun</div>
+                                <div class="weekday">Mon</div>
+                                <div class="weekday">Tue</div>
+                                <div class="weekday">Wed</div>
+                                <div class="weekday">Thu</div>
+                                <div class="weekday">Fri</div>
+                                <div class="weekday">Sat</div>
+                            </div>
+                            <div id="calendarDates" class="calendar-dates"></div>
+                        </div>
+                    </section>
+
+                    <!-- Charts Section -->
+                    <section class="charts-section">
+                        <div class="chart-container">
+                            <h3>Spending by Category</h3>
+                            <div class="chart-with-legend">
+                                <div class="chart-area">
+                                    <canvas id="categoryChart" width="280" height="280"></canvas>
+                                </div>
+                                <div class="legend-area" id="categoryLegend">
+                                    <div class="legend-title">Categories</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <h3>Daily Spending</h3>
+                            <canvas id="dailyChart" width="300" height="200"></canvas>
+                        </div>
+                    </section>
+                </div>
             </section>
 
+<<<<<<< HEAD
             <!-- Month Comparison Section -->
             <section class="month-comparison-section">
                 <div id="monthComparison" class="month-comparison">
@@ -70,42 +188,89 @@
                         <button id="prevMonth" class="nav-btn">‹</button>
                         <h2 id="currentMonth" class="month-title">January 2024</h2>
                         <button id="nextMonth" class="nav-btn">›</button>
+=======
+            <!-- Analytics Section -->
+            <section id="analyticsSection" class="app-section">
+                <div class="section-header">
+                    <h2>📈 Analytics & Insights</h2>
+                    <p class="section-description">Detailed analysis of your spending patterns and financial trends</p>
+                </div>
+                <div class="analytics-overview-content">
+                    <div class="analytics-cards">
+                        <div class="analytics-card">
+                            <h4>Average Daily Spending</h4>
+                            <div class="analytics-value" id="avgDailySpending">₹0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Highest Expense Category</h4>
+                            <div class="analytics-value" id="topCategory">N/A</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Days with Expenses</h4>
+                            <div class="analytics-value" id="expenseDays">0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Spending Streak</h4>
+                            <div class="analytics-value" id="spendingStreak">0 days</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reportsSection" class="app-section">
+                <div class="section-header">
+                    <h2>📋 Reports & Summary</h2>
+                    <p class="section-description">Comprehensive financial reports and summaries</p>
+                </div>
+                <div class="reports-overview-content">
+                    <div class="reports-actions">
+                        <button class="btn btn-primary" onclick="tracker?.generateMonthlyReport()">
+                            📊 Generate Monthly Report
+                        </button>
+                        <button class="btn btn-secondary" onclick="tracker?.exportData()">
+                            📤 Export Data
+                        </button>
+                    </div>
+                    <div id="reportContent" class="report-content">
+                        <p class="report-placeholder">Click "Generate Monthly Report" to see detailed analysis</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- All-Time Totals Section -->
+        <section class="all-time-totals-section">
+            <div class="container">
+                <h2 class="all-time-title">All-Time Summary</h2>
+                <div class="all-time-cards">
+                    <div class="all-time-card income-card">
+                        <div class="card-icon">💰</div>
+                        <div class="card-content">
+                            <h3>Total Income</h3>
+                            <span id="allTimeIncome" class="card-amount">₹0</span>
+                        </div>
+>>>>>>> 602380ce9235d651b865371dd4a93f22d52741c0
                     </div>
                     
-                    <div class="calendar">
-                        <div class="calendar-weekdays">
-                            <div class="weekday">Sun</div>
-                            <div class="weekday">Mon</div>
-                            <div class="weekday">Tue</div>
-                            <div class="weekday">Wed</div>
-                            <div class="weekday">Thu</div>
-                            <div class="weekday">Fri</div>
-                            <div class="weekday">Sat</div>
-                        </div>
-                        <div id="calendarDates" class="calendar-dates"></div>
-                    </div>
-                </section>
-
-                <!-- Charts Section -->
-                <section class="charts-section">
-                    <div class="chart-container">
-                        <h3>Spending Overview</h3>
-                        <div class="chart-with-legend">
-                            <div class="chart-area">
-                                <canvas id="categoryChart" width="280" height="280"></canvas>
-                            </div>
-                            <div class="legend-area" id="categoryLegend">
-                                <div class="legend-title">Categories</div>
-                            </div>
+                    <div class="all-time-card expense-card">
+                        <div class="card-icon">💸</div>
+                        <div class="card-content">
+                            <h3>Total Expenses</h3>
+                            <span id="allTimeExpenses" class="card-amount">₹0</span>
                         </div>
                     </div>
-
-                    <div class="chart-container">
-                        <h3>Daily Spending</h3>
-                        <canvas id="dailyChart" width="300" height="200"></canvas>
+                    
+                    <div class="all-time-card savings-card">
+                        <div class="card-icon">💰</div>
+                        <div class="card-content">
+                            <h3>Total Savings</h3>
+                            <span id="allTimeSavings" class="card-amount">₹0</span>
+                        </div>
                     </div>
-                </section>
+                </div>
             </div>
+<<<<<<< HEAD
         </div>
 
         <!-- All-Time Totals Section -->
@@ -138,6 +303,8 @@
                     </div>
                 </div>
             </div>
+=======
+>>>>>>> 602380ce9235d651b865371dd4a93f22d52741c0
         </section>
     </main>
 
@@ -146,16 +313,18 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Set Monthly Income</h3>
-                <button id="closeIncomeModal" class="close-btn">&times;</button>
+                <button class="close-btn" onclick="tracker?.hideIncomeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
                     <label for="incomeAmount">Monthly Income (₹)</label>
-                    <input type="number" id="incomeAmount" placeholder="Enter your monthly income" min="0" step="0.01">
+                    <input type="number" id="incomeAmount" placeholder="Enter your monthly income" min="0" step="0.01" required>
+                    <div class="input-hint">Set your income for the current month</div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button id="saveIncome" class="btn btn-primary">Save Income</button>
+                <button class="btn btn-secondary" onclick="tracker?.hideIncomeModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -165,17 +334,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="expenseModalTitle">Add Expense</h3>
-                <button id="closeExpenseModal" class="close-btn">&times;</button>
+                <button class="close-btn" onclick="tracker?.hideExpenseModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
                     <label for="expenseName">Expense Name</label>
-                    <input type="text" id="expenseName" placeholder="e.g., Groceries, Transportation">
+                    <input type="text" id="expenseName" placeholder="e.g., Groceries, Transportation" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="expenseCategory">Category</label>
-                    <select id="expenseCategory">
+                    <select id="expenseCategory" required>
                         <option value="Food">🍔 Food</option>
                         <option value="Transportation">🚗 Transportation</option>
                         <option value="Entertainment">🎬 Entertainment</option>
@@ -189,7 +358,7 @@
                 
                 <div class="form-group">
                     <label for="expenseAmount">Amount (₹)</label>
-                    <input type="number" id="expenseAmount" placeholder="0.00" min="0" step="0.01">
+                    <input type="number" id="expenseAmount" placeholder="0.00" min="0" step="0.01" required>
                 </div>
 
                 <div id="expensesList" class="expenses-list"></div>
@@ -197,6 +366,7 @@
             <div class="modal-footer">
                 <button id="saveExpense" class="btn btn-primary">Add Expense</button>
                 <button id="updateExpense" class="btn btn-secondary" style="display: none;">Update Expense</button>
+                <button class="btn btn-secondary" onclick="tracker?.hideExpenseModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -204,6 +374,10 @@
     <!-- Overlay -->
     <div id="overlay" class="overlay"></div>
 
-    <script src="script.js"></script>
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Main JavaScript Application -->
+    <script src="app.js"></script>
 </body>
 </html>
