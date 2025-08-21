@@ -217,6 +217,7 @@ class SmartExpenseTracker {
             this.updateAnalytics();
             this.renderCharts();
             this.updateProfileSwitcher();
+            this.updateFamilyMemberDisplay();
             this.addLogoutButton();
             this.checkFirstTimeSetup();
 
