@@ -76,10 +76,21 @@ class SmartExpenseTracker {
     // Load authenticated user data
     loadAuthenticatedUser() {
         try {
+            // First try to get user from family users (new system)
+            const allUsers = this.getAllFamilyUsers();
+            const currentUserId = localStorage.getItem('current_user_id');
+
+            if (currentUserId && allUsers[currentUserId]) {
+                this.currentUser = allUsers[currentUserId];
+                console.log(`Logged in as: ${this.currentUser.name} (${this.currentUser.email}) - Family System`);
+                return;
+            }
+
+            // Fallback to legacy system
             const userData = localStorage.getItem('user_account_data');
             if (userData) {
                 this.currentUser = JSON.parse(userData);
-                console.log(`Logged in as: ${this.currentUser.name} (${this.currentUser.email})`);
+                console.log(`Logged in as: ${this.currentUser.name} (${this.currentUser.email}) - Legacy System`);
             } else {
                 throw new Error('No authenticated user found');
             }
@@ -87,6 +98,17 @@ class SmartExpenseTracker {
             console.error('Failed to load user data:', error);
             // Redirect to auth if no valid user data
             window.location.href = 'auth.html';
+        }
+    }
+
+    // Get all family users
+    getAllFamilyUsers() {
+        try {
+            const allUsers = localStorage.getItem('all_family_users');
+            return allUsers ? JSON.parse(allUsers) : {};
+        } catch (error) {
+            console.error('Error getting family users:', error);
+            return {};
         }
     }
     
