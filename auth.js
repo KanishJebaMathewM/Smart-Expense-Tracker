@@ -538,12 +538,14 @@ class AuthenticationSystem {
                 if (this.userData.loginAttempts >= this.MAX_LOGIN_ATTEMPTS) {
                     // Lock account
                     this.userData.lockedUntil = new Date(Date.now() + this.LOCKOUT_DURATION).toISOString();
-                    this.saveUserData(this.userData);
+                    this.updateUserInFamily(this.userData.userId, this.userData);
+                    this.saveUserData(this.userData); // Keep for compatibility
                     this.showError(`Too many failed attempts. Account locked for 15 minutes.`);
                 } else {
                     const attemptsLeft = this.MAX_LOGIN_ATTEMPTS - this.userData.loginAttempts;
                     this.showError(`Incorrect PIN. ${attemptsLeft} attempts remaining.`);
-                    this.saveUserData(this.userData);
+                    this.updateUserInFamily(this.userData.userId, this.userData);
+                    this.saveUserData(this.userData); // Keep for compatibility
                 }
                 
                 // Clear PIN input
