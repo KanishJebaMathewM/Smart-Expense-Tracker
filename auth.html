@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3B82F6">
+    <title>Smart Expense Tracker - Secure Login</title>
+    <meta name="description" content="Secure authentication for Smart Expense Tracker">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-icon">🔐</div>
+            <div class="loading-text">Initializing Security...</div>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="loadingProgress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Container -->
+    <div id="authContainer" class="auth-container">
+        <!-- Background Elements -->
+        <div class="auth-background">
+            <div class="bg-pattern"></div>
+            <div class="bg-gradient"></div>
+        </div>
+
+        <!-- Authentication Card -->
+        <div class="auth-card">
+            <!-- Header -->
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <span class="logo-icon">💰</span>
+                    <h1>Smart Expense Tracker</h1>
+                </div>
+                <p class="auth-subtitle">Secure Financial Management System</p>
+            </div>
+
+            <!-- Welcome Screen -->
+            <div id="welcomeScreen" class="auth-screen active">
+                <div class="welcome-content">
+                    <h2>Welcome to Your Financial Future</h2>
+                    <p>Take control of your expenses with our secure, feature-rich expense tracking application.</p>
+                    
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <span class="feature-icon">🔒</span>
+                            <span class="feature-text">Bank-level security with PIN protection</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">👥</span>
+                            <span class="feature-text">Multiple family member profiles</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">📊</span>
+                            <span class="feature-text">Advanced analytics and reporting</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">📱</span>
+                            <span class="feature-text">Works on all devices</span>
+                        </div>
+                    </div>
+
+                    <div class="welcome-actions">
+                        <button id="getStartedBtn" class="auth-btn primary large">Get Started</button>
+                        <button id="existingUserBtn" class="auth-btn secondary large">I'm an Existing User</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signup Screen -->
+            <div id="signupScreen" class="auth-screen">
+                <div class="auth-form-container">
+                    <div class="form-header">
+                        <h2>Create Your Account</h2>
+                        <p>Set up your secure expense tracker account</p>
+                    </div>
+
+                    <form id="signupForm" class="auth-form">
+                        <!-- Account Details -->
+                        <div class="form-section">
+                            <h3>Account Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="signupEmail">Email Address</label>
+                                <input type="email" id="signupEmail" class="form-input" 
+                                       placeholder="your.email@example.com" required>
+                                <div class="input-hint">Used for account recovery (stored locally)</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="signupName">Full Name</label>
+                                <input type="text" id="signupName" class="form-input" 
+                                       placeholder="Your full name" required maxlength="50">
+                            </div>
+                        </div>
+
+                        <!-- Security Setup -->
+                        <div class="form-section">
+                            <h3>Security Setup</h3>
+                            
+                            <div class="form-group">
+                                <label for="signupPin">Create Security PIN</label>
+                                <input type="password" id="signupPin" class="form-input pin-input" 
+                                       placeholder="Enter 4-10 digit PIN" maxlength="10" required>
+                                <div class="pin-strength" id="pinStrength"></div>
+                                <div class="input-hint">Choose a strong PIN between 4-10 digits</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPin">Confirm PIN</label>
+                                <input type="password" id="confirmPin" class="form-input pin-input" 
+                                       placeholder="Re-enter your PIN" maxlength="10" required>
+                                <div class="pin-match" id="pinMatch"></div>
+                            </div>
+                        </div>
+
+                        <!-- Security Question -->
+                        <div class="form-section">
+                            <h3>Account Recovery</h3>
+                            
+                            <div class="form-group">
+                                <label for="securityQuestion">Security Question</label>
+                                <select id="securityQuestion" class="form-input" required>
+                                    <option value="">Choose a security question</option>
+                                    <option value="childhood_pet">What was the name of your first pet?</option>
+                                    <option value="birth_city">What city were you born in?</option>
+                                    <option value="school_name">What was the name of your elementary school?</option>
+                                    <option value="mother_maiden">What is your mother's maiden name?</option>
+                                    <option value="first_car">What was your first car model?</option>
+                                    <option value="favorite_book">What is your favorite book?</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="securityAnswer">Security Answer</label>
+                                <input type="text" id="securityAnswer" class="form-input" 
+                                       placeholder="Your answer" required maxlength="100">
+                                <div class="input-hint">This will help you recover your account if you forget your PIN</div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Privacy -->
+                        <div class="form-section">
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="agreeTerms" required>
+                                    <span class="checkmark"></span>
+                                    <span class="checkbox-text">I agree that all data will be stored locally on my device and I understand that clearing browser data will delete all my information</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="backToWelcomeBtn" class="auth-btn secondary">Back</button>
+                            <button type="submit" id="createAccountBtn" class="auth-btn primary" disabled>Create Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Login Screen -->
+            <div id="loginScreen" class="auth-screen">
+                <div class="auth-form-container">
+                    <div class="form-header">
+                        <h2>Welcome Back!</h2>
+                        <p>Enter your PIN to access your expense tracker</p>
+                    </div>
+
+                    <form id="loginForm" class="auth-form">
+                        <div class="form-section">
+                            <div class="user-info" id="userInfo">
+                                <div class="user-avatar">👤</div>
+                                <div class="user-details">
+                                    <div class="user-name" id="userName">Loading...</div>
+                                    <div class="user-email" id="userEmail">Loading...</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="loginPin">Enter Your PIN</label>
+                                <input type="password" id="loginPin" class="form-input pin-input" 
+                                       placeholder="Enter your PIN" maxlength="10" required autocomplete="off">
+                                <div class="pin-feedback" id="pinFeedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="loginBtn" class="auth-btn primary large" disabled>
+                                <span class="btn-icon">🔓</span>
+                                <span class="btn-text">Unlock Tracker</span>
+                            </button>
+                        </div>
+
+                        <div class="form-links">
+                            <button type="button" id="forgotPinBtn" class="link-btn">Forgot PIN?</button>
+                            <button type="button" id="switchUserBtn" class="link-btn">Different User?</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Forgot PIN Screen -->
+            <div id="forgotPinScreen" class="auth-screen">
+                <div class="auth-form-container">
+                    <div class="form-header">
+                        <h2>Account Recovery</h2>
+                        <p>Answer your security question to reset your PIN</p>
+                    </div>
+
+                    <form id="recoveryForm" class="auth-form">
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label id="recoveryQuestionLabel">Security Question</label>
+                                <div class="question-display" id="recoveryQuestion">Loading...</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="recoveryAnswer">Your Answer</label>
+                                <input type="text" id="recoveryAnswer" class="form-input" 
+                                       placeholder="Enter your answer" required>
+                                <div class="input-hint">Answer must match exactly (case-insensitive)</div>
+                            </div>
+                        </div>
+
+                        <div id="newPinSection" class="form-section" style="display: none;">
+                            <h3>Create New PIN</h3>
+                            
+                            <div class="form-group">
+                                <label for="newPin">New PIN</label>
+                                <input type="password" id="newPin" class="form-input pin-input" 
+                                       placeholder="Enter new PIN" maxlength="10">
+                                <div class="pin-strength" id="newPinStrength"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmNewPin">Confirm New PIN</label>
+                                <input type="password" id="confirmNewPin" class="form-input pin-input" 
+                                       placeholder="Re-enter new PIN" maxlength="10">
+                                <div class="pin-match" id="newPinMatch"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="backToLoginBtn" class="auth-btn secondary">Back to Login</button>
+                            <button type="submit" id="verifyAnswerBtn" class="auth-btn primary">Verify Answer</button>
+                            <button type="button" id="resetPinBtn" class="auth-btn primary" style="display: none;">Reset PIN</button>
+                        </div>
+
+                        <div class="form-links">
+                            <button type="button" id="completeResetBtn" class="link-btn danger">Complete Account Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Success Screen -->
+            <div id="successScreen" class="auth-screen">
+                <div class="success-content">
+                    <div class="success-icon">✅</div>
+                    <h2>Success!</h2>
+                    <p id="successMessage">Your account has been created successfully.</p>
+                    <button id="proceedBtn" class="auth-btn primary large">Continue to Tracker</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="auth-footer">
+            <p>&copy; 2024 Smart Expense Tracker. Your data stays on your device.</p>
+            <div class="footer-links">
+                <span>🔒 Privacy First</span>
+                <span>•</span>
+                <span>📱 Works Offline</span>
+                <span>•</span>
+                <span>🆓 Free Forever</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- JavaScript -->
+    <script src="auth.js"></script>
+</body>
+</html>
