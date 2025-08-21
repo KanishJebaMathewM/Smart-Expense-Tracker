@@ -216,9 +216,7 @@ class SmartExpenseTracker {
             this.updateDashboard();
             this.updateAnalytics();
             this.renderCharts();
-            this.updateProfileSwitcher();
             this.updateFamilyMemberDisplay();
-            this.addLogoutButton();
             this.checkFirstTimeSetup();
 
             console.log('Main tracker initialized successfully');
