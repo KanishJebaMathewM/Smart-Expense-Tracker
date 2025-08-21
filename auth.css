@@ -1067,12 +1067,6 @@ body {
     letter-spacing: -0.025em;
 }
 
-.user-email {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-1);
-    font-weight: var(--font-weight-medium);
-}
 
 .user-last-login {
     font-size: var(--font-size-xs);
