@@ -1065,20 +1065,19 @@ body {
     color: var(--text-primary);
     margin-bottom: var(--spacing-1);
     letter-spacing: -0.025em;
-    font-weight: 600;
-    color: var(--gray-900);
-    margin-bottom: var(--spacing-1);
 }
 
 .user-email {
-    font-size: 0.9rem;
-    color: var(--gray-600);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
     margin-bottom: var(--spacing-1);
+    font-weight: var(--font-weight-medium);
 }
 
 .user-last-login {
-    font-size: 0.8rem;
-    color: var(--gray-500);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    font-weight: var(--font-weight-medium);
 }
 
 .select-user-btn {
