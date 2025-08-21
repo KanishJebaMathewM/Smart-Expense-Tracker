@@ -45,18 +45,37 @@ class SmartExpenseTracker {
     // Initialize the application
     init() {
         try {
-            console.log('Initializing Enhanced Expense Tracker...');
-            
-            this.authScreen = document.getElementById('authScreen');
+            console.log('Initializing Smart Expense Tracker...');
+
             this.mainApp = document.getElementById('mainApp');
-            
+
+            // Get authenticated user data
+            this.loadAuthenticatedUser();
+
             this.hideLoadingScreen();
-            this.bindAuthEvents();
-            this.checkAuthentication();
-            
+            this.bindEvents();
+            this.initMainTracker();
+
         } catch (error) {
             this.showError('Failed to initialize application: ' + error.message);
             console.error('Initialization error:', error);
+        }
+    }
+
+    // Load authenticated user data
+    loadAuthenticatedUser() {
+        try {
+            const userData = localStorage.getItem('user_account_data');
+            if (userData) {
+                this.currentUser = JSON.parse(userData);
+                console.log(`Logged in as: ${this.currentUser.name} (${this.currentUser.email})`);
+            } else {
+                throw new Error('No authenticated user found');
+            }
+        } catch (error) {
+            console.error('Failed to load user data:', error);
+            // Redirect to auth if no valid user data
+            window.location.href = 'auth.html';
         }
     }
     
