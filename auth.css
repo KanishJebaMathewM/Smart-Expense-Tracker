@@ -86,6 +86,8 @@
     --font-size-2xl: 1.5rem;
     --font-size-3xl: 1.875rem;
     --font-size-4xl: 2.25rem;
+    --font-size-5xl: 3rem;
+    --font-size-6xl: 3.75rem;
     
     --font-weight-normal: 400;
     --font-weight-medium: 500;
@@ -137,8 +139,15 @@ body {
 }
 
 .loading-icon {
-    font-size: var(--font-size-4xl);
-    margin-bottom: var(--spacing-4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    margin: 0 auto var(--spacing-4);
+    color: white;
     animation: pulse 2s infinite;
 }
 
@@ -227,7 +236,7 @@ body {
     margin: 0 auto;
     padding: var(--spacing-6);
     background: var(--bg-primary);
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: var(--shadow-xl);
     margin-top: var(--spacing-8);
     margin-bottom: var(--spacing-8);
@@ -247,8 +256,16 @@ body {
 }
 
 .logo-icon {
-    font-size: var(--font-size-4xl);
-    margin-bottom: var(--spacing-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--accent-500);
+    border-radius: 12px;
+    margin-bottom: var(--spacing-3);
+    color: white;
+    box-shadow: var(--shadow-lg);
 }
 
 .auth-logo h1 {
