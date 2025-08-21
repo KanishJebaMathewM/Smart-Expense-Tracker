@@ -300,18 +300,8 @@ class SmartExpenseTracker {
             // Keyboard shortcuts
             this.bindKeyboardShortcuts();
             
-            // Profile Switcher Events (if exists)
-            this.safeAddEventListener('profileSwitcherBtn', 'click', () => this.toggleProfileDropdown());
-            this.safeAddEventListener('addProfileBtn', 'click', () => this.showProfileCreation());
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                const dropdown = document.getElementById('profileDropdown');
-                const btn = document.getElementById('profileSwitcherBtn');
-                if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
-                    this.closeProfileDropdown();
-                }
-            });
+            // Logout button event
+            this.safeAddEventListener('logoutBtn', 'click', () => this.logout());
 
             // Prevent modal close on content click
             document.querySelectorAll('.modal-content').forEach(content => {
