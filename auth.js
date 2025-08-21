@@ -777,7 +777,7 @@ class AuthenticationSystem {
             }
 
             userListContainer.innerHTML = Object.values(allUsers).map(user => `
-                <div class="user-item" data-user-id="${user.userId}">
+                <div class="user-item" data-user-id="${user.userId}" onclick="authSystem.selectUser('${user.userId}')">
                     <div class="user-avatar">
                         <span class="user-initial">${user.name.charAt(0).toUpperCase()}</span>
                     </div>
@@ -787,9 +787,6 @@ class AuthenticationSystem {
                             Last login: ${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                         </div>
                     </div>
-                    <button class="select-user-btn" onclick="authSystem.selectUser('${user.userId}')">
-                        Select
-                    </button>
                 </div>
             `).join('');
 
