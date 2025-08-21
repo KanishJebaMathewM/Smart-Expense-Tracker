@@ -143,10 +143,11 @@ class SmartExpenseTracker {
         }
     }
     
-    // Get all profiles
+    // Get all profiles (user-specific)
     getProfiles() {
         try {
-            const profiles = localStorage.getItem(this.STORAGE_KEYS.PROFILES);
+            const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILES);
+            const profiles = localStorage.getItem(userSpecificKey);
             return profiles ? JSON.parse(profiles) : {};
         } catch (error) {
             console.error('Error getting profiles:', error);
@@ -154,16 +155,23 @@ class SmartExpenseTracker {
         }
     }
 
-    // Save profiles
+    // Save profiles (user-specific)
     saveProfiles(profiles) {
         try {
-            localStorage.setItem(this.STORAGE_KEYS.PROFILES, JSON.stringify(profiles));
+            const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILES);
+            localStorage.setItem(userSpecificKey, JSON.stringify(profiles));
             return true;
         } catch (error) {
             this.showError('Failed to save profiles: ' + error.message);
             console.error('Error saving profiles:', error);
             return false;
         }
+    }
+
+    // Get user-specific storage key
+    getUserSpecificKey(baseKey) {
+        const userId = this.currentUser?.userId || this.currentUser?.email || 'default';
+        return `${baseKey}_${userId.replace(/[^a-zA-Z0-9]/g, '_')}`;
     }
 
     // Logout (redirect to auth)
