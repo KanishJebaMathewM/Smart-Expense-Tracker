@@ -234,12 +234,13 @@ body {
     max-width: 480px;
     width: 100%;
     margin: 0 auto;
-    padding: var(--spacing-6);
+    padding: var(--spacing-8);
     background: var(--bg-primary);
-    border-radius: 12px;
+    border-radius: 16px;
     box-shadow: var(--shadow-xl);
-    margin-top: var(--spacing-8);
-    margin-bottom: var(--spacing-8);
+    margin-top: var(--spacing-10);
+    margin-bottom: var(--spacing-10);
+    border: 1px solid var(--border-color);
 }
 
 .auth-header {
@@ -435,19 +436,21 @@ body {
 }
 
 .form-input {
-    padding: var(--spacing-4);
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
+    padding: var(--spacing-4) var(--spacing-5);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
     font-size: var(--font-size-base);
     background: var(--bg-primary);
     transition: all var(--transition-fast);
     font-family: inherit;
+    box-shadow: var(--shadow-sm);
 }
 
 .form-input:focus {
     outline: none;
-    border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--accent-500);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), var(--shadow-md);
+    background: var(--bg-primary);
 }
 
 .form-input:invalid:not(:focus):not(:placeholder-shown) {
@@ -529,16 +532,17 @@ body {
 .checkmark {
     width: 20px;
     height: 20px;
-    border: 2px solid var(--border-color);
-    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
     flex-shrink: 0;
     position: relative;
     transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark {
-    background: var(--primary-500);
-    border-color: var(--primary-500);
+    background: var(--accent-500);
+    border-color: var(--accent-500);
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
