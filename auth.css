@@ -925,17 +925,151 @@ body {
     }
 }
 
+/* User Selection Screen */
+.user-list-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: var(--spacing-6) 0;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.user-list {
+    padding: var(--spacing-2);
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-2);
+    background: white;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.user-item:hover {
+    border-color: var(--primary-300);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.user-item:last-child {
+    margin-bottom: 0;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--spacing-4);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.user-initial {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-1);
+}
+
+.user-email {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-1);
+}
+
+.user-last-login {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+}
+
+.select-user-btn {
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--primary-500);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: var(--spacing-3);
+}
+
+.select-user-btn:hover {
+    background: var(--primary-600);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.select-user-btn:active {
+    transform: translateY(0);
+}
+
+/* Empty state for user list */
+.user-list:empty::after {
+    content: "No family members found. Add a family member to get started.";
+    display: block;
+    text-align: center;
+    color: var(--gray-500);
+    padding: var(--spacing-8);
+    font-style: italic;
+}
+
+/* Responsive design for user selection */
+@media (max-width: 640px) {
+    .user-item {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--spacing-3);
+    }
+
+    .user-avatar {
+        margin-right: 0;
+        margin-bottom: var(--spacing-3);
+    }
+
+    .select-user-btn {
+        margin-left: 0;
+        margin-top: var(--spacing-3);
+        width: 100%;
+    }
+
+    .user-list-container {
+        max-height: 300px;
+    }
+}
+
 /* Print Styles */
 @media print {
     .auth-container {
         background: white !important;
     }
-    
+
     .bg-gradient,
     .bg-pattern {
         display: none !important;
     }
-    
+
     .auth-card {
         box-shadow: none !important;
         border: 1px solid var(--gray-300) !important;
