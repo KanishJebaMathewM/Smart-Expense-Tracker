@@ -72,7 +72,31 @@
 
                     <div class="welcome-actions">
                         <button id="getStartedBtn" class="auth-btn primary large">Get Started</button>
-                        <button id="existingUserBtn" class="auth-btn secondary large">I'm an Existing User</button>
+                        <button id="existingUserBtn" class="auth-btn secondary large">Family Login</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Selection Screen -->
+            <div id="userSelectionScreen" class="auth-screen">
+                <div class="auth-form-container">
+                    <div class="form-header">
+                        <h2>Select Family Member</h2>
+                        <p>Choose your account to continue</p>
+                    </div>
+
+                    <div class="user-list-container">
+                        <div id="userList" class="user-list">
+                            <!-- User items will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="addFamilyMemberBtn" class="auth-btn primary">
+                            <span class="btn-icon">👤</span>
+                            <span class="btn-text">Add Family Member</span>
+                        </button>
+                        <button type="button" class="auth-btn secondary" onclick="authSystem.switchScreen('welcome')">Back</button>
                     </div>
                 </div>
             </div>
