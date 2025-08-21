@@ -330,6 +330,18 @@ class SmartExpenseTracker {
         }
     }
     
+    // Update family member display in header
+    updateFamilyMemberDisplay() {
+        try {
+            const familyMemberName = document.getElementById('familyMemberName');
+            if (familyMemberName && this.currentUser) {
+                familyMemberName.textContent = this.currentUser.name;
+            }
+        } catch (error) {
+            console.error('Error updating family member display:', error);
+        }
+    }
+
     // Update profile switcher in header
     updateProfileSwitcher() {
         try {
