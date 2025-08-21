@@ -65,7 +65,6 @@ class SmartExpenseTracker {
             this.loadAuthenticatedUser();
 
             this.hideLoadingScreen();
-            this.bindEvents();
             this.initMainTracker();
 
         } catch (error) {
