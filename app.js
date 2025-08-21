@@ -212,8 +212,8 @@ class SmartExpenseTracker {
         }
     }
     
-    // Bind main application events
-    bindMainEvents() {
+    // Bind all application events
+    bindEvents() {
         try {
             // Income modal events
             this.safeAddEventListener('setIncomeBtn', 'click', () => this.showIncomeModal());
