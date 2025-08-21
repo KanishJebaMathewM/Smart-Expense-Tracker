@@ -121,6 +121,29 @@ class SmartExpenseTracker {
         }
     }
     
+    // Get all profiles
+    getProfiles() {
+        try {
+            const profiles = localStorage.getItem(this.STORAGE_KEYS.PROFILES);
+            return profiles ? JSON.parse(profiles) : {};
+        } catch (error) {
+            console.error('Error getting profiles:', error);
+            return {};
+        }
+    }
+
+    // Save profiles
+    saveProfiles(profiles) {
+        try {
+            localStorage.setItem(this.STORAGE_KEYS.PROFILES, JSON.stringify(profiles));
+            return true;
+        } catch (error) {
+            this.showError('Failed to save profiles: ' + error.message);
+            console.error('Error saving profiles:', error);
+            return false;
+        }
+    }
+
     // Logout (redirect to auth)
     logout() {
         try {
