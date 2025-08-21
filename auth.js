@@ -12,6 +12,8 @@ class AuthenticationSystem {
         // Storage keys
         this.STORAGE_KEYS = {
             USER_DATA: 'user_account_data',
+            ALL_USERS: 'all_family_users', // Store list of all family members
+            CURRENT_USER: 'current_user_id',
             APP_SESSION: 'app_session_token',
             SECURITY_HASH: 'security_pin_hash',
             PROFILES: 'user_profiles',
@@ -62,15 +64,21 @@ class AuthenticationSystem {
     // Check if user already exists
     checkExistingUser() {
         try {
-            const userData = this.getUserData();
-            
-            if (userData && userData.email) {
-                // Existing user - show login screen
-                this.userData = userData;
-                this.displayUserInfo();
-                this.switchScreen('login');
+            const allUsers = this.getAllUsers();
+            const currentUserId = localStorage.getItem(this.STORAGE_KEYS.CURRENT_USER);
+
+            if (Object.keys(allUsers).length > 0) {
+                if (currentUserId && allUsers[currentUserId]) {
+                    // Load current user data
+                    this.userData = allUsers[currentUserId];
+                    this.displayUserInfo();
+                    this.switchScreen('login');
+                } else {
+                    // Show user selection if multiple users exist
+                    this.showUserSelection();
+                }
             } else {
-                // New user - show welcome screen
+                // New family - show welcome screen
                 this.switchScreen('welcome');
             }
         } catch (error) {
@@ -84,7 +92,8 @@ class AuthenticationSystem {
         try {
             // Welcome screen events
             this.safeAddEventListener('getStartedBtn', 'click', () => this.switchScreen('signup'));
-            this.safeAddEventListener('existingUserBtn', 'click', () => this.switchScreen('login'));
+            this.safeAddEventListener('existingUserBtn', 'click', () => this.showUserSelection());
+            this.safeAddEventListener('addFamilyMemberBtn', 'click', () => this.switchScreen('signup'));
             
             // Signup form events
             this.safeAddEventListener('signupForm', 'submit', (e) => this.handleSignup(e));
@@ -94,7 +103,7 @@ class AuthenticationSystem {
             // Login form events
             this.safeAddEventListener('loginForm', 'submit', (e) => this.handleLogin(e));
             this.safeAddEventListener('forgotPinBtn', 'click', () => this.switchScreen('forgotPin'));
-            this.safeAddEventListener('switchUserBtn', 'click', () => this.switchUser());
+            this.safeAddEventListener('switchUserBtn', 'click', () => this.showUserSelection());
             this.safeAddEventListener('loginPin', 'input', () => this.validateLoginForm());
             
             // Recovery form events
@@ -390,10 +399,10 @@ class AuthenticationSystem {
                 return;
             }
             
-            // Check if user already exists
-            const existingUser = this.getUserData();
-            if (existingUser && existingUser.email) {
-                this.showError('An account already exists. Please login or reset your account.');
+            // Check if user with this email already exists
+            const allUsers = this.getAllUsers();
+            if (Object.values(allUsers).some(user => user.email === formData.email)) {
+                this.showError('An account with this email already exists. Please use a different email or login.');
                 return;
             }
             
@@ -456,8 +465,11 @@ class AuthenticationSystem {
                 lockedUntil: null
             };
             
-            // Save user data
-            this.saveUserData(userData);
+            // Save user data to family users list
+            const userId = this.generateUserId(userData.email);
+            userData.userId = userId;
+            this.addUserToFamily(userId, userData);
+            this.setCurrentUser(userId);
             this.userData = userData;
             
             // Show success message
@@ -707,18 +719,78 @@ class AuthenticationSystem {
         }
     }
     
-    // Switch to different user
-    switchUser() {
+    // Show user selection screen
+    showUserSelection() {
         try {
-            // Clear session but keep user data
-            localStorage.removeItem(this.STORAGE_KEYS.APP_SESSION);
-            
-            this.showInfo('Switched to new user mode. You can now create a new account or login as a different user.');
-            this.switchScreen('welcome');
-            
+            const allUsers = this.getAllUsers();
+
+            if (Object.keys(allUsers).length === 0) {
+                this.switchScreen('welcome');
+                return;
+            }
+
+            this.switchScreen('userSelection');
+            this.renderUserList();
+
         } catch (error) {
-            this.showError('Failed to switch user: ' + error.message);
-            console.error('User switch error:', error);
+            this.showError('Failed to show user selection: ' + error.message);
+            console.error('User selection error:', error);
+        }
+    }
+
+    // Render user list for selection
+    renderUserList() {
+        try {
+            const allUsers = this.getAllUsers();
+            const userListContainer = document.getElementById('userList');
+
+            if (!userListContainer) {
+                console.warn('User list container not found');
+                return;
+            }
+
+            userListContainer.innerHTML = Object.values(allUsers).map(user => `
+                <div class="user-item" data-user-id="${user.userId}">
+                    <div class="user-avatar">
+                        <span class="user-initial">${user.name.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">${this.escapeHtml(user.name)}</div>
+                        <div class="user-email">${this.escapeHtml(user.email)}</div>
+                        <div class="user-last-login">
+                            Last login: ${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                        </div>
+                    </div>
+                    <button class="select-user-btn" onclick="authSystem.selectUser('${user.userId}')">
+                        Select
+                    </button>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error('Error rendering user list:', error);
+        }
+    }
+
+    // Select a user from the list
+    selectUser(userId) {
+        try {
+            const allUsers = this.getAllUsers();
+            const user = allUsers[userId];
+
+            if (!user) {
+                this.showError('User not found');
+                return;
+            }
+
+            this.userData = user;
+            this.setCurrentUser(userId);
+            this.displayUserInfo();
+            this.switchScreen('login');
+
+        } catch (error) {
+            this.showError('Failed to select user: ' + error.message);
+            console.error('User selection error:', error);
         }
     }
     
