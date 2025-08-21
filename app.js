@@ -1647,7 +1647,7 @@ class SmartExpenseTracker {
                         break;
                     case 'escape':
                         this.hideAllModals();
-                        this.closeProfileDropdown();
+                        // closeProfileDropdown() removed - no longer needed
                         break;
                 }
             });
