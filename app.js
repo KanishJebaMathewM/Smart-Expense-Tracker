@@ -912,8 +912,7 @@ class SmartExpenseTracker {
 
             const savingsRate = income > 0 ? ((balance / income) * 100).toFixed(1) : 0;
 
-            reportContent.innerHTML = `
-                <div class="report-summary">
+            reportContent.innerHTML = `<div class="report-summary">
                     <h3>📊 Monthly Report - ${monthNames[this.currentMonth]} ${this.currentYear}</h3>
                     <h4>Profile: ${this.escapeHtml(this.currentProfile?.name || 'Unknown')}</h4>
 
