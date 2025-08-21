@@ -250,12 +250,13 @@ class SmartExpenseTracker {
                 console.log('Created default profile');
             } else {
                 // Load existing profile or first available profile
-                const currentProfileId = localStorage.getItem(this.STORAGE_KEYS.CURRENT_PROFILE);
+                const userSpecificCurrentProfileKey = this.getUserSpecificKey(this.STORAGE_KEYS.CURRENT_PROFILE);
+                const currentProfileId = localStorage.getItem(userSpecificCurrentProfileKey);
                 const profile = profiles[currentProfileId] || Object.values(profiles)[0];
 
                 this.currentProfile = profile;
                 if (currentProfileId !== profile.id) {
-                    localStorage.setItem(this.STORAGE_KEYS.CURRENT_PROFILE, profile.id);
+                    localStorage.setItem(userSpecificCurrentProfileKey, profile.id);
                 }
 
                 console.log(`Loaded profile: ${profile.name}`);
