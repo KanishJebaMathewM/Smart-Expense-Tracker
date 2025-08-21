@@ -718,6 +718,7 @@ class AuthenticationSystem {
             const allUsers = this.getAllUsers();
 
             if (Object.keys(allUsers).length === 0) {
+                this.showInfo('No family accounts found. Please create an account first.');
                 this.switchScreen('welcome');
                 return;
             }
