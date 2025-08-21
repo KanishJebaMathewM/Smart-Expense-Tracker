@@ -157,9 +157,22 @@ class AuthenticationSystem {
                 targetScreen.classList.add('active');
                 this.currentScreen = screenName;
 
-                // Trigger validation for signup screen
+                // Setup signup screen
                 if (screenName === 'signup') {
                     setTimeout(() => {
+                        // Clear form and reset button state
+                        const submitBtn = document.getElementById('createAccountBtn');
+                        if (submitBtn) {
+                            submitBtn.disabled = false; // Start enabled
+                        }
+
+                        // Clear any previous form data to ensure clean state
+                        const form = document.getElementById('signupForm');
+                        if (form) {
+                            form.reset();
+                        }
+
+                        // Run validation
                         this.validateSignupForm();
                     }, 100);
                 }
