@@ -483,8 +483,8 @@ class SmartExpenseTracker {
             this.updateDashboard();
             this.updateAnalytics();
             this.renderCharts();
-            this.updateProfileSwitcher();
-            
+            // updateProfileSwitcher() removed - no longer needed
+
         } catch (error) {
             this.showError('Failed to switch profile: ' + error.message);
             console.error('Profile switch error:', error);
