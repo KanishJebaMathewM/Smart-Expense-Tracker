@@ -108,130 +108,6 @@ class SmartExpenseTracker {
         }
     }
     
-    // Check if user is authenticated
-    checkAuthentication() {
-        const savedPin = localStorage.getItem(this.STORAGE_KEYS.APP_PIN);
-        
-        if (!savedPin) {
-            // First time setup - create PIN
-            this.showPinSetup();
-        } else {
-            // Show login
-            this.showPinLogin();
-        }
-    }
-    
-    // Show PIN setup for first time users
-    showPinSetup() {
-        this.hideAllAuthForms();
-        document.getElementById('pinSetupForm').style.display = 'flex';
-        this.authScreen.style.display = 'flex';
-    }
-    
-    // Show PIN login
-    showPinLogin() {
-        this.hideAllAuthForms();
-        document.getElementById('pinLoginForm').style.display = 'flex';
-        this.authScreen.style.display = 'flex';
-        
-        // Focus on PIN input
-        setTimeout(() => {
-            const pinInput = document.getElementById('pinInput');
-            if (pinInput) pinInput.focus();
-        }, 100);
-    }
-    
-    // Show profile selection
-    showProfileSelection() {
-        this.hideAllAuthForms();
-        this.renderProfilesList();
-        document.getElementById('profileSelectForm').style.display = 'flex';
-    }
-    
-    // Show profile creation
-    showProfileCreation() {
-        this.hideAllAuthForms();
-        document.getElementById('profileCreateForm').style.display = 'flex';
-        
-        // Clear form
-        document.getElementById('profileName').value = '';
-        this.selectIcon('👨');
-        
-        setTimeout(() => {
-            document.getElementById('profileName').focus();
-        }, 100);
-    }
-    
-    // Hide all auth forms
-    hideAllAuthForms() {
-        const forms = ['pinLoginForm', 'pinSetupForm', 'profileSelectForm', 'profileCreateForm'];
-        forms.forEach(formId => {
-            const form = document.getElementById(formId);
-            if (form) form.style.display = 'none';
-        });
-    }
-    
-    // Bind authentication event listeners
-    bindAuthEvents() {
-        try {
-            // PIN Setup Events
-            this.safeAddEventListener('newPinInput', 'input', () => this.validatePinSetup());
-            this.safeAddEventListener('confirmPinInput', 'input', () => this.validatePinSetup());
-            this.safeAddEventListener('setPinBtn', 'click', () => this.setupPin());
-            
-            // PIN Login Events
-            this.safeAddEventListener('pinInput', 'input', () => this.validatePinLogin());
-            this.safeAddEventListener('loginBtn', 'click', () => this.authenticatePin());
-            this.safeAddEventListener('forgotPinBtn', 'click', () => this.resetApp());
-            
-            // Profile Events
-            this.safeAddEventListener('createProfileBtn', 'click', () => this.showProfileCreation());
-            this.safeAddEventListener('profileName', 'input', () => this.validateProfileForm());
-            this.safeAddEventListener('saveProfileBtn', 'click', () => this.createProfile());
-            this.safeAddEventListener('cancelCreateBtn', 'click', () => this.showProfileSelection());
-            
-            // Profile Switcher Events
-            this.safeAddEventListener('profileSwitcherBtn', 'click', () => this.toggleProfileDropdown());
-            this.safeAddEventListener('addProfileBtn', 'click', () => this.showProfileCreation());
-            this.safeAddEventListener('logoutBtn', 'click', () => this.logout());
-            
-            // Icon selector
-            document.querySelectorAll('.icon-option').forEach(icon => {
-                icon.addEventListener('click', (e) => {
-                    const iconValue = e.target.dataset.icon;
-                    this.selectIcon(iconValue);
-                });
-            });
-            
-            // Enter key handling
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    if (document.getElementById('pinSetupForm').style.display === 'flex') {
-                        this.setupPin();
-                    } else if (document.getElementById('pinLoginForm').style.display === 'flex') {
-                        this.authenticatePin();
-                    } else if (document.getElementById('profileCreateForm').style.display === 'flex') {
-                        this.createProfile();
-                    }
-                }
-            });
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                const dropdown = document.getElementById('profileDropdown');
-                const btn = document.getElementById('profileSwitcherBtn');
-                if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
-                    this.closeProfileDropdown();
-                }
-            });
-            
-            console.log('Authentication events bound successfully');
-        } catch (error) {
-            this.showError('Failed to bind authentication events: ' + error.message);
-            console.error('Auth event binding error:', error);
-        }
-    }
-    
     // Safe event listener helper
     safeAddEventListener(elementId, event, handler) {
         try {
@@ -1376,7 +1252,7 @@ class SmartExpenseTracker {
         const insights = [];
 
         if (balance < 0) {
-            insights.push('<p>⚠️ You\'re spending more than your income. Consider reducing expenses.</p>');
+            insights.push('<p>⚠�� You\'re spending more than your income. Consider reducing expenses.</p>');
         } else if (balance / income < 0.1) {
             insights.push('<p>⚠️ Low savings rate. Try to save at least 10% of your income.</p>');
         } else if (balance / income > 0.3) {
