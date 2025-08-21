@@ -122,153 +122,26 @@ class SmartExpenseTracker {
         }
     }
     
-    // Get all profiles
-    getProfiles() {
+    // Logout (redirect to auth)
+    logout() {
         try {
-            const profiles = localStorage.getItem(this.STORAGE_KEYS.PROFILES);
-            return profiles ? JSON.parse(profiles) : {};
-        } catch (error) {
-            console.error('Error getting profiles:', error);
-            return {};
-        }
-    }
-    
-    // Save profiles
-    saveProfiles(profiles) {
-        try {
-            localStorage.setItem(this.STORAGE_KEYS.PROFILES, JSON.stringify(profiles));
-            return true;
-        } catch (error) {
-            this.showError('Failed to save profiles: ' + error.message);
-            console.error('Error saving profiles:', error);
-            return false;
-        }
-    }
-    
-    // Create new profile
-    createProfile() {
-        try {
-            const name = document.getElementById('profileName').value.trim();
-            const selectedIcon = document.querySelector('.icon-option.selected')?.dataset.icon || '👤';
-            
-            if (!name || name.length < 1 || name.length > 20) {
-                this.showError('Profile name must be 1-20 characters');
-                return;
+            if (confirm('Are you sure you want to logout? You will need to enter your PIN again.')) {
+                // Save current profile data before logout
+                this.saveProfileData();
+
+                // Clear session data
+                localStorage.removeItem('app_session_token');
+
+                this.showSuccess('Logged out successfully');
+
+                // Redirect to auth page
+                setTimeout(() => {
+                    window.location.href = 'auth.html';
+                }, 1500);
             }
-            
-            const profiles = this.getProfiles();
-            
-            // Check if name already exists
-            const nameExists = Object.values(profiles).some(profile => 
-                profile.name.toLowerCase() === name.toLowerCase()
-            );
-            
-            if (nameExists) {
-                this.showError('Profile name already exists');
-                return;
-            }
-            
-            // Create new profile
-            const profileId = 'profile_' + Date.now();
-            const newProfile = {
-                id: profileId,
-                name: name,
-                icon: selectedIcon,
-                createdAt: new Date().toISOString(),
-                lastAccessed: new Date().toISOString()
-            };
-            
-            profiles[profileId] = newProfile;
-            
-            if (this.saveProfiles(profiles)) {
-                this.showSuccess(`Profile "${name}" created successfully!`);
-                this.selectProfile(profileId);
-            }
-            
         } catch (error) {
-            this.showError('Failed to create profile: ' + error.message);
-            console.error('Profile creation error:', error);
-        }
-    }
-    
-    // Render profiles list
-    renderProfilesList() {
-        try {
-            const profiles = this.getProfiles();
-            const profilesList = document.getElementById('profilesList');
-            
-            if (!profilesList) return;
-            
-            if (Object.keys(profiles).length === 0) {
-                profilesList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); margin: var(--spacing-4) 0;">No profiles found. Create your first profile!</p>';
-                return;
-            }
-            
-            profilesList.innerHTML = Object.values(profiles).map(profile => `
-                <div class="profile-item" data-profile-id="${profile.id}">
-                    <div class="profile-item-icon">${profile.icon}</div>
-                    <div class="profile-item-info">
-                        <div class="profile-item-name">${this.escapeHtml(profile.name)}</div>
-                        <div class="profile-item-desc">Last accessed: ${new Date(profile.lastAccessed).toLocaleDateString()}</div>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Add click handlers
-            profilesList.querySelectorAll('.profile-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const profileId = item.dataset.profileId;
-                    this.selectProfile(profileId);
-                });
-            });
-            
-        } catch (error) {
-            this.showError('Failed to render profiles list: ' + error.message);
-            console.error('Error rendering profiles list:', error);
-        }
-    }
-    
-    // Select and load profile
-    selectProfile(profileId) {
-        try {
-            const profiles = this.getProfiles();
-            const profile = profiles[profileId];
-            
-            if (!profile) {
-                this.showError('Profile not found');
-                return;
-            }
-            
-            // Update last accessed
-            profile.lastAccessed = new Date().toISOString();
-            profiles[profileId] = profile;
-            this.saveProfiles(profiles);
-            
-            // Set current profile
-            this.currentProfile = profile;
-            localStorage.setItem(this.STORAGE_KEYS.CURRENT_PROFILE, profileId);
-            
-            this.showSuccess(`Welcome back, ${profile.name}!`);
-            this.loadMainApp();
-            
-        } catch (error) {
-            this.showError('Failed to select profile: ' + error.message);
-            console.error('Profile selection error:', error);
-        }
-    }
-    
-    // Load main application
-    loadMainApp() {
-        try {
-            this.authScreen.style.display = 'none';
-            this.mainApp.style.display = 'block';
-            
-            // Initialize main tracker
-            this.initMainTracker();
-            
-        } catch (error) {
-            this.showError('Failed to load main app: ' + error.message);
-            console.error('Main app loading error:', error);
+            this.showError('Failed to logout: ' + error.message);
+            console.error('Logout error:', error);
         }
     }
     
