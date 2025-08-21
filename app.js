@@ -1,13 +1,13 @@
 /**
- * Enhanced Smart Expense Tracker with PIN Authentication and Multi-Profile Support
- * Features: Secure PIN lock, Multiple user profiles, Profile-specific data storage
+ * Smart Expense Tracker - Main Application
+ * Works with separate authentication system (auth.html)
+ * Features: Multiple user profiles, Profile-specific data storage, Advanced analytics
  */
 
-class EnhancedExpenseTracker {
+class SmartExpenseTracker {
     constructor() {
         this.currentProfile = null;
-        this.isAuthenticated = false;
-        this.authScreen = null;
+        this.currentUser = null;
         this.mainApp = null;
         
         // Storage keys
