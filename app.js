@@ -491,28 +491,7 @@ class SmartExpenseTracker {
         }
     }
     
-    // Logout (lock app)
-    logout() {
-        try {
-            // Save current profile data
-            this.saveProfileData();
-            
-            // Reset state
-            this.isAuthenticated = false;
-            this.currentProfile = null;
-            
-            // Show login screen
-            this.mainApp.style.display = 'none';
-            this.showPinLogin();
-            
-            this.closeProfileDropdown();
-            this.showSuccess('App locked successfully');
-            
-        } catch (error) {
-            this.showError('Failed to logout: ' + error.message);
-            console.error('Logout error:', error);
-        }
-    }
+    // Old logout function removed - using the correct one at line 159
     
     // Select icon in profile creation
     selectIcon(iconValue) {
