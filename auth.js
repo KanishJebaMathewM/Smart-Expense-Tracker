@@ -310,20 +310,33 @@ class AuthenticationSystem {
             const question = document.getElementById('securityQuestion')?.value || '';
             const answer = document.getElementById('securityAnswer')?.value || '';
             const agreedTerms = document.getElementById('agreeTerms')?.checked || false;
-            
+
             const submitBtn = document.getElementById('createAccountBtn');
             if (!submitBtn) return;
-            
-            const isValid = this.isValidEmail(email) &&
-                           name.trim().length >= 2 &&
-                           pin.length >= this.PIN_MIN_LENGTH &&
-                           pin.length <= this.PIN_MAX_LENGTH &&
-                           pin === confirmPin &&
-                           question !== '' &&
-                           answer.trim().length >= 3 &&
-                           agreedTerms &&
-                           /^\d+$/.test(pin);
-            
+
+            // Debug validation
+            const emailValid = this.isValidEmail(email);
+            const nameValid = name.trim().length >= 2;
+            const pinLengthValid = pin.length >= this.PIN_MIN_LENGTH && pin.length <= this.PIN_MAX_LENGTH;
+            const pinMatchValid = pin === confirmPin;
+            const questionValid = question !== '';
+            const answerValid = answer.trim().length >= 3;
+            const termsValid = agreedTerms;
+            const pinDigitsValid = /^\d+$/.test(pin);
+
+            console.log('Signup form validation:', {
+                email: email, emailValid,
+                name: name, nameValid,
+                pin: pin, pinLengthValid, pinMatchValid, pinDigitsValid,
+                question: question, questionValid,
+                answer: answer, answerValid,
+                termsValid
+            });
+
+            const isValid = emailValid && nameValid && pinLengthValid && pinMatchValid &&
+                           questionValid && answerValid && termsValid && pinDigitsValid;
+
+            console.log('Form is valid:', isValid);
             submitBtn.disabled = !isValid;
         } catch (error) {
             console.error('Error validating signup form:', error);
