@@ -16,7 +16,13 @@
     <!-- Loading Screen -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-content">
-            <div class="loading-icon">🔐</div>
+            <div class="loading-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <circle cx="12" cy="16" r="1"/>
+                    <path d="m7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
             <div class="loading-text">Initializing Security...</div>
             <div class="loading-progress">
                 <div class="progress-bar">
@@ -39,7 +45,12 @@
             <!-- Header -->
             <div class="auth-header">
                 <div class="auth-logo">
-                    <span class="logo-icon">💰</span>
+                    <div class="logo-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                    </div>
                     <h1>Smart Expense Tracker</h1>
                 </div>
                 <p class="auth-subtitle">Secure Financial Management System</p>
@@ -53,19 +64,43 @@
                     
                     <div class="feature-list">
                         <div class="feature-item">
-                            <span class="feature-icon">🔒</span>
+                            <div class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <circle cx="12" cy="16" r="1"/>
+                                    <path d="m7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                            </div>
                             <span class="feature-text">Bank-level security with PIN protection</span>
                         </div>
                         <div class="feature-item">
-                            <span class="feature-icon">👥</span>
+                            <div class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </div>
                             <span class="feature-text">Multiple family member profiles</span>
                         </div>
                         <div class="feature-item">
-                            <span class="feature-icon">📊</span>
+                            <div class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="20" x2="12" y2="10"/>
+                                    <line x1="18" y1="20" x2="18" y2="4"/>
+                                    <line x1="6" y1="20" x2="6" y2="16"/>
+                                </svg>
+                            </div>
                             <span class="feature-text">Advanced analytics and reporting</span>
                         </div>
                         <div class="feature-item">
-                            <span class="feature-icon">📱</span>
+                            <div class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                                    <line x1="12" y1="18" x2="12.01" y2="18"/>
+                                </svg>
+                            </div>
                             <span class="feature-text">Works on all devices</span>
                         </div>
                     </div>
@@ -93,7 +128,12 @@
 
                     <div class="form-actions">
                         <button type="button" id="addFamilyMemberBtn" class="auth-btn primary">
-                            <span class="btn-icon">👤</span>
+                            <div class="btn-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
                             <span class="btn-text">Add Family Member</span>
                         </button>
                         <button type="button" class="auth-btn secondary" onclick="authSystem.switchScreen('welcome')">Back</button>
