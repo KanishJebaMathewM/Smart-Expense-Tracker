@@ -366,22 +366,7 @@ class SmartExpenseTracker {
         }
     }
     
-    // Update profile switcher
-    updateProfileSwitcher() {
-        try {
-            if (!this.currentProfile) return;
-            
-            const profileIcon = document.getElementById('currentProfileIcon');
-            const profileName = document.getElementById('currentProfileName');
-            
-            if (profileIcon) profileIcon.textContent = this.currentProfile.icon;
-            if (profileName) profileName.textContent = this.currentProfile.name;
-            
-            this.renderProfileDropdown();
-        } catch (error) {
-            console.error('Error updating profile switcher:', error);
-        }
-    }
+    // Profile switcher removed - method no longer needed
     
     // Render profile dropdown
     renderProfileDropdown() {
