@@ -999,21 +999,22 @@ body {
     align-items: center;
     padding: var(--spacing-5);
     margin-bottom: 0;
-    background: var(--bg-primary);
+    background: #334155;
     border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border: 1px solid #475569;
     transition: all var(--transition-fast);
     cursor: pointer;
     box-shadow: var(--shadow-sm);
     position: relative;
     overflow: hidden;
+    color: white;
 }
 
 .user-item:hover {
     border-color: var(--accent-500);
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
-    background: #f0f4f8;
+    background: #475569;
 }
 
 .user-item::before {
