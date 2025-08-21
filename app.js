@@ -154,20 +154,61 @@ class SmartExpenseTracker {
             this.currentYear = this.currentDate.getFullYear();
             this.selectedDate = null;
             this.editingExpenseId = null;
-            
-            this.bindMainEvents();
+
+            // Check if user has profiles, if not create a default one
+            this.ensureDefaultProfile();
+
             this.loadProfileData();
             this.renderCalendar();
             this.updateDashboard();
             this.updateAnalytics();
             this.renderCharts();
             this.updateProfileSwitcher();
+            this.addLogoutButton();
             this.checkFirstTimeSetup();
-            
+
             console.log('Main tracker initialized successfully');
         } catch (error) {
             this.showError('Failed to initialize main tracker: ' + error.message);
             console.error('Main tracker initialization error:', error);
+        }
+    }
+
+    // Ensure user has at least one profile
+    ensureDefaultProfile() {
+        try {
+            const profiles = this.getProfiles();
+
+            if (Object.keys(profiles).length === 0) {
+                // Create default profile for the user
+                const defaultProfile = {
+                    id: 'profile_default',
+                    name: this.currentUser?.name || 'My Profile',
+                    icon: '👤',
+                    createdAt: new Date().toISOString(),
+                    lastAccessed: new Date().toISOString()
+                };
+
+                profiles[defaultProfile.id] = defaultProfile;
+                this.saveProfiles(profiles);
+                this.currentProfile = defaultProfile;
+                localStorage.setItem(this.STORAGE_KEYS.CURRENT_PROFILE, defaultProfile.id);
+
+                console.log('Created default profile');
+            } else {
+                // Load existing profile or first available profile
+                const currentProfileId = localStorage.getItem(this.STORAGE_KEYS.CURRENT_PROFILE);
+                const profile = profiles[currentProfileId] || Object.values(profiles)[0];
+
+                this.currentProfile = profile;
+                if (currentProfileId !== profile.id) {
+                    localStorage.setItem(this.STORAGE_KEYS.CURRENT_PROFILE, profile.id);
+                }
+
+                console.log(`Loaded profile: ${profile.name}`);
+            }
+        } catch (error) {
+            console.error('Error ensuring default profile:', error);
         }
     }
     
