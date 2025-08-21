@@ -783,7 +783,6 @@ class AuthenticationSystem {
                     </div>
                     <div class="user-info">
                         <div class="user-name">${this.escapeHtml(user.name)}</div>
-                        <div class="user-email">${this.escapeHtml(user.email)}</div>
                         <div class="user-last-login">
                             Last login: ${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                         </div>
