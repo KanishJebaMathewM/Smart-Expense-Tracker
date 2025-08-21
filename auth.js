@@ -65,22 +65,11 @@ class AuthenticationSystem {
     checkExistingUser() {
         try {
             const allUsers = this.getAllUsers();
-            const currentUserId = localStorage.getItem(this.STORAGE_KEYS.CURRENT_USER);
 
-            if (Object.keys(allUsers).length > 0) {
-                if (currentUserId && allUsers[currentUserId]) {
-                    // Load current user data
-                    this.userData = allUsers[currentUserId];
-                    this.displayUserInfo();
-                    this.switchScreen('login');
-                } else {
-                    // Show user selection if multiple users exist
-                    this.showUserSelection();
-                }
-            } else {
-                // New family - show welcome screen
-                this.switchScreen('welcome');
-            }
+            // Always show welcome screen for clear navigation
+            // Users can choose to create new account or login to existing ones
+            this.switchScreen('welcome');
+
         } catch (error) {
             console.error('Error checking existing user:', error);
             this.switchScreen('welcome');
