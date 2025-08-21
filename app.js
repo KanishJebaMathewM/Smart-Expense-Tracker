@@ -157,6 +157,7 @@ class SmartExpenseTracker {
             // Check if user has profiles, if not create a default one
             this.ensureDefaultProfile();
 
+            this.bindEvents();
             this.loadProfileData();
             this.renderCalendar();
             this.updateDashboard();
