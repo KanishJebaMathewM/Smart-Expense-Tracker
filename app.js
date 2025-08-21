@@ -370,28 +370,7 @@ class SmartExpenseTracker {
     
     // Old profile dropdown methods removed - interface simplified
     
-    // Switch to different profile
-    switchProfile(profileId) {
-        try {
-            // Save current profile data
-            this.saveProfileData();
-            
-            // Load new profile
-            this.selectProfile(profileId);
-            
-            // Refresh the display
-            this.loadProfileData();
-            this.renderCalendar();
-            this.updateDashboard();
-            this.updateAnalytics();
-            this.renderCharts();
-            // updateProfileSwitcher() removed - no longer needed
-
-        } catch (error) {
-            this.showError('Failed to switch profile: ' + error.message);
-            console.error('Profile switch error:', error);
-        }
-    }
+    // switchProfile method removed - interface simplified
     
     // Old logout function removed - using the correct one at line 159
     
