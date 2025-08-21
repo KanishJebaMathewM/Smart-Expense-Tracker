@@ -1,23 +1,21 @@
 /**
- * Smart Expense Tracker - Consolidated Application
- * All-in-one expense tracking application with proper error handling
+ * Enhanced Smart Expense Tracker with PIN Authentication and Multi-Profile Support
+ * Features: Secure PIN lock, Multiple user profiles, Profile-specific data storage
  */
 
-class SmartExpenseTracker {
+class EnhancedExpenseTracker {
     constructor() {
-        this.currentDate = new Date();
-        this.currentMonth = this.currentDate.getMonth();
-        this.currentYear = this.currentDate.getFullYear();
-        this.selectedDate = null;
-        this.editingExpenseId = null;
+        this.currentProfile = null;
+        this.isAuthenticated = false;
+        this.authScreen = null;
+        this.mainApp = null;
         
-        // Data storage keys
+        // Storage keys
         this.STORAGE_KEYS = {
-            INCOME: 'monthlyIncomes',
-            EXPENSES: 'expenses',
-            BUDGETS: 'budgets',
-            GOALS: 'goals',
-            SETTINGS: 'appSettings'
+            APP_PIN: 'app_security_pin',
+            PROFILES: 'user_profiles',
+            CURRENT_PROFILE: 'current_profile_id',
+            PROFILE_DATA: 'profile_data_'
         };
         
         // Category colors for charts
@@ -35,19 +33,27 @@ class SmartExpenseTracker {
         this.init();
     }
     
+    // Simple hash function for PIN security
+    async hashPin(pin) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(pin + 'expense_tracker_salt');
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    
     // Initialize the application
     init() {
         try {
-            console.log('Initializing Smart Expense Tracker...');
+            console.log('Initializing Enhanced Expense Tracker...');
+            
+            this.authScreen = document.getElementById('authScreen');
+            this.mainApp = document.getElementById('mainApp');
+            
             this.hideLoadingScreen();
-            this.bindEvents();
-            this.loadData();
-            this.renderCalendar();
-            this.updateDashboard();
-            this.updateAnalytics();
-            this.renderCharts();
-            this.checkFirstTimeSetup();
-            this.showSuccess('Application loaded successfully!');
+            this.bindAuthEvents();
+            this.checkAuthentication();
+            
         } catch (error) {
             this.showError('Failed to initialize application: ' + error.message);
             console.error('Initialization error:', error);
@@ -71,16 +77,451 @@ class SmartExpenseTracker {
         }
     }
     
-    // Bind all event listeners
-    bindEvents() {
+    // Check if user is authenticated
+    checkAuthentication() {
+        const savedPin = localStorage.getItem(this.STORAGE_KEYS.APP_PIN);
+        
+        if (!savedPin) {
+            // First time setup - create PIN
+            this.showPinSetup();
+        } else {
+            // Show login
+            this.showPinLogin();
+        }
+    }
+    
+    // Show PIN setup for first time users
+    showPinSetup() {
+        this.hideAllAuthForms();
+        document.getElementById('pinSetupForm').style.display = 'flex';
+        this.authScreen.style.display = 'flex';
+    }
+    
+    // Show PIN login
+    showPinLogin() {
+        this.hideAllAuthForms();
+        document.getElementById('pinLoginForm').style.display = 'flex';
+        this.authScreen.style.display = 'flex';
+        
+        // Focus on PIN input
+        setTimeout(() => {
+            const pinInput = document.getElementById('pinInput');
+            if (pinInput) pinInput.focus();
+        }, 100);
+    }
+    
+    // Show profile selection
+    showProfileSelection() {
+        this.hideAllAuthForms();
+        this.renderProfilesList();
+        document.getElementById('profileSelectForm').style.display = 'flex';
+    }
+    
+    // Show profile creation
+    showProfileCreation() {
+        this.hideAllAuthForms();
+        document.getElementById('profileCreateForm').style.display = 'flex';
+        
+        // Clear form
+        document.getElementById('profileName').value = '';
+        this.selectIcon('👨');
+        
+        setTimeout(() => {
+            document.getElementById('profileName').focus();
+        }, 100);
+    }
+    
+    // Hide all auth forms
+    hideAllAuthForms() {
+        const forms = ['pinLoginForm', 'pinSetupForm', 'profileSelectForm', 'profileCreateForm'];
+        forms.forEach(formId => {
+            const form = document.getElementById(formId);
+            if (form) form.style.display = 'none';
+        });
+    }
+    
+    // Bind authentication event listeners
+    bindAuthEvents() {
+        try {
+            // PIN Setup Events
+            this.safeAddEventListener('newPinInput', 'input', () => this.validatePinSetup());
+            this.safeAddEventListener('confirmPinInput', 'input', () => this.validatePinSetup());
+            this.safeAddEventListener('setPinBtn', 'click', () => this.setupPin());
+            
+            // PIN Login Events
+            this.safeAddEventListener('pinInput', 'input', () => this.validatePinLogin());
+            this.safeAddEventListener('loginBtn', 'click', () => this.authenticatePin());
+            this.safeAddEventListener('forgotPinBtn', 'click', () => this.resetApp());
+            
+            // Profile Events
+            this.safeAddEventListener('createProfileBtn', 'click', () => this.showProfileCreation());
+            this.safeAddEventListener('profileName', 'input', () => this.validateProfileForm());
+            this.safeAddEventListener('saveProfileBtn', 'click', () => this.createProfile());
+            this.safeAddEventListener('cancelCreateBtn', 'click', () => this.showProfileSelection());
+            
+            // Profile Switcher Events
+            this.safeAddEventListener('profileSwitcherBtn', 'click', () => this.toggleProfileDropdown());
+            this.safeAddEventListener('addProfileBtn', 'click', () => this.showProfileCreation());
+            this.safeAddEventListener('logoutBtn', 'click', () => this.logout());
+            
+            // Icon selector
+            document.querySelectorAll('.icon-option').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    const iconValue = e.target.dataset.icon;
+                    this.selectIcon(iconValue);
+                });
+            });
+            
+            // Enter key handling
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    if (document.getElementById('pinSetupForm').style.display === 'flex') {
+                        this.setupPin();
+                    } else if (document.getElementById('pinLoginForm').style.display === 'flex') {
+                        this.authenticatePin();
+                    } else if (document.getElementById('profileCreateForm').style.display === 'flex') {
+                        this.createProfile();
+                    }
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const dropdown = document.getElementById('profileDropdown');
+                const btn = document.getElementById('profileSwitcherBtn');
+                if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                    this.closeProfileDropdown();
+                }
+            });
+            
+            console.log('Authentication events bound successfully');
+        } catch (error) {
+            this.showError('Failed to bind authentication events: ' + error.message);
+            console.error('Auth event binding error:', error);
+        }
+    }
+    
+    // Safe event listener helper
+    safeAddEventListener(elementId, event, handler) {
+        try {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.addEventListener(event, handler);
+            } else {
+                console.warn(`Element ${elementId} not found`);
+            }
+        } catch (error) {
+            console.error(`Error binding event to ${elementId}:`, error);
+        }
+    }
+    
+    // Validate PIN setup form
+    validatePinSetup() {
+        const newPin = document.getElementById('newPinInput').value;
+        const confirmPin = document.getElementById('confirmPinInput').value;
+        const setPinBtn = document.getElementById('setPinBtn');
+        
+        const isValid = newPin.length >= 4 && newPin.length <= 10 && 
+                       newPin === confirmPin && /^\d+$/.test(newPin);
+        
+        setPinBtn.disabled = !isValid;
+    }
+    
+    // Validate PIN login form
+    validatePinLogin() {
+        const pin = document.getElementById('pinInput').value;
+        const loginBtn = document.getElementById('loginBtn');
+        
+        loginBtn.disabled = pin.length < 4;
+    }
+    
+    // Validate profile creation form
+    validateProfileForm() {
+        const name = document.getElementById('profileName').value.trim();
+        const saveBtn = document.getElementById('saveProfileBtn');
+        
+        saveBtn.disabled = name.length < 1 || name.length > 20;
+    }
+    
+    // Setup PIN for first time
+    async setupPin() {
+        try {
+            const newPin = document.getElementById('newPinInput').value;
+            const confirmPin = document.getElementById('confirmPinInput').value;
+            
+            if (newPin !== confirmPin) {
+                this.showError('PINs do not match');
+                return;
+            }
+            
+            if (newPin.length < 4 || newPin.length > 10) {
+                this.showError('PIN must be 4-10 digits');
+                return;
+            }
+            
+            if (!/^\d+$/.test(newPin)) {
+                this.showError('PIN must contain only numbers');
+                return;
+            }
+            
+            const hashedPin = await this.hashPin(newPin);
+            localStorage.setItem(this.STORAGE_KEYS.APP_PIN, hashedPin);
+            
+            this.showSuccess('PIN created successfully!');
+            this.showProfileSelection();
+            
+        } catch (error) {
+            this.showError('Failed to setup PIN: ' + error.message);
+            console.error('PIN setup error:', error);
+        }
+    }
+    
+    // Authenticate user with PIN
+    async authenticatePin() {
+        try {
+            const enteredPin = document.getElementById('pinInput').value;
+            const savedPin = localStorage.getItem(this.STORAGE_KEYS.APP_PIN);
+            
+            if (!enteredPin || enteredPin.length < 4) {
+                this.showError('Please enter your PIN');
+                return;
+            }
+            
+            const hashedEnteredPin = await this.hashPin(enteredPin);
+            
+            if (hashedEnteredPin === savedPin) {
+                this.isAuthenticated = true;
+                this.showSuccess('Login successful!');
+                
+                // Check if user has profiles
+                const profiles = this.getProfiles();
+                if (Object.keys(profiles).length === 0) {
+                    this.showProfileCreation();
+                } else {
+                    this.showProfileSelection();
+                }
+            } else {
+                this.showError('Incorrect PIN. Please try again.');
+                document.getElementById('pinInput').value = '';
+            }
+            
+        } catch (error) {
+            this.showError('Authentication failed: ' + error.message);
+            console.error('Authentication error:', error);
+        }
+    }
+    
+    // Reset app (forgot PIN)
+    resetApp() {
+        if (confirm('This will delete all data and reset the app. Are you sure?')) {
+            try {
+                // Clear all localStorage
+                Object.values(this.STORAGE_KEYS).forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                // Clear profile data
+                const profiles = this.getProfiles();
+                Object.keys(profiles).forEach(profileId => {
+                    localStorage.removeItem(this.STORAGE_KEYS.PROFILE_DATA + profileId);
+                });
+                
+                this.showSuccess('App reset successfully!');
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+                
+            } catch (error) {
+                this.showError('Failed to reset app: ' + error.message);
+                console.error('Reset error:', error);
+            }
+        }
+    }
+    
+    // Get all profiles
+    getProfiles() {
+        try {
+            const profiles = localStorage.getItem(this.STORAGE_KEYS.PROFILES);
+            return profiles ? JSON.parse(profiles) : {};
+        } catch (error) {
+            console.error('Error getting profiles:', error);
+            return {};
+        }
+    }
+    
+    // Save profiles
+    saveProfiles(profiles) {
+        try {
+            localStorage.setItem(this.STORAGE_KEYS.PROFILES, JSON.stringify(profiles));
+            return true;
+        } catch (error) {
+            this.showError('Failed to save profiles: ' + error.message);
+            console.error('Error saving profiles:', error);
+            return false;
+        }
+    }
+    
+    // Create new profile
+    createProfile() {
+        try {
+            const name = document.getElementById('profileName').value.trim();
+            const selectedIcon = document.querySelector('.icon-option.selected')?.dataset.icon || '👤';
+            
+            if (!name || name.length < 1 || name.length > 20) {
+                this.showError('Profile name must be 1-20 characters');
+                return;
+            }
+            
+            const profiles = this.getProfiles();
+            
+            // Check if name already exists
+            const nameExists = Object.values(profiles).some(profile => 
+                profile.name.toLowerCase() === name.toLowerCase()
+            );
+            
+            if (nameExists) {
+                this.showError('Profile name already exists');
+                return;
+            }
+            
+            // Create new profile
+            const profileId = 'profile_' + Date.now();
+            const newProfile = {
+                id: profileId,
+                name: name,
+                icon: selectedIcon,
+                createdAt: new Date().toISOString(),
+                lastAccessed: new Date().toISOString()
+            };
+            
+            profiles[profileId] = newProfile;
+            
+            if (this.saveProfiles(profiles)) {
+                this.showSuccess(`Profile "${name}" created successfully!`);
+                this.selectProfile(profileId);
+            }
+            
+        } catch (error) {
+            this.showError('Failed to create profile: ' + error.message);
+            console.error('Profile creation error:', error);
+        }
+    }
+    
+    // Render profiles list
+    renderProfilesList() {
+        try {
+            const profiles = this.getProfiles();
+            const profilesList = document.getElementById('profilesList');
+            
+            if (!profilesList) return;
+            
+            if (Object.keys(profiles).length === 0) {
+                profilesList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); margin: var(--spacing-4) 0;">No profiles found. Create your first profile!</p>';
+                return;
+            }
+            
+            profilesList.innerHTML = Object.values(profiles).map(profile => `
+                <div class="profile-item" data-profile-id="${profile.id}">
+                    <div class="profile-item-icon">${profile.icon}</div>
+                    <div class="profile-item-info">
+                        <div class="profile-item-name">${this.escapeHtml(profile.name)}</div>
+                        <div class="profile-item-desc">Last accessed: ${new Date(profile.lastAccessed).toLocaleDateString()}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click handlers
+            profilesList.querySelectorAll('.profile-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const profileId = item.dataset.profileId;
+                    this.selectProfile(profileId);
+                });
+            });
+            
+        } catch (error) {
+            this.showError('Failed to render profiles list: ' + error.message);
+            console.error('Error rendering profiles list:', error);
+        }
+    }
+    
+    // Select and load profile
+    selectProfile(profileId) {
+        try {
+            const profiles = this.getProfiles();
+            const profile = profiles[profileId];
+            
+            if (!profile) {
+                this.showError('Profile not found');
+                return;
+            }
+            
+            // Update last accessed
+            profile.lastAccessed = new Date().toISOString();
+            profiles[profileId] = profile;
+            this.saveProfiles(profiles);
+            
+            // Set current profile
+            this.currentProfile = profile;
+            localStorage.setItem(this.STORAGE_KEYS.CURRENT_PROFILE, profileId);
+            
+            this.showSuccess(`Welcome back, ${profile.name}!`);
+            this.loadMainApp();
+            
+        } catch (error) {
+            this.showError('Failed to select profile: ' + error.message);
+            console.error('Profile selection error:', error);
+        }
+    }
+    
+    // Load main application
+    loadMainApp() {
+        try {
+            this.authScreen.style.display = 'none';
+            this.mainApp.style.display = 'block';
+            
+            // Initialize main tracker
+            this.initMainTracker();
+            
+        } catch (error) {
+            this.showError('Failed to load main app: ' + error.message);
+            console.error('Main app loading error:', error);
+        }
+    }
+    
+    // Initialize main expense tracker functionality
+    initMainTracker() {
+        try {
+            // Initialize tracker properties
+            this.currentDate = new Date();
+            this.currentMonth = this.currentDate.getMonth();
+            this.currentYear = this.currentDate.getFullYear();
+            this.selectedDate = null;
+            this.editingExpenseId = null;
+            
+            this.bindMainEvents();
+            this.loadProfileData();
+            this.renderCalendar();
+            this.updateDashboard();
+            this.updateAnalytics();
+            this.renderCharts();
+            this.updateProfileSwitcher();
+            this.checkFirstTimeSetup();
+            
+            console.log('Main tracker initialized successfully');
+        } catch (error) {
+            this.showError('Failed to initialize main tracker: ' + error.message);
+            console.error('Main tracker initialization error:', error);
+        }
+    }
+    
+    // Bind main application events
+    bindMainEvents() {
         try {
             // Income modal events
             this.safeAddEventListener('setIncomeBtn', 'click', () => this.showIncomeModal());
-            this.safeAddEventListener('closeIncomeModal', 'click', () => this.hideIncomeModal());
             this.safeAddEventListener('saveIncome', 'click', () => this.saveIncome());
             
             // Expense modal events
-            this.safeAddEventListener('closeExpenseModal', 'click', () => this.hideExpenseModal());
             this.safeAddEventListener('saveExpense', 'click', () => this.saveExpense());
             this.safeAddEventListener('updateExpense', 'click', () => this.updateExpense());
             
@@ -110,87 +551,238 @@ class SmartExpenseTracker {
                 content.addEventListener('click', (e) => e.stopPropagation());
             });
             
-            console.log('Event listeners bound successfully');
+            // Modal close buttons
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                btn.addEventListener('click', () => this.hideAllModals());
+            });
+            
+            console.log('Main events bound successfully');
         } catch (error) {
-            this.showError('Failed to bind events: ' + error.message);
-            console.error('Event binding error:', error);
+            this.showError('Failed to bind main events: ' + error.message);
+            console.error('Main event binding error:', error);
         }
     }
     
-    // Safe event listener helper
-    safeAddEventListener(elementId, event, handler) {
+    // Load profile-specific data
+    loadProfileData() {
         try {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.addEventListener(event, handler);
+            if (!this.currentProfile) return;
+            
+            const profileDataKey = this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id;
+            const profileData = localStorage.getItem(profileDataKey);
+            
+            if (profileData) {
+                const data = JSON.parse(profileData);
+                this.income = data.income || {};
+                this.expenses = data.expenses || {};
             } else {
-                console.warn(`Element ${elementId} not found`);
+                this.income = {};
+                this.expenses = {};
             }
+            
+            console.log('Profile data loaded successfully');
         } catch (error) {
-            console.error(`Error binding event to ${elementId}:`, error);
+            this.showError('Failed to load profile data: ' + error.message);
+            console.error('Profile data loading error:', error);
+            this.income = {};
+            this.expenses = {};
         }
     }
     
-    // Bind navigation tabs
-    bindNavigationTabs() {
+    // Save profile-specific data
+    saveProfileData() {
         try {
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    const targetSection = e.target.closest('.nav-tab').dataset.section;
-                    this.switchSection(targetSection);
+            if (!this.currentProfile) return false;
+            
+            const profileDataKey = this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id;
+            const profileData = {
+                income: this.income || {},
+                expenses: this.expenses || {},
+                lastSaved: new Date().toISOString()
+            };
+            
+            localStorage.setItem(profileDataKey, JSON.stringify(profileData));
+            return true;
+        } catch (error) {
+            this.showError('Failed to save profile data: ' + error.message);
+            console.error('Profile data saving error:', error);
+            return false;
+        }
+    }
+    
+    // Update profile switcher
+    updateProfileSwitcher() {
+        try {
+            if (!this.currentProfile) return;
+            
+            const profileIcon = document.getElementById('currentProfileIcon');
+            const profileName = document.getElementById('currentProfileName');
+            
+            if (profileIcon) profileIcon.textContent = this.currentProfile.icon;
+            if (profileName) profileName.textContent = this.currentProfile.name;
+            
+            this.renderProfileDropdown();
+        } catch (error) {
+            console.error('Error updating profile switcher:', error);
+        }
+    }
+    
+    // Render profile dropdown
+    renderProfileDropdown() {
+        try {
+            const profiles = this.getProfiles();
+            const dropdownList = document.getElementById('profileDropdownList');
+            
+            if (!dropdownList) return;
+            
+            dropdownList.innerHTML = Object.values(profiles).map(profile => `
+                <div class="dropdown-profile-item ${profile.id === this.currentProfile?.id ? 'current' : ''}" 
+                     data-profile-id="${profile.id}">
+                    <div class="dropdown-profile-icon">${profile.icon}</div>
+                    <div class="dropdown-profile-info">
+                        <div class="dropdown-profile-name">${this.escapeHtml(profile.name)}</div>
+                        <div class="dropdown-profile-desc">${profile.id === this.currentProfile?.id ? 'Current profile' : 'Switch to this profile'}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click handlers
+            dropdownList.querySelectorAll('.dropdown-profile-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const profileId = item.dataset.profileId;
+                    if (profileId !== this.currentProfile?.id) {
+                        this.switchProfile(profileId);
+                    }
+                    this.closeProfileDropdown();
                 });
             });
+            
         } catch (error) {
-            console.error('Error binding navigation tabs:', error);
+            console.error('Error rendering profile dropdown:', error);
         }
     }
     
-    // Bind keyboard shortcuts
-    bindKeyboardShortcuts() {
+    // Toggle profile dropdown
+    toggleProfileDropdown() {
         try {
-            document.addEventListener('keydown', (e) => {
-                if (document.querySelector('.modal.active')) return;
-                
-                switch(e.key.toLowerCase()) {
-                    case 'i':
-                        if (e.ctrlKey || e.metaKey) {
-                            e.preventDefault();
-                            this.showIncomeModal();
-                        }
-                        break;
-                    case 'e':
-                        if (e.ctrlKey || e.metaKey) {
-                            e.preventDefault();
-                            this.showExpenseModal(new Date());
-                        }
-                        break;
-                    case 'escape':
-                        this.hideAllModals();
-                        break;
+            const dropdown = document.getElementById('profileDropdown');
+            const btn = document.getElementById('profileSwitcherBtn');
+            
+            if (dropdown && btn) {
+                const isActive = dropdown.classList.contains('active');
+                if (isActive) {
+                    this.closeProfileDropdown();
+                } else {
+                    this.openProfileDropdown();
                 }
-            });
+            }
         } catch (error) {
-            console.error('Error binding keyboard shortcuts:', error);
+            console.error('Error toggling profile dropdown:', error);
         }
     }
     
-    // Data Management Methods
-    loadData() {
+    // Open profile dropdown
+    openProfileDropdown() {
         try {
-            this.income = this.getIncome();
-            this.expenses = this.getExpenses();
-            console.log('Data loaded successfully');
+            const dropdown = document.getElementById('profileDropdown');
+            const btn = document.getElementById('profileSwitcherBtn');
+            
+            if (dropdown && btn) {
+                this.renderProfileDropdown();
+                dropdown.classList.add('active');
+                btn.classList.add('active');
+            }
         } catch (error) {
-            this.showError('Failed to load data: ' + error.message);
-            console.error('Data loading error:', error);
+            console.error('Error opening profile dropdown:', error);
         }
     }
     
+    // Close profile dropdown
+    closeProfileDropdown() {
+        try {
+            const dropdown = document.getElementById('profileDropdown');
+            const btn = document.getElementById('profileSwitcherBtn');
+            
+            if (dropdown && btn) {
+                dropdown.classList.remove('active');
+                btn.classList.remove('active');
+            }
+        } catch (error) {
+            console.error('Error closing profile dropdown:', error);
+        }
+    }
+    
+    // Switch to different profile
+    switchProfile(profileId) {
+        try {
+            // Save current profile data
+            this.saveProfileData();
+            
+            // Load new profile
+            this.selectProfile(profileId);
+            
+            // Refresh the display
+            this.loadProfileData();
+            this.renderCalendar();
+            this.updateDashboard();
+            this.updateAnalytics();
+            this.renderCharts();
+            this.updateProfileSwitcher();
+            
+        } catch (error) {
+            this.showError('Failed to switch profile: ' + error.message);
+            console.error('Profile switch error:', error);
+        }
+    }
+    
+    // Logout (lock app)
+    logout() {
+        try {
+            // Save current profile data
+            this.saveProfileData();
+            
+            // Reset state
+            this.isAuthenticated = false;
+            this.currentProfile = null;
+            
+            // Show login screen
+            this.mainApp.style.display = 'none';
+            this.showPinLogin();
+            
+            this.closeProfileDropdown();
+            this.showSuccess('App locked successfully');
+            
+        } catch (error) {
+            this.showError('Failed to logout: ' + error.message);
+            console.error('Logout error:', error);
+        }
+    }
+    
+    // Select icon in profile creation
+    selectIcon(iconValue) {
+        document.querySelectorAll('.icon-option').forEach(icon => {
+            icon.classList.remove('selected');
+        });
+        
+        const selectedIcon = document.querySelector(`[data-icon="${iconValue}"]`);
+        if (selectedIcon) {
+            selectedIcon.classList.add('selected');
+        }
+    }
+    
+    // Utility function to escape HTML
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // All the expense tracker methods from the original implementation
+    // Income and expense management methods
     getIncome(month = this.currentMonth, year = this.currentYear) {
         try {
-            const incomes = this.getAllIncomes();
             const key = `${year}-${String(month + 1).padStart(2, '0')}`;
-            return parseFloat(incomes[key]) || 0;
+            return parseFloat(this.income[key]) || 0;
         } catch (error) {
             console.error('Error getting income:', error);
             return 0;
@@ -202,11 +794,9 @@ class SmartExpenseTracker {
             if (amount < 0) {
                 throw new Error('Income cannot be negative');
             }
-            const incomes = this.getAllIncomes();
             const key = `${year}-${String(month + 1).padStart(2, '0')}`;
-            incomes[key] = amount;
-            localStorage.setItem(this.STORAGE_KEYS.INCOME, JSON.stringify(incomes));
-            this.income = amount;
+            this.income[key] = amount;
+            this.saveProfileData();
             return true;
         } catch (error) {
             this.showError('Failed to save income: ' + error.message);
@@ -215,30 +805,14 @@ class SmartExpenseTracker {
         }
     }
     
-    getAllIncomes() {
-        try {
-            const incomes = localStorage.getItem(this.STORAGE_KEYS.INCOME);
-            return incomes ? JSON.parse(incomes) : {};
-        } catch (error) {
-            console.error('Error getting all incomes:', error);
-            return {};
-        }
-    }
-    
     getExpenses() {
-        try {
-            const expenses = localStorage.getItem(this.STORAGE_KEYS.EXPENSES);
-            return expenses ? JSON.parse(expenses) : {};
-        } catch (error) {
-            console.error('Error getting expenses:', error);
-            return {};
-        }
+        return this.expenses || {};
     }
     
     setExpenses(expenses) {
         try {
-            localStorage.setItem(this.STORAGE_KEYS.EXPENSES, JSON.stringify(expenses));
             this.expenses = expenses;
+            this.saveProfileData();
             return true;
         } catch (error) {
             this.showError('Failed to save expenses: ' + error.message);
@@ -665,22 +1239,21 @@ class SmartExpenseTracker {
             console.error('Error rendering expenses list:', error);
         }
     }
-    
-    // Utility function to escape HTML
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
 
     // Export data functionality
     exportData() {
         try {
+            if (!this.currentProfile) {
+                this.showError('No profile selected');
+                return;
+            }
+
             const data = {
-                incomes: this.getAllIncomes(),
-                expenses: this.getExpenses(),
+                profile: this.currentProfile,
+                income: this.income,
+                expenses: this.expenses,
                 exportDate: new Date().toISOString(),
-                appVersion: '2.0.0'
+                appVersion: '3.0.0'
             };
 
             const dataStr = JSON.stringify(data, null, 2);
@@ -689,7 +1262,7 @@ class SmartExpenseTracker {
 
             const link = document.createElement('a');
             link.href = url;
-            link.download = `expense-tracker-export-${new Date().toISOString().split('T')[0]}.json`;
+            link.download = `expense-tracker-${this.currentProfile.name}-export-${new Date().toISOString().split('T')[0]}.json`;
             link.click();
 
             URL.revokeObjectURL(url);
@@ -726,6 +1299,7 @@ class SmartExpenseTracker {
             reportContent.innerHTML = `
                 <div class="report-summary">
                     <h3>📊 Monthly Report - ${monthNames[this.currentMonth]} ${this.currentYear}</h3>
+                    <h4>Profile: ${this.escapeHtml(this.currentProfile?.name || 'Unknown')}</h4>
 
                     <div class="report-grid">
                         <div class="report-card">
@@ -773,7 +1347,7 @@ class SmartExpenseTracker {
         if (balance < 0) {
             insights.push('<p>⚠️ You\'re spending more than your income. Consider reducing expenses.</p>');
         } else if (balance / income < 0.1) {
-            insights.push('<p>⚠�� Low savings rate. Try to save at least 10% of your income.</p>');
+            insights.push('<p>⚠️ Low savings rate. Try to save at least 10% of your income.</p>');
         } else if (balance / income > 0.3) {
             insights.push('<p>✅ Great savings rate! You\'re saving over 30% of your income.</p>');
         }
@@ -919,7 +1493,6 @@ class SmartExpenseTracker {
     
     refreshDisplay() {
         try {
-            this.loadData();
             this.renderCalendar();
             this.updateDashboard();
             this.updateAnalytics();
@@ -1150,8 +1723,7 @@ class SmartExpenseTracker {
     
     getAllTimeIncome() {
         try {
-            const allIncomes = this.getAllIncomes();
-            return Object.values(allIncomes).reduce((total, income) => total + parseFloat(income), 0);
+            return Object.values(this.income).reduce((total, income) => total + parseFloat(income), 0);
         } catch (error) {
             console.error('Error calculating all-time income:', error);
             return 0;
@@ -1424,6 +1996,50 @@ class SmartExpenseTracker {
         }
     }
     
+    // Bind navigation tabs
+    bindNavigationTabs() {
+        try {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const targetSection = e.target.closest('.nav-tab').dataset.section;
+                    this.switchSection(targetSection);
+                });
+            });
+        } catch (error) {
+            console.error('Error binding navigation tabs:', error);
+        }
+    }
+    
+    // Bind keyboard shortcuts
+    bindKeyboardShortcuts() {
+        try {
+            document.addEventListener('keydown', (e) => {
+                if (document.querySelector('.modal.active')) return;
+                
+                switch(e.key.toLowerCase()) {
+                    case 'i':
+                        if (e.ctrlKey || e.metaKey) {
+                            e.preventDefault();
+                            this.showIncomeModal();
+                        }
+                        break;
+                    case 'e':
+                        if (e.ctrlKey || e.metaKey) {
+                            e.preventDefault();
+                            this.showExpenseModal(new Date());
+                        }
+                        break;
+                    case 'escape':
+                        this.hideAllModals();
+                        this.closeProfileDropdown();
+                        break;
+                }
+            });
+        } catch (error) {
+            console.error('Error binding keyboard shortcuts:', error);
+        }
+    }
+    
     // First time setup check
     checkFirstTimeSetup() {
         try {
@@ -1500,25 +2116,11 @@ class SmartExpenseTracker {
     }
 }
 
-// Global initialization
+// Initialize the enhanced tracker when DOM is loaded
 let tracker;
-
 document.addEventListener('DOMContentLoaded', () => {
-    try {
-        tracker = new SmartExpenseTracker();
-        window.tracker = tracker; // Make globally available
-        console.log('Smart Expense Tracker initialized');
-    } catch (error) {
-        console.error('Failed to initialize tracker:', error);
-        alert('Failed to initialize the application. Please refresh the page.');
-    }
+    tracker = new EnhancedExpenseTracker();
 });
 
-// Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => console.log('SW registered'))
-            .catch(error => console.log('SW registration failed'));
-    });
-}
+// Make tracker globally available for onclick handlers
+window.tracker = tracker;
