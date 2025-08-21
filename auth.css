@@ -1013,7 +1013,7 @@ body {
     border-color: var(--accent-500);
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
-    background: #f8f9fa;
+    background: #f0f4f8;
 }
 
 .user-item::before {
