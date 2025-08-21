@@ -245,7 +245,8 @@ class SmartExpenseTracker {
                 profiles[defaultProfile.id] = defaultProfile;
                 this.saveProfiles(profiles);
                 this.currentProfile = defaultProfile;
-                localStorage.setItem(this.STORAGE_KEYS.CURRENT_PROFILE, defaultProfile.id);
+                const userSpecificCurrentProfileKey = this.getUserSpecificKey(this.STORAGE_KEYS.CURRENT_PROFILE);
+                localStorage.setItem(userSpecificCurrentProfileKey, defaultProfile.id);
 
                 console.log('Created default profile');
             } else {
