@@ -1997,10 +1997,10 @@ class SmartExpenseTracker {
     }
 }
 
-// Initialize the enhanced tracker when DOM is loaded
+// Initialize the tracker when DOM is loaded
 let tracker;
 document.addEventListener('DOMContentLoaded', () => {
-    tracker = new EnhancedExpenseTracker();
+    tracker = new SmartExpenseTracker();
 });
 
 // Make tracker globally available for onclick handlers
