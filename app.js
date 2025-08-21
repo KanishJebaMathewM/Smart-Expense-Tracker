@@ -448,7 +448,8 @@ class SmartExpenseTracker {
 
             // Update current profile
             this.currentProfile = profile;
-            localStorage.setItem(this.STORAGE_KEYS.CURRENT_PROFILE, profileId);
+            const userSpecificCurrentProfileKey = this.getUserSpecificKey(this.STORAGE_KEYS.CURRENT_PROFILE);
+            localStorage.setItem(userSpecificCurrentProfileKey, profileId);
 
             // Update last accessed
             profile.lastAccessed = new Date().toISOString();
