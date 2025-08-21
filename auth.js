@@ -150,13 +150,20 @@ class AuthenticationSystem {
             document.querySelectorAll('.auth-screen').forEach(screen => {
                 screen.classList.remove('active');
             });
-            
+
             // Show target screen
             const targetScreen = document.getElementById(`${screenName}Screen`);
             if (targetScreen) {
                 targetScreen.classList.add('active');
                 this.currentScreen = screenName;
-                
+
+                // Trigger validation for signup screen
+                if (screenName === 'signup') {
+                    setTimeout(() => {
+                        this.validateSignupForm();
+                    }, 100);
+                }
+
                 // Focus first input
                 setTimeout(() => {
                     const firstInput = targetScreen.querySelector('input, select');
@@ -165,7 +172,7 @@ class AuthenticationSystem {
                     }
                 }, 100);
             }
-            
+
             console.log(`Switched to ${screenName} screen`);
         } catch (error) {
             console.error(`Error switching to ${screenName} screen:`, error);
