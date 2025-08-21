@@ -1075,27 +1075,6 @@ body {
     font-weight: var(--font-weight-medium);
 }
 
-.select-user-btn {
-    padding: var(--spacing-2) var(--spacing-4);
-    background: var(--primary-500);
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-left: var(--spacing-3);
-}
-
-.select-user-btn:hover {
-    background: var(--primary-600);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.select-user-btn:active {
-    transform: translateY(0);
-}
 
 /* Empty state for user list */
 .user-list:empty::after {
