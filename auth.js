@@ -674,7 +674,8 @@ class AuthenticationSystem {
             this.userData.pinHash = newPinHash;
             this.userData.loginAttempts = 0;
             this.userData.lockedUntil = null;
-            this.saveUserData(this.userData);
+            this.updateUserInFamily(this.userData.userId, this.userData);
+            this.saveUserData(this.userData); // Keep for compatibility
             
             // Show success
             document.getElementById('successMessage').textContent = 
