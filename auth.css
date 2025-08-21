@@ -600,7 +600,7 @@ body {
 .auth-btn {
     padding: var(--spacing-4) var(--spacing-6);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
@@ -619,14 +619,15 @@ body {
 }
 
 .auth-btn.primary {
-    background: var(--primary-500);
+    background: var(--accent-500);
     color: var(--text-inverse);
+    box-shadow: var(--shadow-sm);
 }
 
 .auth-btn.primary:hover:not(:disabled) {
-    background: var(--primary-600);
+    background: var(--accent-600);
     transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
 }
 
 .auth-btn.primary:active {
@@ -642,19 +643,26 @@ body {
 }
 
 .auth-btn.secondary {
-    background: transparent;
-    color: var(--text-secondary);
+    background: var(--bg-primary);
+    color: var(--text-primary);
     border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
 }
 
 .auth-btn.secondary:hover {
-    background: var(--bg-secondary);
+    background: var(--primary-50);
     color: var(--text-primary);
-    border-color: var(--gray-300);
+    border-color: var(--primary-300);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-icon {
-    font-size: var(--font-size-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
 }
 
 /* Form Actions */
