@@ -474,14 +474,14 @@ class SmartExpenseTracker {
         this.showInfo('Profile creation feature will be available in a future update. For now, you can manage profiles through the authentication system.');
     }
 
-    // Load profile-specific data
+    // Load profile-specific data (user-specific)
     loadProfileData() {
         try {
             if (!this.currentProfile) return;
-            
-            const profileDataKey = this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id;
-            const profileData = localStorage.getItem(profileDataKey);
-            
+
+            const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id);
+            const profileData = localStorage.getItem(userSpecificKey);
+
             if (profileData) {
                 const data = JSON.parse(profileData);
                 this.income = data.income || {};
@@ -490,8 +490,8 @@ class SmartExpenseTracker {
                 this.income = {};
                 this.expenses = {};
             }
-            
-            console.log('Profile data loaded successfully');
+
+            console.log(`Profile data loaded successfully for user: ${this.currentUser?.name}`);
         } catch (error) {
             this.showError('Failed to load profile data: ' + error.message);
             console.error('Profile data loading error:', error);
@@ -499,20 +499,21 @@ class SmartExpenseTracker {
             this.expenses = {};
         }
     }
-    
-    // Save profile-specific data
+
+    // Save profile-specific data (user-specific)
     saveProfileData() {
         try {
             if (!this.currentProfile) return false;
-            
-            const profileDataKey = this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id;
+
+            const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id);
             const profileData = {
                 income: this.income || {},
                 expenses: this.expenses || {},
-                lastSaved: new Date().toISOString()
+                lastSaved: new Date().toISOString(),
+                user: this.currentUser?.name || 'Unknown'
             };
-            
-            localStorage.setItem(profileDataKey, JSON.stringify(profileData));
+
+            localStorage.setItem(userSpecificKey, JSON.stringify(profileData));
             return true;
         } catch (error) {
             this.showError('Failed to save profile data: ' + error.message);
