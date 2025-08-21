@@ -1,0 +1,12 @@
+{
+  "name": "smart-expense-tracker",
+  "version": "2.0.0",
+  "description": "A comprehensive expense tracking application built with vanilla HTML, CSS, and JavaScript",
+  "scripts": {
+    "dev": "python3 -m http.server 3000",
+    "start": "python3 -m http.server 3000"
+  },
+  "keywords": ["expense", "tracker", "budget", "finance", "pwa"],
+  "author": "",
+  "license": "MIT"
+}
