@@ -1099,11 +1099,6 @@ body {
         margin-bottom: var(--spacing-3);
     }
 
-    .select-user-btn {
-        margin-left: 0;
-        margin-top: var(--spacing-3);
-        width: 100%;
-    }
 
     .user-list-container {
         max-height: 300px;
