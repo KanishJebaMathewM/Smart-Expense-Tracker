@@ -1013,8 +1013,7 @@ body {
     border-color: var(--accent-500);
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    color: white;
+    background: #f8f9fa;
 }
 
 .user-item::before {
