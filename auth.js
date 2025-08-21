@@ -878,7 +878,7 @@ class AuthenticationSystem {
         }
     }
     
-    // Get user data from storage
+    // Get user data from storage (legacy - kept for compatibility)
     getUserData() {
         try {
             const userData = localStorage.getItem(this.STORAGE_KEYS.USER_DATA);
@@ -888,14 +888,81 @@ class AuthenticationSystem {
             return null;
         }
     }
-    
-    // Save user data to storage
+
+    // Save user data to storage (legacy - kept for compatibility)
     saveUserData(userData) {
         try {
             localStorage.setItem(this.STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
             return true;
         } catch (error) {
             console.error('Error saving user data:', error);
+            return false;
+        }
+    }
+
+    // Get all family users
+    getAllUsers() {
+        try {
+            const allUsers = localStorage.getItem(this.STORAGE_KEYS.ALL_USERS);
+            return allUsers ? JSON.parse(allUsers) : {};
+        } catch (error) {
+            console.error('Error getting all users:', error);
+            return {};
+        }
+    }
+
+    // Save all family users
+    saveAllUsers(users) {
+        try {
+            localStorage.setItem(this.STORAGE_KEYS.ALL_USERS, JSON.stringify(users));
+            return true;
+        } catch (error) {
+            console.error('Error saving all users:', error);
+            return false;
+        }
+    }
+
+    // Add user to family
+    addUserToFamily(userId, userData) {
+        try {
+            const allUsers = this.getAllUsers();
+            allUsers[userId] = userData;
+            this.saveAllUsers(allUsers);
+            return true;
+        } catch (error) {
+            console.error('Error adding user to family:', error);
+            return false;
+        }
+    }
+
+    // Set current active user
+    setCurrentUser(userId) {
+        try {
+            localStorage.setItem(this.STORAGE_KEYS.CURRENT_USER, userId);
+            return true;
+        } catch (error) {
+            console.error('Error setting current user:', error);
+            return false;
+        }
+    }
+
+    // Generate unique user ID
+    generateUserId(email) {
+        return 'user_' + email.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() + '_' + Date.now();
+    }
+
+    // Update user data in family list
+    updateUserInFamily(userId, userData) {
+        try {
+            const allUsers = this.getAllUsers();
+            if (allUsers[userId]) {
+                allUsers[userId] = { ...allUsers[userId], ...userData };
+                this.saveAllUsers(allUsers);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error updating user in family:', error);
             return false;
         }
     }
