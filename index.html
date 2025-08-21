@@ -414,6 +414,53 @@
 
     </div> <!-- Close mainApp container -->
 
+    <!-- Authentication Check Script -->
+    <script>
+        // Check authentication status before loading main app
+        (function checkAuthentication() {
+            try {
+                // Check if user is authenticated
+                const sessionData = localStorage.getItem('app_session_token');
+                const userData = localStorage.getItem('user_account_data');
+
+                if (!sessionData || !userData) {
+                    // No valid session or user data - redirect to auth
+                    window.location.href = 'auth.html';
+                    return;
+                }
+
+                // Parse session data
+                const session = JSON.parse(sessionData);
+                const user = JSON.parse(userData);
+
+                // Check if session is expired
+                const expiryTime = new Date(session.expiresAt);
+                const currentTime = new Date();
+
+                if (currentTime >= expiryTime) {
+                    // Session expired - redirect to auth
+                    localStorage.removeItem('app_session_token');
+                    window.location.href = 'auth.html';
+                    return;
+                }
+
+                // Valid session - load main app
+                console.log(`Authenticated user: ${user.name} (${user.email})`);
+
+                // Update loading text to show user
+                const loadingText = document.querySelector('.loading-text');
+                if (loadingText) {
+                    loadingText.textContent = `Welcome back, ${user.name}!`;
+                }
+
+            } catch (error) {
+                console.error('Authentication check failed:', error);
+                // On error, redirect to auth for safety
+                window.location.href = 'auth.html';
+            }
+        })();
+    </script>
+
     <!-- Main JavaScript Application -->
     <script src="app.js"></script>
 </body>
