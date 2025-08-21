@@ -267,17 +267,30 @@ class SmartExpenseTracker {
             // Keyboard shortcuts
             this.bindKeyboardShortcuts();
             
+            // Profile Switcher Events (if exists)
+            this.safeAddEventListener('profileSwitcherBtn', 'click', () => this.toggleProfileDropdown());
+            this.safeAddEventListener('addProfileBtn', 'click', () => this.showProfileCreation());
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const dropdown = document.getElementById('profileDropdown');
+                const btn = document.getElementById('profileSwitcherBtn');
+                if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                    this.closeProfileDropdown();
+                }
+            });
+
             // Prevent modal close on content click
             document.querySelectorAll('.modal-content').forEach(content => {
                 content.addEventListener('click', (e) => e.stopPropagation());
             });
-            
+
             // Modal close buttons
             document.querySelectorAll('.close-btn').forEach(btn => {
                 btn.addEventListener('click', () => this.hideAllModals());
             });
-            
-            console.log('Main events bound successfully');
+
+            console.log('Events bound successfully');
         } catch (error) {
             this.showError('Failed to bind main events: ' + error.message);
             console.error('Main event binding error:', error);
