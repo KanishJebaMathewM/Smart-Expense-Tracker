@@ -164,17 +164,22 @@ class SmartExpenseTracker {
 
                 // Clear session data
                 localStorage.removeItem('app_session_token');
+                localStorage.removeItem('current_user_id');
 
                 this.showSuccess('Logged out successfully');
 
-                // Redirect to auth page
+                // Redirect to auth page immediately
                 setTimeout(() => {
                     window.location.href = 'auth.html';
-                }, 1500);
+                }, 1000);
             }
         } catch (error) {
             this.showError('Failed to logout: ' + error.message);
             console.error('Logout error:', error);
+            // Force redirect even on error
+            setTimeout(() => {
+                window.location.href = 'auth.html';
+            }, 2000);
         }
     }
     
