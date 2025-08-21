@@ -122,129 +122,6 @@ class SmartExpenseTracker {
         }
     }
     
-    // Validate PIN setup form
-    validatePinSetup() {
-        const newPin = document.getElementById('newPinInput').value;
-        const confirmPin = document.getElementById('confirmPinInput').value;
-        const setPinBtn = document.getElementById('setPinBtn');
-        
-        const isValid = newPin.length >= 4 && newPin.length <= 10 && 
-                       newPin === confirmPin && /^\d+$/.test(newPin);
-        
-        setPinBtn.disabled = !isValid;
-    }
-    
-    // Validate PIN login form
-    validatePinLogin() {
-        const pin = document.getElementById('pinInput').value;
-        const loginBtn = document.getElementById('loginBtn');
-        
-        loginBtn.disabled = pin.length < 4;
-    }
-    
-    // Validate profile creation form
-    validateProfileForm() {
-        const name = document.getElementById('profileName').value.trim();
-        const saveBtn = document.getElementById('saveProfileBtn');
-        
-        saveBtn.disabled = name.length < 1 || name.length > 20;
-    }
-    
-    // Setup PIN for first time
-    async setupPin() {
-        try {
-            const newPin = document.getElementById('newPinInput').value;
-            const confirmPin = document.getElementById('confirmPinInput').value;
-            
-            if (newPin !== confirmPin) {
-                this.showError('PINs do not match');
-                return;
-            }
-            
-            if (newPin.length < 4 || newPin.length > 10) {
-                this.showError('PIN must be 4-10 digits');
-                return;
-            }
-            
-            if (!/^\d+$/.test(newPin)) {
-                this.showError('PIN must contain only numbers');
-                return;
-            }
-            
-            const hashedPin = await this.hashPin(newPin);
-            localStorage.setItem(this.STORAGE_KEYS.APP_PIN, hashedPin);
-            
-            this.showSuccess('PIN created successfully!');
-            this.showProfileSelection();
-            
-        } catch (error) {
-            this.showError('Failed to setup PIN: ' + error.message);
-            console.error('PIN setup error:', error);
-        }
-    }
-    
-    // Authenticate user with PIN
-    async authenticatePin() {
-        try {
-            const enteredPin = document.getElementById('pinInput').value;
-            const savedPin = localStorage.getItem(this.STORAGE_KEYS.APP_PIN);
-            
-            if (!enteredPin || enteredPin.length < 4) {
-                this.showError('Please enter your PIN');
-                return;
-            }
-            
-            const hashedEnteredPin = await this.hashPin(enteredPin);
-            
-            if (hashedEnteredPin === savedPin) {
-                this.isAuthenticated = true;
-                this.showSuccess('Login successful!');
-                
-                // Check if user has profiles
-                const profiles = this.getProfiles();
-                if (Object.keys(profiles).length === 0) {
-                    this.showProfileCreation();
-                } else {
-                    this.showProfileSelection();
-                }
-            } else {
-                this.showError('Incorrect PIN. Please try again.');
-                document.getElementById('pinInput').value = '';
-            }
-            
-        } catch (error) {
-            this.showError('Authentication failed: ' + error.message);
-            console.error('Authentication error:', error);
-        }
-    }
-    
-    // Reset app (forgot PIN)
-    resetApp() {
-        if (confirm('This will delete all data and reset the app. Are you sure?')) {
-            try {
-                // Clear all localStorage
-                Object.values(this.STORAGE_KEYS).forEach(key => {
-                    localStorage.removeItem(key);
-                });
-                
-                // Clear profile data
-                const profiles = this.getProfiles();
-                Object.keys(profiles).forEach(profileId => {
-                    localStorage.removeItem(this.STORAGE_KEYS.PROFILE_DATA + profileId);
-                });
-                
-                this.showSuccess('App reset successfully!');
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
-                
-            } catch (error) {
-                this.showError('Failed to reset app: ' + error.message);
-                console.error('Reset error:', error);
-            }
-        }
-    }
-    
     // Get all profiles
     getProfiles() {
         try {
@@ -1252,7 +1129,7 @@ class SmartExpenseTracker {
         const insights = [];
 
         if (balance < 0) {
-            insights.push('<p>⚠�� You\'re spending more than your income. Consider reducing expenses.</p>');
+            insights.push('<p>⚠️ You\'re spending more than your income. Consider reducing expenses.</p>');
         } else if (balance / income < 0.1) {
             insights.push('<p>⚠️ Low savings rate. Try to save at least 10% of your income.</p>');
         } else if (balance / income > 0.3) {
