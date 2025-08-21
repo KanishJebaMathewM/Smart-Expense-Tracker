@@ -33,26 +33,7 @@ class SmartExpenseTracker {
         this.init();
     }
     
-    // Add logout functionality to header
-    addLogoutButton() {
-        try {
-            const headerActions = document.querySelector('.header-actions');
-            if (headerActions) {
-                const logoutBtn = document.createElement('button');
-                logoutBtn.id = 'logoutBtn';
-                logoutBtn.className = 'action-btn';
-                logoutBtn.title = 'Logout and Lock App';
-                logoutBtn.innerHTML = `
-                    <span>🔒</span>
-                    <span class="btn-text">Logout</span>
-                `;
-                logoutBtn.addEventListener('click', () => this.logout());
-                headerActions.appendChild(logoutBtn);
-            }
-        } catch (error) {
-            console.error('Error adding logout button:', error);
-        }
-    }
+    // Logout button is now directly in HTML
     
     // Initialize the application
     init() {
