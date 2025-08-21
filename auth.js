@@ -513,7 +513,8 @@ class AuthenticationSystem {
                 this.userData.lastLogin = new Date().toISOString();
                 this.userData.loginAttempts = 0;
                 this.userData.lockedUntil = null;
-                this.saveUserData(this.userData);
+                this.updateUserInFamily(this.userData.userId, this.userData);
+                this.saveUserData(this.userData); // Keep for compatibility
                 
                 // Create session
                 this.createSession();
