@@ -353,19 +353,20 @@
         // Check authentication status before loading main app
         (function checkAuthentication() {
             try {
-                // Check if user is authenticated
+                // Check if user is authenticated (check session and current user)
                 const sessionData = localStorage.getItem('app_session_token');
-                const userData = localStorage.getItem('user_account_data');
+                const currentUserId = localStorage.getItem('current_user_id');
+                const allUsers = localStorage.getItem('all_family_users');
 
-                if (!sessionData || !userData) {
-                    // No valid session or user data - redirect to auth
+                // If no session or no current user, redirect to auth
+                if (!sessionData || !currentUserId) {
+                    console.log('No session or current user found, redirecting to auth');
                     window.location.href = 'auth.html';
                     return;
                 }
 
                 // Parse session data
                 const session = JSON.parse(sessionData);
-                const user = JSON.parse(userData);
 
                 // Check if session is expired
                 const expiryTime = new Date(session.expiresAt);
@@ -373,18 +374,41 @@
 
                 if (currentTime >= expiryTime) {
                     // Session expired - redirect to auth
+                    console.log('Session expired, redirecting to auth');
                     localStorage.removeItem('app_session_token');
+                    localStorage.removeItem('current_user_id');
+                    window.location.href = 'auth.html';
+                    return;
+                }
+
+                // Get current user data
+                let currentUser = null;
+                if (allUsers) {
+                    const users = JSON.parse(allUsers);
+                    currentUser = users[currentUserId];
+                }
+
+                // Fallback to legacy user data
+                if (!currentUser) {
+                    const userData = localStorage.getItem('user_account_data');
+                    if (userData) {
+                        currentUser = JSON.parse(userData);
+                    }
+                }
+
+                if (!currentUser) {
+                    console.log('No valid user data found, redirecting to auth');
                     window.location.href = 'auth.html';
                     return;
                 }
 
                 // Valid session - load main app
-                console.log(`Authenticated user: ${user.name} (${user.email})`);
+                console.log(`Authenticated user: ${currentUser.name} (${currentUser.email})`);
 
                 // Update loading text to show user
                 const loadingText = document.querySelector('.loading-text');
                 if (loadingText) {
-                    loadingText.textContent = `Welcome back, ${user.name}!`;
+                    loadingText.textContent = `Welcome back, ${currentUser.name}!`;
                 }
 
             } catch (error) {
