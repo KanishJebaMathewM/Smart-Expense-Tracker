@@ -26,76 +26,8 @@
         </div>
     </div>
 
-    <!-- Authentication Screen -->
-    <div id="authScreen" class="auth-screen">
-        <div class="auth-container">
-            <div class="auth-header">
-                <div class="auth-logo">
-                    <span class="logo-icon">💰</span>
-                    <h1>Smart Expense Tracker</h1>
-                </div>
-                <p class="auth-subtitle">Secure Financial Management</p>
-            </div>
-
-            <!-- PIN Login -->
-            <div id="pinLoginForm" class="auth-form">
-                <h2>Enter Your PIN</h2>
-                <div class="pin-input-container">
-                    <input type="password" id="pinInput" class="pin-input" maxlength="10" placeholder="Enter PIN">
-                    <div class="pin-dots" id="pinDots"></div>
-                </div>
-                <button id="loginBtn" class="auth-btn primary" disabled>Login</button>
-                <button id="forgotPinBtn" class="auth-btn secondary">Forgot PIN?</button>
-            </div>
-
-            <!-- Profile Selection -->
-            <div id="profileSelectForm" class="auth-form" style="display: none;">
-                <h2>Select Profile</h2>
-                <div id="profilesList" class="profiles-list"></div>
-                <button id="createProfileBtn" class="auth-btn secondary">+ Create New Profile</button>
-            </div>
-
-            <!-- PIN Setup -->
-            <div id="pinSetupForm" class="auth-form" style="display: none;">
-                <h2>Set Up Security PIN</h2>
-                <p class="setup-description">Create a 4-10 digit PIN to secure your data</p>
-                <div class="pin-input-container">
-                    <input type="password" id="newPinInput" class="pin-input" maxlength="10" placeholder="Create PIN (4-10 digits)">
-                </div>
-                <div class="pin-input-container">
-                    <input type="password" id="confirmPinInput" class="pin-input" maxlength="10" placeholder="Confirm PIN">
-                </div>
-                <button id="setPinBtn" class="auth-btn primary" disabled>Set PIN</button>
-            </div>
-
-            <!-- Profile Creation -->
-            <div id="profileCreateForm" class="auth-form" style="display: none;">
-                <h2>Create Profile</h2>
-                <div class="form-group">
-                    <label for="profileName">Profile Name</label>
-                    <input type="text" id="profileName" class="profile-input" placeholder="e.g., Dad, Mom, Kid" maxlength="20">
-                </div>
-                <div class="form-group">
-                    <label for="profileIcon">Choose Icon</label>
-                    <div class="icon-selector">
-                        <button type="button" class="icon-option selected" data-icon="👨">👨</button>
-                        <button type="button" class="icon-option" data-icon="👩">👩</button>
-                        <button type="button" class="icon-option" data-icon="👧">👧</button>
-                        <button type="button" class="icon-option" data-icon="👦">👦</button>
-                        <button type="button" class="icon-option" data-icon="🧑">🧑</button>
-                        <button type="button" class="icon-option" data-icon="👤">👤</button>
-                    </div>
-                </div>
-                <div class="auth-form-actions">
-                    <button id="cancelCreateBtn" class="auth-btn secondary">Cancel</button>
-                    <button id="saveProfileBtn" class="auth-btn primary" disabled>Create Profile</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main App Container -->
-    <div id="mainApp" class="main-app" style="display: none;">
+    <div id="mainApp" class="main-app">
 
     <!-- Header -->
     <header class="header">
