@@ -2036,9 +2036,17 @@ class SmartExpenseTracker {
 
     getAllExpenseCount() {
         try {
+            // Ensure expenses object exists
+            if (!this.expenses || typeof this.expenses !== 'object') {
+                this.expenses = {};
+                return 0;
+            }
+
             let count = 0;
             Object.values(this.expenses).forEach(dayExpenses => {
-                count += dayExpenses.length;
+                if (Array.isArray(dayExpenses)) {
+                    count += dayExpenses.length;
+                }
             });
             return count;
         } catch (error) {
