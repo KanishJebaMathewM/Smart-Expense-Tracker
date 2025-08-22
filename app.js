@@ -1898,6 +1898,8 @@ class SmartExpenseTracker {
 
             // Load profile picture
             this.loadProfilePicture();
+            // Ensure family member display is updated on app start
+            this.updateFamilyMemberDisplay();
 
         } catch (error) {
             console.error('Error loading profile data:', error);
@@ -1917,6 +1919,10 @@ class SmartExpenseTracker {
                 profileImage.style.display = 'none';
                 defaultIcon.style.display = 'flex';
             }
+
+            // Also update family member display
+            this.updateFamilyMemberDisplay();
+
         } catch (error) {
             console.error('Error loading profile picture:', error);
         }
@@ -1963,6 +1969,7 @@ class SmartExpenseTracker {
             reader.onload = (e) => {
                 this.profileData.profilePicture = e.target.result;
                 this.loadProfilePicture();
+                this.saveProfileToStorage(); // Save immediately when picture is uploaded
                 this.showSuccess('Profile picture uploaded successfully');
             };
             reader.readAsDataURL(file);
@@ -2006,6 +2013,7 @@ class SmartExpenseTracker {
 
             // Update UI
             document.getElementById('familyMemberName').textContent = name;
+            this.updateFamilyMemberDisplay(); // Update family member icon too
 
             this.showSuccess('Profile updated successfully');
             this.hideProfile();
@@ -2013,6 +2021,44 @@ class SmartExpenseTracker {
         } catch (error) {
             console.error('Error saving profile data:', error);
             this.showError('Failed to save profile data');
+        }
+    }
+
+    // Update family member display with profile picture
+    updateFamilyMemberDisplay() {
+        try {
+            const familyMemberIcon = document.querySelector('.family-member-icon');
+            if (!familyMemberIcon) return;
+
+            if (this.profileData.profilePicture) {
+                // Create or update profile image in family member display
+                let profileImg = familyMemberIcon.querySelector('.profile-img');
+                if (!profileImg) {
+                    profileImg = document.createElement('img');
+                    profileImg.className = 'profile-img small';
+                    familyMemberIcon.innerHTML = ''; // Clear existing content
+                    familyMemberIcon.appendChild(profileImg);
+                }
+                profileImg.src = this.profileData.profilePicture;
+            } else {
+                // Show default icon
+                familyMemberIcon.innerHTML = '<div class="icon-bg icon-user small"></div>';
+            }
+
+        } catch (error) {
+            console.error('Error updating family member display:', error);
+        }
+    }
+
+    // Save profile data immediately to storage
+    saveProfileToStorage() {
+        try {
+            const currentUserId = localStorage.getItem('current_user_id');
+            if (currentUserId) {
+                localStorage.setItem(`profile_data_${currentUserId}`, JSON.stringify(this.profileData));
+            }
+        } catch (error) {
+            console.error('Error saving profile to storage:', error);
         }
     }
 
