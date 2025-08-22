@@ -89,6 +89,21 @@ class SmartExpenseTracker {
         this.expenses = {};
         this.tasks = {};
 
+        // Nutrition planner data structures
+        this.inventory = {}; // Kitchen stock items
+        this.mealPlans = {}; // Weekly meal plans
+        this.recipes = {}; // User saved recipes
+        this.shoppingList = {}; // Shopping list items
+        this.nutritionLog = {}; // Daily nutrition tracking
+        this.userPreferences = { // User dietary preferences
+            dietType: 'mixed', // 'veg', 'non-veg', 'mixed'
+            allergies: [],
+            calorieTarget: 2000,
+            proteinTarget: 150,
+            carbTarget: 250,
+            fatTarget: 65
+        };
+
         // Task management properties
         this.editingTaskId = null;
         this.taskFilters = {
@@ -96,7 +111,64 @@ class SmartExpenseTracker {
             category: 'all'
         };
 
+        // Nutrition planner properties
+        this.editingMealId = null;
+        this.editingInventoryId = null;
+        this.currentMealPlan = null;
+
+        // Comprehensive food nutrition database
+        this.foodDatabase = {
+            // Grains & Cereals (per 100g)
+            'rice': { name: 'Rice (White, Cooked)', calories: 130, protein: 2.7, carbs: 28, fat: 0.3, fiber: 0.4, category: 'grains', unit: 'cups' },
+            'brown_rice': { name: 'Brown Rice (Cooked)', calories: 112, protein: 2.6, carbs: 23, fat: 0.9, fiber: 1.8, category: 'grains', unit: 'cups' },
+            'wheat_flour': { name: 'Wheat Flour', calories: 364, protein: 10.3, carbs: 76, fat: 1.5, fiber: 2.7, category: 'grains', unit: 'cups' },
+            'oats': { name: 'Oats', calories: 389, protein: 16.9, carbs: 66.3, fat: 6.9, fiber: 10.6, category: 'grains', unit: 'cups' },
+            'quinoa': { name: 'Quinoa (Cooked)', calories: 120, protein: 4.4, carbs: 22, fat: 1.9, fiber: 2.8, category: 'grains', unit: 'cups' },
+
+            // Vegetables (per 100g)
+            'tomato': { name: 'Tomato', calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2, fiber: 1.2, category: 'vegetables', unit: 'pieces' },
+            'onion': { name: 'Onion', calories: 40, protein: 1.1, carbs: 9.3, fat: 0.1, fiber: 1.7, category: 'vegetables', unit: 'pieces' },
+            'potato': { name: 'Potato', calories: 77, protein: 2.0, carbs: 17, fat: 0.1, fiber: 2.2, category: 'vegetables', unit: 'pieces' },
+            'carrot': { name: 'Carrot', calories: 41, protein: 0.9, carbs: 9.6, fat: 0.2, fiber: 2.8, category: 'vegetables', unit: 'pieces' },
+            'spinach': { name: 'Spinach', calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4, fiber: 2.2, category: 'vegetables', unit: 'cups' },
+            'broccoli': { name: 'Broccoli', calories: 34, protein: 2.8, carbs: 7, fat: 0.4, fiber: 2.6, category: 'vegetables', unit: 'cups' },
+            'cauliflower': { name: 'Cauliflower', calories: 25, protein: 1.9, carbs: 5, fat: 0.3, fiber: 2.0, category: 'vegetables', unit: 'cups' },
+            'bell_pepper': { name: 'Bell Pepper', calories: 31, protein: 1.0, carbs: 7, fat: 0.3, fiber: 2.5, category: 'vegetables', unit: 'pieces' },
+
+            // Proteins (per 100g)
+            'chicken': { name: 'Chicken Breast', calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, category: 'protein', unit: 'grams' },
+            'fish': { name: 'Fish (General)', calories: 206, protein: 22, carbs: 0, fat: 12, fiber: 0, category: 'protein', unit: 'grams' },
+            'eggs': { name: 'Eggs', calories: 155, protein: 13, carbs: 1.1, fat: 11, fiber: 0, category: 'protein', unit: 'pieces' },
+            'paneer': { name: 'Paneer', calories: 265, protein: 18.3, carbs: 1.2, fat: 20.8, fiber: 0, category: 'protein', unit: 'grams' },
+            'tofu': { name: 'Tofu', calories: 76, protein: 8, carbs: 1.9, fat: 4.8, fiber: 0.3, category: 'protein', unit: 'grams' },
+            'lentils': { name: 'Lentils (Cooked)', calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 7.9, category: 'protein', unit: 'cups' },
+            'chickpeas': { name: 'Chickpeas (Cooked)', calories: 164, protein: 8.9, carbs: 27, fat: 2.6, fiber: 7.6, category: 'protein', unit: 'cups' },
+
+            // Dairy (per 100g/ml)
+            'milk': { name: 'Milk (Whole)', calories: 61, protein: 3.2, carbs: 4.8, fat: 3.3, fiber: 0, category: 'dairy', unit: 'ml' },
+            'yogurt': { name: 'Yogurt (Plain)', calories: 59, protein: 10, carbs: 3.6, fat: 0.4, fiber: 0, category: 'dairy', unit: 'grams' },
+            'cheese': { name: 'Cheese', calories: 113, protein: 7, carbs: 1, fat: 9, fiber: 0, category: 'dairy', unit: 'grams' },
+
+            // Oils & Fats (per 100g)
+            'oil': { name: 'Cooking Oil', calories: 884, protein: 0, carbs: 0, fat: 100, fiber: 0, category: 'fats', unit: 'ml' },
+            'butter': { name: 'Butter', calories: 717, protein: 0.9, carbs: 0.1, fat: 81, fiber: 0, category: 'fats', unit: 'grams' },
+            'ghee': { name: 'Ghee', calories: 900, protein: 0, carbs: 0, fat: 100, fiber: 0, category: 'fats', unit: 'grams' },
+
+            // Fruits (per 100g)
+            'apple': { name: 'Apple', calories: 52, protein: 0.3, carbs: 14, fat: 0.2, fiber: 2.4, category: 'fruits', unit: 'pieces' },
+            'banana': { name: 'Banana', calories: 89, protein: 1.1, carbs: 23, fat: 0.3, fiber: 2.6, category: 'fruits', unit: 'pieces' },
+            'orange': { name: 'Orange', calories: 47, protein: 0.9, carbs: 12, fat: 0.1, fiber: 2.4, category: 'fruits', unit: 'pieces' },
+
+            // Spices & Others (per 100g)
+            'salt': { name: 'Salt', calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, category: 'spices', unit: 'grams' },
+            'sugar': { name: 'Sugar', calories: 387, protein: 0, carbs: 100, fat: 0, fiber: 0, category: 'spices', unit: 'grams' },
+            'turmeric': { name: 'Turmeric', calories: 354, protein: 7.8, carbs: 65, fat: 9.9, fiber: 21, category: 'spices', unit: 'grams' }
+        };
+
         this.init();
+
+        // Initialize nutrition planner
+        this.initNutritionPlanner();
     }
 
     // Utility function for debouncing
