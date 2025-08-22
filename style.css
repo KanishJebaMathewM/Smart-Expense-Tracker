@@ -276,6 +276,137 @@
     font-size: 0.7em;
 }
 
+/* Contextual Icons for Different Purposes */
+.icon-income {
+    background: linear-gradient(135deg, #10b981, #059669);
+    position: relative;
+}
+.icon-income::before {
+    content: '📈';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+}
+
+.icon-expense {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    position: relative;
+}
+.icon-expense::before {
+    content: '📤';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+}
+
+.icon-savings {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    position: relative;
+}
+.icon-savings::before {
+    content: '🏛️';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.6em;
+}
+
+.icon-balance {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    position: relative;
+}
+.icon-balance::before {
+    content: '⚖️';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.6em;
+}
+
+.icon-logout {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    position: relative;
+}
+.icon-logout::before {
+    content: '🚪';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+}
+
+.icon-upload {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    position: relative;
+}
+.icon-upload::before {
+    content: '📷';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+}
+
+.icon-app-logo {
+    background: linear-gradient(135deg, #10b981, #059669);
+    position: relative;
+}
+.icon-app-logo::before {
+    content: '💰';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8em;
+}
+
+.icon-welcome {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    position: relative;
+}
+.icon-welcome::before {
+    content: '⭐';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8em;
+}
+
+.icon-add {
+    background: linear-gradient(135deg, #10b981, #059669);
+    position: relative;
+}
+.icon-add::before {
+    content: '➕';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+}
+
+.icon-total {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    position: relative;
+}
+.icon-total::before {
+    content: '📊';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+}
+
 /* Icon base class for background images */
 .icon-bg {
     width: 24px;
