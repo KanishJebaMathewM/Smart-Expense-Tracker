@@ -646,7 +646,7 @@ class SmartExpenseTracker {
                 if (legacyIncome && Object.keys(this.income).length === 0) {
                     try {
                         this.income = JSON.parse(legacyIncome);
-                        console.log('��� Migrated legacy income data');
+                        console.log('✅ Migrated legacy income data');
                     } catch (e) {
                         console.error('❌ Failed to migrate income data:', e);
                     }
@@ -6832,6 +6832,131 @@ class SmartExpenseTracker {
             }
         } catch (error) {
             console.error('Error rendering nutrition charts:', error);
+        }
+    }
+
+    // Create meal prep tasks for the week
+    createMealPrepTasks() {
+        try {
+            const weekKey = this.currentMealPlanWeek || this.getCurrentWeekKey();
+            const weekPlan = this.mealPlans[weekKey];
+
+            if (!weekPlan || Object.keys(weekPlan).length === 0) {
+                this.showInfo('No meals planned for this week. Plan some meals first.');
+                return;
+            }
+
+            // Group meals by day
+            const mealsByDay = {};
+            Object.entries(weekPlan).forEach(([mealKey, meal]) => {
+                const day = mealKey.split('-')[0]; // e.g., 'monday-breakfast' -> 'monday'
+                if (!mealsByDay[day]) {
+                    mealsByDay[day] = [];
+                }
+                mealsByDay[day].push({
+                    mealType: mealKey.split('-')[1],
+                    recipeName: meal.recipeName,
+                    recipeId: meal.recipeId
+                });
+            });
+
+            let tasksCreated = 0;
+            Object.entries(mealsByDay).forEach(([day, meals]) => {
+                const taskId = Date.now().toString() + day;
+                const mealNames = meals.map(m => `${m.mealType}: ${m.recipeName}`).join(', ');
+
+                // Calculate prep date (day before)
+                const weekStart = new Date(weekKey);
+                const dayIndex = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].indexOf(day);
+                const mealDate = new Date(weekStart);
+                mealDate.setDate(weekStart.getDate() + dayIndex);
+
+                const prepDate = new Date(mealDate);
+                prepDate.setDate(mealDate.getDate() - 1);
+
+                this.tasks[taskId] = {
+                    id: taskId,
+                    title: `Meal Prep for ${day.charAt(0).toUpperCase() + day.slice(1)}`,
+                    description: `Prepare ingredients and cook meals for tomorrow: ${mealNames}. ` +
+                                `This helps maintain your nutrition goals and saves time.`,
+                    priority: 'medium',
+                    category: 'health',
+                    status: 'pending',
+                    dueDate: prepDate.toISOString().split('T')[0],
+                    createdDate: new Date().toISOString(),
+                    hasBudget: false,
+                    nutritionRelated: true,
+                    mealPrepDay: day,
+                    plannedMeals: meals
+                };
+
+                tasksCreated++;
+            });
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            this.showSuccess(`Created ${tasksCreated} meal prep tasks for your planned meals!`);
+
+        } catch (error) {
+            this.showError('Failed to create meal prep tasks: ' + error.message);
+            console.error('Error creating meal prep tasks:', error);
+        }
+    }
+
+    // Create weekly grocery shopping task based on shopping list
+    createGroceryShoppingTask() {
+        try {
+            const pendingItems = Object.values(this.shoppingList).filter(item => !item.purchased);
+
+            if (pendingItems.length === 0) {
+                this.showInfo('No pending items in shopping list. Add some items first.');
+                return;
+            }
+
+            // Group items by category for better organization
+            const itemsByCategory = {};
+            pendingItems.forEach(item => {
+                if (!itemsByCategory[item.category]) {
+                    itemsByCategory[item.category] = [];
+                }
+                itemsByCategory[item.category].push(`${item.name} (${item.quantity} ${item.unit})`);
+            });
+
+            const categoryList = Object.entries(itemsByCategory)
+                .map(([category, items]) => `${category}: ${items.join(', ')}`)
+                .join('\n');
+
+            const taskId = Date.now().toString();
+            this.tasks[taskId] = {
+                id: taskId,
+                title: 'Weekly Grocery Shopping',
+                description: `Buy ${pendingItems.length} items from your shopping list:\n\n${categoryList}\n\n` +
+                            `Remember to check for fresher alternatives and compare prices for savings.`,
+                priority: 'high',
+                category: 'shopping',
+                status: 'pending',
+                dueDate: null,
+                createdDate: new Date().toISOString(),
+                hasBudget: true,
+                expenseCategory: 'Food',
+                nutritionRelated: true,
+                shoppingItems: pendingItems.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                    category: item.category
+                }))
+            };
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            this.showSuccess('Created grocery shopping task with your current shopping list!');
+
+        } catch (error) {
+            this.showError('Failed to create grocery shopping task: ' + error.message);
+            console.error('Error creating grocery shopping task:', error);
         }
     }
 
