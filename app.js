@@ -2112,7 +2112,7 @@ class SmartExpenseTracker {
         if (balance < 0) {
             insights.push('<p><span class="warning-icon">⚠</span> You\'re spending more than your income. Consider reducing expenses.</p>');
         } else if (balance / income < 0.1) {
-            insights.push('<p><span class="warning-icon">⚠</span> Low savings rate. Try to save at least 10% of your income.</p>');
+            insights.push('<p><span class="warning-icon">��</span> Low savings rate. Try to save at least 10% of your income.</p>');
         } else if (balance / income > 0.3) {
             insights.push('<p><span class="success-icon">✓</span> Great savings rate! You\'re saving over 30% of your income.</p>');
         }
@@ -6618,42 +6618,6 @@ class SmartExpenseTracker {
         }
     }
 
-    // Add individual grocery item to expenses
-    async addGroceryExpense(foodId, quantity, unit, actualCost) {
-        try {
-            const foodData = this.foodDatabase[foodId];
-            if (!foodData) {
-                this.showError('Food item not found');
-                return false;
-            }
-
-            const today = new Date();
-            const expense = {
-                name: `${foodData.name} (${quantity} ${unit})`,
-                category: 'Food',
-                amount: actualCost,
-                nutritionRelated: true,
-                foodId: foodId,
-                quantity: quantity,
-                unit: unit
-            };
-
-            if (this.addExpenseForDate(today, expense)) {
-                // Also add to inventory
-                this.addToInventory(foodId, quantity, unit);
-
-                this.updateDashboard();
-                this.updateNutritionOverview();
-
-                return true;
-            }
-
-            return false;
-        } catch (error) {
-            console.error('Error adding grocery expense:', error);
-            return false;
-        }
-    }
 
 
     // Get nutrition-related expenses for a date range
