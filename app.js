@@ -822,6 +822,7 @@ class SmartExpenseTracker {
             this.safeAddEventListener('generateMealPlanBtn', 'click', () => this.generateWeeklyMealPlan());
             this.safeAddEventListener('setNutritionGoalsBtn', 'click', () => this.showNutritionGoalsModal());
             this.safeAddEventListener('exportShoppingListBtn', 'click', () => this.exportShoppingList());
+            this.safeAddEventListener('createGroceryTaskBtn', 'click', () => this.createGroceryShoppingTask());
 
             // Nutrition tab switching
             document.querySelectorAll('.nutrition-tab-btn').forEach(btn => {
