@@ -177,7 +177,7 @@ class SmartExpenseTracker {
                 }
             }
 
-            console.log('⚠️ User not found in family system, trying legacy system...');
+            console.log('⚠�� User not found in family system, trying legacy system...');
 
             // Fallback to legacy system
             const userData = localStorage.getItem('user_account_data');
@@ -809,8 +809,33 @@ class SmartExpenseTracker {
     saveProfileData() {
         try {
             if (!this.currentProfile) {
-                console.warn('⚠️ Cannot save: No current profile');
-                return false;
+                console.warn('⚠️ Cannot save: No current profile found');
+                console.log('Debug info:', {
+                    hasCurrentUser: !!this.currentUser,
+                    userName: this.currentUser?.name,
+                    userEmail: this.currentUser?.email,
+                    profiles: this.getProfiles()
+                });
+
+                // Try to create a profile if we have user data
+                if (this.currentUser) {
+                    console.log('🔄 Attempting to create emergency profile for save...');
+                    try {
+                        this.ensureDefaultProfile();
+                        if (this.currentProfile) {
+                            console.log('✅ Emergency profile created successfully');
+                        } else {
+                            console.error('❌ Failed to create emergency profile');
+                            return false;
+                        }
+                    } catch (profileError) {
+                        console.error('❌ Error creating emergency profile:', profileError);
+                        return false;
+                    }
+                } else {
+                    console.error('❌ No current user data available for profile creation');
+                    return false;
+                }
             }
 
             console.log('💾 Saving profile data...');
