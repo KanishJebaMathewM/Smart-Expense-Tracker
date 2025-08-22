@@ -6540,7 +6540,7 @@ class SmartExpenseTracker {
     // EXPENSE INTEGRATION METHODS
     // ==============================================
 
-    // Purchase shopping list items and add to expenses
+    // Mark shopping list items as purchased and add to inventory
     async purchaseShoppingItems() {
         try {
             const items = Object.values(this.shoppingList).filter(item => !item.purchased);
@@ -6550,13 +6550,11 @@ class SmartExpenseTracker {
                 return;
             }
 
-            const totalCost = items.reduce((sum, item) => sum + item.estimatedCost, 0);
-
             const shouldPurchase = await confirmAsync(
-                `Purchase ${items.length} items for approximately ₹${totalCost.toFixed(2)}?`,
+                `Mark ${items.length} shopping list items as purchased and add them to your kitchen inventory?`,
                 {
-                    title: 'Purchase Groceries',
-                    confirmText: 'Purchase & Track',
+                    title: 'Mark Items as Purchased',
+                    confirmText: 'Mark as Purchased',
                     cancelText: 'Cancel',
                     confirmClass: 'btn-primary'
                 }
@@ -6564,51 +6562,41 @@ class SmartExpenseTracker {
 
             if (shouldPurchase) {
                 const today = new Date();
-                let totalActualCost = 0;
+                let addedToInventory = 0;
 
-                // Group items by category for combined expense entries
-                const categoryGroups = {};
+                // Mark items as purchased and add to inventory
                 items.forEach(item => {
-                    if (!categoryGroups[item.category]) {
-                        categoryGroups[item.category] = {
-                            items: [],
-                            totalCost: 0
-                        };
+                    this.shoppingList[item.id].purchased = true;
+                    this.shoppingList[item.id].purchaseDate = today.toISOString();
+
+                    // Add to inventory
+                    if (this.addToInventory(item.foodId, item.quantity, item.unit)) {
+                        addedToInventory++;
                     }
-                    categoryGroups[item.category].items.push(item);
-                    categoryGroups[item.category].totalCost += item.estimatedCost;
                 });
 
-                // Create expense entries for each category
-                for (const [category, group] of Object.entries(categoryGroups)) {
-                    const expenseName = `Groceries - ${category} (${group.items.length} items)`;
-                    const expense = {
-                        name: expenseName,
-                        category: 'Food',
-                        amount: group.totalCost,
-                        nutritionRelated: true,
-                        groceryItems: group.items.map(item => ({
-                            name: item.name,
-                            quantity: item.quantity,
-                            unit: item.unit,
-                            cost: item.estimatedCost
-                        }))
-                    };
+                // Create a task reminder to track the grocery expense
+                const taskId = Date.now().toString();
+                const groceryCategories = [...new Set(items.map(item => item.category))];
+                const taskDescription = `Purchased groceries: ${groceryCategories.join(', ')}. ${items.length} items added to kitchen inventory.`;
 
-                    if (this.addExpenseForDate(today, expense)) {
-                        totalActualCost += group.totalCost;
-
-                        // Mark items as purchased and add to inventory
-                        group.items.forEach(item => {
-                            this.shoppingList[item.id].purchased = true;
-                            this.shoppingList[item.id].purchaseDate = today.toISOString();
-                            this.shoppingList[item.id].actualCost = item.estimatedCost;
-
-                            // Add to inventory
-                            this.addToInventory(item.foodId, item.quantity, item.unit);
-                        });
-                    }
-                }
+                this.tasks[taskId] = {
+                    id: taskId,
+                    title: 'Track Grocery Expense',
+                    description: taskDescription,
+                    priority: 'medium',
+                    category: 'shopping',
+                    status: 'pending',
+                    dueDate: today.toISOString().split('T')[0],
+                    createdDate: today.toISOString(),
+                    hasBudget: true,
+                    expenseCategory: 'Food',
+                    groceryItems: items.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        unit: item.unit
+                    }))
+                };
 
                 this.hasUnsavedChanges = true;
                 this.debouncedSave();
@@ -6620,12 +6608,12 @@ class SmartExpenseTracker {
                 this.updateDashboard();
 
                 this.showSuccess(
-                    `Groceries purchased for ₹${totalActualCost.toFixed(2)}! ` +
-                    `Items added to inventory and expenses tracked.`
+                    `${addedToInventory} items marked as purchased and added to inventory! ` +
+                    `A task has been created to remind you to track the grocery expense.`
                 );
             }
         } catch (error) {
-            this.showError('Failed to purchase groceries: ' + error.message);
+            this.showError('Failed to process shopping items: ' + error.message);
             console.error('Error purchasing shopping items:', error);
         }
     }
