@@ -6080,10 +6080,7 @@ class SmartExpenseTracker {
             recipeData.missingIngredients.forEach(missing => {
                 const foodData = this.foodDatabase[missing.food];
                 if (foodData) {
-                    // Estimate cost (basic estimation)
-                    const estimatedCost = this.estimateIngredientCost(missing.food, missing.missing);
-
-                    if (this.addToShoppingList(missing.food, missing.missing, foodData.unit, estimatedCost)) {
+                    if (this.addToShoppingList(missing.food, missing.missing, foodData.unit)) {
                         addedCount++;
                     }
                 }
