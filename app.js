@@ -2846,13 +2846,13 @@ class SmartExpenseTracker {
             document.querySelectorAll('.app-section').forEach(section => {
                 section.classList.remove('active');
             });
-            
+
             // Show target section
             const targetSection = document.getElementById(`${sectionName}Section`);
             if (targetSection) {
                 targetSection.classList.add('active');
             }
-            
+
             // Update navigation
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -2861,8 +2861,49 @@ class SmartExpenseTracker {
             if (activeTab) {
                 activeTab.classList.add('active');
             }
+
+            // Handle section-specific initialization
+            switch(sectionName) {
+                case 'nutrition':
+                    this.initNutritionSection();
+                    break;
+                case 'tasks':
+                    this.refreshTaskManagerDisplay();
+                    break;
+                case 'analytics':
+                    this.updateAnalytics();
+                    break;
+                case 'reports':
+                    // Reports section doesn't need special initialization
+                    break;
+                default:
+                    // Dashboard
+                    this.updateDashboard();
+                    break;
+            }
         } catch (error) {
             console.error('Error switching section:', error);
+        }
+    }
+
+    // Initialize nutrition section when first loaded
+    initNutritionSection() {
+        try {
+            console.log('Initializing nutrition section...');
+
+            // Update nutrition overview cards
+            this.updateNutritionOverview();
+
+            // Render current tab content
+            const activeTab = document.querySelector('.nutrition-tab-btn.active');
+            const currentTab = activeTab ? activeTab.dataset.nutritionTab : 'inventory';
+
+            // Switch to inventory tab by default and render content
+            this.switchNutritionTab(currentTab);
+
+            console.log('Nutrition section initialized successfully');
+        } catch (error) {
+            console.error('Error initializing nutrition section:', error);
         }
     }
     
@@ -4402,6 +4443,11 @@ class SmartExpenseTracker {
             }
 
             console.log('Nutrition planner initialized successfully');
+
+            // Update the nutrition overview if we're in the nutrition section
+            if (document.getElementById('nutritionSection')?.classList.contains('active')) {
+                this.updateNutritionOverview();
+            }
         } catch (error) {
             console.error('Error initializing nutrition planner:', error);
         }
