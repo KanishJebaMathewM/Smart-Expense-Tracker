@@ -718,6 +718,7 @@ class SmartExpenseTracker {
                 }
             } else {
                 console.log('❌ No user-specific data found');
+                console.log(`%c⚠️ NO DATA FOUND for key: ${userSpecificKey}`, 'color: red; font-size: 16px; font-weight: bold;');
 
                 // Check if there are any storage keys that might match
                 const allKeys = Object.keys(localStorage);
@@ -727,6 +728,12 @@ class SmartExpenseTracker {
                 // Try to migrate from legacy storage if no user-specific data found
                 console.log('🔄 Checking for legacy data migration...');
                 this.migrateLegacyData();
+
+                // Check if migration found anything
+                const totalAfterMigration = Object.keys(this.income).length + Object.keys(this.expenses).length + Object.keys(this.tasks).length;
+                if (totalAfterMigration === 0) {
+                    console.log(`%c📝 NO DATA FOUND ANYWHERE - This appears to be a fresh start`, 'color: orange; font-size: 14px; font-weight: bold;');
+                }
             }
 
             console.log(`✅ Profile data loading completed for user: ${this.currentUser?.name}`);
