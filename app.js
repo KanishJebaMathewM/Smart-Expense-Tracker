@@ -2446,17 +2446,33 @@ class SmartExpenseTracker {
     toggleTaskStatus(taskId, newStatus) {
         try {
             if (this.tasks[taskId]) {
-                this.tasks[taskId].status = newStatus;
-                this.tasks[taskId].updatedAt = new Date().toISOString();
+                const task = this.tasks[taskId];
+                const previousStatus = task.status;
+
+                task.status = newStatus;
+                task.updatedAt = new Date().toISOString();
 
                 if (newStatus === 'completed') {
-                    this.tasks[taskId].completedAt = new Date().toISOString();
+                    task.completedAt = new Date().toISOString();
+
+                    // Handle budget task completion
+                    if (task.budget && task.budget > 0) {
+                        this.handleBudgetTaskCompletion(task);
+                    }
                 }
 
                 if (this.setTasks(this.tasks)) {
                     this.renderTasks();
                     this.updateTaskStats();
-                    this.showSuccess('Task status updated!');
+                    this.renderCalendar(); // Update calendar to show completed tasks
+                    this.updateDashboard(); // Update dashboard with latest data
+                    this.updateExpenseIntegration(); // Update expense integration
+
+                    if (newStatus === 'completed' && task.budget) {
+                        this.showSuccess(`Task completed! Calendar and expenses updated.`);
+                    } else {
+                        this.showSuccess('Task status updated!');
+                    }
                 }
             }
         } catch (error) {
@@ -2943,7 +2959,7 @@ class SmartExpenseTracker {
                         </div>
                         <div class="summary-content">
                             <div class="summary-stat">
-                                <span class="stat-value">₹${totalTaskSpent}/₹${totalTaskBudget}</span>
+                                <span class="stat-value">���${totalTaskSpent}/₹${totalTaskBudget}</span>
                                 <span class="stat-label">Spent/Budgeted</span>
                             </div>
                             ${totalTaskBudget > 0 ? `
