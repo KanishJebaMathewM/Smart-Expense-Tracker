@@ -4774,6 +4774,437 @@ class SmartExpenseTracker {
             return false;
         }
     }
+
+    // ==============================================
+    // NUTRITION PLANNER UI METHODS
+    // ==============================================
+
+    // Switch nutrition tabs
+    switchNutritionTab(tabName) {
+        try {
+            // Hide all nutrition tab contents
+            document.querySelectorAll('.nutrition-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show target tab
+            const targetTab = document.getElementById(`${tabName}Tab`);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+
+            // Update tab buttons
+            document.querySelectorAll('.nutrition-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`[data-nutrition-tab="${tabName}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+
+            // Refresh content for specific tabs
+            switch(tabName) {
+                case 'inventory':
+                    this.renderInventory();
+                    break;
+                case 'recipes':
+                    this.renderRecipes();
+                    break;
+                case 'meal-plan':
+                    this.renderMealPlan();
+                    break;
+                case 'shopping':
+                    this.renderShoppingList();
+                    break;
+                case 'insights':
+                    this.renderNutritionInsights();
+                    break;
+            }
+        } catch (error) {
+            console.error('Error switching nutrition tab:', error);
+        }
+    }
+
+    // Show inventory modal
+    showInventoryModal(itemId = null) {
+        try {
+            const modalHtml = `
+                <div id="inventoryModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>${itemId ? 'Edit' : 'Add'} Inventory Item</h3>
+                            <button class="close-btn" onclick="tracker.hideInventoryModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="foodSelect">Food Item</label>
+                                <select id="foodSelect" required>
+                                    <option value="">Select food item...</option>
+                                    ${Object.entries(this.foodDatabase).map(([id, food]) =>
+                                        `<option value="${id}">${food.name}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="itemQuantity">Quantity</label>
+                                <input type="number" id="itemQuantity" placeholder="Enter quantity" min="0" step="0.1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="itemUnit">Unit</label>
+                                <input type="text" id="itemUnit" placeholder="e.g., cups, pieces, grams" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date (Optional)</label>
+                                <input type="date" id="expiryDate">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="saveInventoryItem" class="btn btn-primary">${itemId ? 'Update' : 'Add'} Item</button>
+                            <button class="btn btn-secondary" onclick="tracker.hideInventoryModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="inventoryOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Bind save event
+            document.getElementById('saveInventoryItem').addEventListener('click', () => {
+                this.saveInventoryItem(itemId);
+            });
+
+            // Auto-fill unit when food is selected
+            document.getElementById('foodSelect').addEventListener('change', (e) => {
+                const foodId = e.target.value;
+                if (foodId && this.foodDatabase[foodId]) {
+                    document.getElementById('itemUnit').value = this.foodDatabase[foodId].unit;
+                }
+            });
+
+        } catch (error) {
+            console.error('Error showing inventory modal:', error);
+        }
+    }
+
+    // Hide inventory modal
+    hideInventoryModal() {
+        try {
+            const modal = document.getElementById('inventoryModal');
+            const overlay = document.getElementById('inventoryOverlay');
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding inventory modal:', error);
+        }
+    }
+
+    // Save inventory item
+    saveInventoryItem(editingId = null) {
+        try {
+            const foodId = document.getElementById('foodSelect').value;
+            const quantity = parseFloat(document.getElementById('itemQuantity').value);
+            const unit = document.getElementById('itemUnit').value;
+            const expiryDate = document.getElementById('expiryDate').value || null;
+
+            if (!foodId || !quantity || quantity <= 0) {
+                this.showError('Please fill all required fields with valid values');
+                return;
+            }
+
+            if (this.addToInventory(foodId, quantity, unit, expiryDate)) {
+                this.hideInventoryModal();
+                this.renderInventory();
+                this.updateNutritionOverview();
+                this.showSuccess('Inventory item added successfully!');
+            }
+        } catch (error) {
+            this.showError('Failed to save inventory item: ' + error.message);
+            console.error('Error saving inventory item:', error);
+        }
+    }
+
+    // Show recipe modal
+    showRecipeModal(recipeId = null) {
+        try {
+            const modalHtml = `
+                <div id="recipeModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>${recipeId ? 'Edit' : 'Add'} Recipe</h3>
+                            <button class="close-btn" onclick="tracker.hideRecipeModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="recipeName">Recipe Name</label>
+                                <input type="text" id="recipeName" placeholder="Enter recipe name" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="recipeServings">Servings</label>
+                                    <input type="number" id="recipeServings" placeholder="2" min="1" value="2" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="recipePrepTime">Prep Time (minutes)</label>
+                                    <input type="number" id="recipePrepTime" placeholder="30" min="1" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="recipeDietType">Diet Type</label>
+                                    <select id="recipeDietType" required>
+                                        <option value="veg">Vegetarian</option>
+                                        <option value="non-veg">Non-Vegetarian</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="recipeCategory">Category</label>
+                                    <select id="recipeCategory" required>
+                                        <option value="breakfast">Breakfast</option>
+                                        <option value="main">Main Course</option>
+                                        <option value="snack">Snacks</option>
+                                        <option value="dessert">Dessert</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ingredients</label>
+                                <div id="ingredientsList">
+                                    <div class="ingredient-item">
+                                        <select class="ingredient-select">
+                                            <option value="">Select ingredient...</option>
+                                            ${Object.entries(this.foodDatabase).map(([id, food]) =>
+                                                `<option value="${id}">${food.name}</option>`
+                                            ).join('')}
+                                        </select>
+                                        <input type="number" class="ingredient-quantity" placeholder="Qty" min="0" step="0.1">
+                                        <input type="text" class="ingredient-unit" placeholder="Unit">
+                                        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">Remove</button>
+                                    </div>
+                                </div>
+                                <button type="button" id="addIngredient" class="btn btn-secondary">Add Ingredient</button>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="recipeInstructions">Instructions (one per line)</label>
+                                <textarea id="recipeInstructions" rows="4" placeholder="Enter cooking instructions, one step per line"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="saveRecipe" class="btn btn-primary">${recipeId ? 'Update' : 'Add'} Recipe</button>
+                            <button class="btn btn-secondary" onclick="tracker.hideRecipeModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="recipeOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Bind events
+            document.getElementById('saveRecipe').addEventListener('click', () => {
+                this.saveRecipe(recipeId);
+            });
+
+            document.getElementById('addIngredient').addEventListener('click', () => {
+                this.addIngredientRow();
+            });
+
+        } catch (error) {
+            console.error('Error showing recipe modal:', error);
+        }
+    }
+
+    // Hide recipe modal
+    hideRecipeModal() {
+        try {
+            const modal = document.getElementById('recipeModal');
+            const overlay = document.getElementById('recipeOverlay');
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding recipe modal:', error);
+        }
+    }
+
+    // Add ingredient row
+    addIngredientRow() {
+        try {
+            const ingredientsList = document.getElementById('ingredientsList');
+            const ingredientHtml = `
+                <div class="ingredient-item">
+                    <select class="ingredient-select">
+                        <option value="">Select ingredient...</option>
+                        ${Object.entries(this.foodDatabase).map(([id, food]) =>
+                            `<option value="${id}">${food.name}</option>`
+                        ).join('')}
+                    </select>
+                    <input type="number" class="ingredient-quantity" placeholder="Qty" min="0" step="0.1">
+                    <input type="text" class="ingredient-unit" placeholder="Unit">
+                    <button type="button" class="btn-remove" onclick="this.parentElement.remove()">Remove</button>
+                </div>
+            `;
+            ingredientsList.insertAdjacentHTML('beforeend', ingredientHtml);
+        } catch (error) {
+            console.error('Error adding ingredient row:', error);
+        }
+    }
+
+    // Show shopping modal
+    showShoppingModal() {
+        try {
+            const modalHtml = `
+                <div id="shoppingModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Add Shopping List Item</h3>
+                            <button class="close-btn" onclick="tracker.hideShoppingModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="shoppingFoodSelect">Food Item</label>
+                                <select id="shoppingFoodSelect" required>
+                                    <option value="">Select food item...</option>
+                                    ${Object.entries(this.foodDatabase).map(([id, food]) =>
+                                        `<option value="${id}">${food.name}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="shoppingQuantity">Quantity</label>
+                                <input type="number" id="shoppingQuantity" placeholder="Enter quantity" min="0" step="0.1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="shoppingUnit">Unit</label>
+                                <input type="text" id="shoppingUnit" placeholder="e.g., cups, pieces, grams" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="estimatedCost">Estimated Cost (₹)</label>
+                                <input type="number" id="estimatedCost" placeholder="0" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="saveShoppingItem" class="btn btn-primary">Add to List</button>
+                            <button class="btn btn-secondary" onclick="tracker.hideShoppingModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="shoppingOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Bind save event
+            document.getElementById('saveShoppingItem').addEventListener('click', () => {
+                this.saveShoppingItem();
+            });
+
+            // Auto-fill unit when food is selected
+            document.getElementById('shoppingFoodSelect').addEventListener('change', (e) => {
+                const foodId = e.target.value;
+                if (foodId && this.foodDatabase[foodId]) {
+                    document.getElementById('shoppingUnit').value = this.foodDatabase[foodId].unit;
+                }
+            });
+
+        } catch (error) {
+            console.error('Error showing shopping modal:', error);
+        }
+    }
+
+    // Hide shopping modal
+    hideShoppingModal() {
+        try {
+            const modal = document.getElementById('shoppingModal');
+            const overlay = document.getElementById('shoppingOverlay');
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding shopping modal:', error);
+        }
+    }
+
+    // Show nutrition goals modal
+    showNutritionGoalsModal() {
+        try {
+            const modalHtml = `
+                <div id="nutritionGoalsModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Set Nutrition Goals</h3>
+                            <button class="close-btn" onclick="tracker.hideNutritionGoalsModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="calorieTarget">Daily Calorie Goal</label>
+                                <input type="number" id="calorieTarget" value="${this.userPreferences.calorieTarget}" min="1000" max="5000" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="proteinTarget">Daily Protein Goal (g)</label>
+                                <input type="number" id="proteinTarget" value="${this.userPreferences.proteinTarget}" min="50" max="300" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="carbTarget">Daily Carbs Goal (g)</label>
+                                <input type="number" id="carbTarget" value="${this.userPreferences.carbTarget}" min="100" max="500" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fatTarget">Daily Fat Goal (g)</label>
+                                <input type="number" id="fatTarget" value="${this.userPreferences.fatTarget}" min="20" max="150" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="dietTypePreference">Diet Preference</label>
+                                <select id="dietTypePreference">
+                                    <option value="mixed" ${this.userPreferences.dietType === 'mixed' ? 'selected' : ''}>Mixed</option>
+                                    <option value="veg" ${this.userPreferences.dietType === 'veg' ? 'selected' : ''}>Vegetarian</option>
+                                    <option value="non-veg" ${this.userPreferences.dietType === 'non-veg' ? 'selected' : ''}>Non-Vegetarian</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="saveNutritionGoals" class="btn btn-primary">Save Goals</button>
+                            <button class="btn btn-secondary" onclick="tracker.hideNutritionGoalsModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="nutritionGoalsOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Bind save event
+            document.getElementById('saveNutritionGoals').addEventListener('click', () => {
+                this.saveNutritionGoals();
+            });
+
+        } catch (error) {
+            console.error('Error showing nutrition goals modal:', error);
+        }
+    }
+
+    // Hide nutrition goals modal
+    hideNutritionGoalsModal() {
+        try {
+            const modal = document.getElementById('nutritionGoalsModal');
+            const overlay = document.getElementById('nutritionGoalsOverlay');
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding nutrition goals modal:', error);
+        }
+    }
 }
 
 // Initialize the tracker when DOM is loaded
