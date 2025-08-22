@@ -443,6 +443,7 @@ class SmartExpenseTracker {
             const profileData = {
                 income: this.income || {},
                 expenses: this.expenses || {},
+                tasks: this.tasks || {},
                 lastSaved: new Date().toISOString(),
                 user: this.currentUser?.name || 'Unknown'
             };
