@@ -193,7 +193,7 @@
     position: relative;
 }
 .icon-expense::before {
-    content: '💸';
+    content: '💳';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -206,7 +206,7 @@
     position: relative;
 }
 .icon-savings::before {
-    content: '🐷';
+    content: '💸';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -245,7 +245,7 @@
     position: relative;
 }
 .icon-upload::before {
-    content: '📷';
+    content: '📁';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -258,7 +258,7 @@
     position: relative;
 }
 .icon-app-logo::before {
-    content: '📊';
+    content: '💼';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -271,7 +271,7 @@
     position: relative;
 }
 .icon-welcome::before {
-    content: '🎉';
+    content: '✨';
     position: absolute;
     top: 50%;
     left: 50%;
