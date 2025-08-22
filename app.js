@@ -1404,11 +1404,19 @@ class SmartExpenseTracker {
     
     getAllTimeExpenses() {
         try {
+            // Ensure expenses object exists
+            if (!this.expenses || typeof this.expenses !== 'object') {
+                this.expenses = {};
+                return 0;
+            }
+
             let total = 0;
             Object.keys(this.expenses).forEach(dateKey => {
-                this.expenses[dateKey].forEach(expense => {
-                    total += parseFloat(expense.amount);
-                });
+                if (Array.isArray(this.expenses[dateKey])) {
+                    this.expenses[dateKey].forEach(expense => {
+                        total += parseFloat(expense.amount) || 0;
+                    });
+                }
             });
             return total;
         } catch (error) {
