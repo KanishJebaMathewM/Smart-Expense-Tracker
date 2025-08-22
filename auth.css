@@ -30,18 +30,151 @@
     height: 16px;
 }
 
-/* Category Icons */
-.icon-money { background-image: url('https://images.pexels.com/photos/4452504/pexels-photo-4452504.jpeg'); }
-.icon-home { background-image: url('https://images.pexels.com/photos/238480/pexels-photo-238480.jpeg'); }
-.icon-analytics { background-image: url('https://images.pexels.com/photos/7793173/pexels-photo-7793173.jpeg'); }
-.icon-food { background-image: url('https://images.pexels.com/photos/983587/pexels-photo-983587.jpeg'); }
-.icon-transportation { background-image: url('https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg'); }
-.icon-shopping { background-image: url('https://images.pexels.com/photos/2385387/pexels-photo-2385387.jpeg'); }
-.icon-entertainment { background-image: url('https://images.pexels.com/photos/18440206/pexels-photo-18440206.jpeg'); }
-.icon-health { background-image: url('https://images.pexels.com/photos/6320167/pexels-photo-6320167.jpeg'); }
-.icon-education { background-image: url('https://images.pexels.com/photos/207732/pexels-photo-207732.jpeg'); }
-.icon-bills { background-image: url('https://images.pexels.com/photos/4452375/pexels-photo-4452375.jpeg'); }
-.icon-user { background-image: url('https://images.pexels.com/photos/2380794/pexels-photo-2380794.jpeg'); }
+/* Category Icons - Modern CSS Design */
+.icon-money {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    position: relative;
+}
+.icon-money::before {
+    content: '$';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
+.icon-home {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    position: relative;
+}
+.icon-home::before {
+    content: '🏠';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+}
+
+.icon-analytics {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    position: relative;
+}
+.icon-analytics::before {
+    content: '📊';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+}
+
+.icon-food {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    position: relative;
+}
+.icon-food::before {
+    content: '🍽️';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.6em;
+}
+
+.icon-transportation {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    position: relative;
+}
+.icon-transportation::before {
+    content: '🚗';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.6em;
+}
+
+.icon-shopping {
+    background: linear-gradient(135deg, #ec4899, #db2777);
+    position: relative;
+}
+.icon-shopping::before {
+    content: '🛍️';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.6em;
+}
+
+.icon-entertainment {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    position: relative;
+}
+.icon-entertainment::before {
+    content: '🎬';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.6em;
+}
+
+.icon-health {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    position: relative;
+}
+.icon-health::before {
+    content: '⚕️';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.6em;
+}
+
+.icon-education {
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    position: relative;
+}
+.icon-education::before {
+    content: '📚';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.6em;
+}
+
+.icon-bills {
+    background: linear-gradient(135deg, #84cc16, #65a30d);
+    position: relative;
+}
+.icon-bills::before {
+    content: '📋';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.6em;
+}
+
+.icon-user {
+    background: linear-gradient(135deg, #6366f1, #4338ca);
+    position: relative;
+}
+.icon-user::before {
+    content: '👤';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+}
 
 /* Icon base class for background images */
 .icon-bg {
