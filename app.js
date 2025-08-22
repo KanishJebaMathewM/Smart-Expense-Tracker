@@ -4355,6 +4355,401 @@ class SmartExpenseTracker {
             console.error('Error updating task-expense summary:', error);
         }
     }
+
+    // ==============================================
+    // NUTRITION PLANNER METHODS
+    // ==============================================
+
+    // Initialize nutrition planner
+    initNutritionPlanner() {
+        try {
+            console.log('Initializing Nutrition Planner...');
+
+            // Ensure data structures exist
+            this.inventory = this.inventory || {};
+            this.mealPlans = this.mealPlans || {};
+            this.recipes = this.recipes || {};
+            this.shoppingList = this.shoppingList || {};
+            this.nutritionLog = this.nutritionLog || {};
+
+            // Initialize with some default recipes if none exist
+            if (Object.keys(this.recipes).length === 0) {
+                this.initializeDefaultRecipes();
+            }
+
+            console.log('Nutrition planner initialized successfully');
+        } catch (error) {
+            console.error('Error initializing nutrition planner:', error);
+        }
+    }
+
+    // Initialize default recipes
+    initializeDefaultRecipes() {
+        try {
+            this.recipes = {
+                'fried_rice': {
+                    id: 'fried_rice',
+                    name: 'Vegetable Fried Rice',
+                    ingredients: {
+                        'rice': { quantity: 1, unit: 'cups' },
+                        'eggs': { quantity: 2, unit: 'pieces' },
+                        'carrot': { quantity: 0.5, unit: 'pieces' },
+                        'onion': { quantity: 0.5, unit: 'pieces' },
+                        'oil': { quantity: 2, unit: 'ml' }
+                    },
+                    instructions: ['Cook rice', 'Scramble eggs', 'Stir-fry vegetables', 'Mix everything together'],
+                    servings: 2,
+                    prepTime: 30,
+                    difficulty: 'easy',
+                    category: 'main',
+                    cuisine: 'asian',
+                    dietType: 'veg'
+                },
+                'chicken_curry': {
+                    id: 'chicken_curry',
+                    name: 'Chicken Curry',
+                    ingredients: {
+                        'chicken': { quantity: 300, unit: 'grams' },
+                        'onion': { quantity: 1, unit: 'pieces' },
+                        'tomato': { quantity: 2, unit: 'pieces' },
+                        'oil': { quantity: 3, unit: 'ml' },
+                        'turmeric': { quantity: 1, unit: 'grams' }
+                    },
+                    instructions: ['Marinate chicken', 'Cook onions', 'Add tomatoes and spices', 'Add chicken and simmer'],
+                    servings: 3,
+                    prepTime: 45,
+                    difficulty: 'medium',
+                    category: 'main',
+                    cuisine: 'indian',
+                    dietType: 'non-veg'
+                },
+                'oats_breakfast': {
+                    id: 'oats_breakfast',
+                    name: 'Healthy Oats Bowl',
+                    ingredients: {
+                        'oats': { quantity: 0.5, unit: 'cups' },
+                        'milk': { quantity: 200, unit: 'ml' },
+                        'banana': { quantity: 1, unit: 'pieces' },
+                        'apple': { quantity: 0.5, unit: 'pieces' }
+                    },
+                    instructions: ['Cook oats with milk', 'Add chopped fruits', 'Mix and serve'],
+                    servings: 1,
+                    prepTime: 10,
+                    difficulty: 'easy',
+                    category: 'breakfast',
+                    cuisine: 'healthy',
+                    dietType: 'veg'
+                },
+                'paneer_curry': {
+                    id: 'paneer_curry',
+                    name: 'Paneer Butter Masala',
+                    ingredients: {
+                        'paneer': { quantity: 200, unit: 'grams' },
+                        'tomato': { quantity: 3, unit: 'pieces' },
+                        'onion': { quantity: 1, unit: 'pieces' },
+                        'butter': { quantity: 2, unit: 'grams' },
+                        'milk': { quantity: 50, unit: 'ml' }
+                    },
+                    instructions: ['Prepare tomato base', 'Add paneer cubes', 'Simmer with cream', 'Garnish and serve'],
+                    servings: 2,
+                    prepTime: 35,
+                    difficulty: 'medium',
+                    category: 'main',
+                    cuisine: 'indian',
+                    dietType: 'veg'
+                }
+            };
+
+            // Save recipes
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+        } catch (error) {
+            console.error('Error initializing default recipes:', error);
+        }
+    }
+
+    // Calculate nutrition for a recipe
+    calculateRecipeNutrition(recipe) {
+        try {
+            let totalNutrition = {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+                fiber: 0
+            };
+
+            Object.entries(recipe.ingredients).forEach(([foodId, ingredient]) => {
+                const foodData = this.foodDatabase[foodId];
+                if (foodData) {
+                    const quantity = ingredient.quantity;
+
+                    // Convert to per 100g basis for calculation
+                    let multiplier = quantity / 100;
+
+                    // Adjust multiplier based on unit
+                    if (foodData.unit === 'pieces') {
+                        // Estimate average weight for pieces
+                        const pieceWeights = {
+                            'eggs': 50,
+                            'tomato': 150,
+                            'onion': 150,
+                            'potato': 150,
+                            'carrot': 100,
+                            'apple': 150,
+                            'banana': 120,
+                            'orange': 150,
+                            'bell_pepper': 150
+                        };
+                        const weight = pieceWeights[foodId] || 100;
+                        multiplier = (quantity * weight) / 100;
+                    } else if (foodData.unit === 'cups') {
+                        // Convert cups to grams (approximate)
+                        const cupWeights = {
+                            'rice': 185,
+                            'brown_rice': 195,
+                            'oats': 80,
+                            'quinoa': 185,
+                            'spinach': 30,
+                            'broccoli': 90,
+                            'lentils': 200,
+                            'chickpeas': 200
+                        };
+                        const weight = cupWeights[foodId] || 100;
+                        multiplier = (quantity * weight) / 100;
+                    } else if (foodData.unit === 'ml') {
+                        // Assume 1ml = 1g for liquids
+                        multiplier = quantity / 100;
+                    }
+
+                    totalNutrition.calories += foodData.calories * multiplier;
+                    totalNutrition.protein += foodData.protein * multiplier;
+                    totalNutrition.carbs += foodData.carbs * multiplier;
+                    totalNutrition.fat += foodData.fat * multiplier;
+                    totalNutrition.fiber += foodData.fiber * multiplier;
+                }
+            });
+
+            // Round to 1 decimal place
+            Object.keys(totalNutrition).forEach(key => {
+                totalNutrition[key] = Math.round(totalNutrition[key] * 10) / 10;
+            });
+
+            return totalNutrition;
+        } catch (error) {
+            console.error('Error calculating recipe nutrition:', error);
+            return { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+        }
+    }
+
+    // Check which recipes can be made with current inventory
+    getAvailableRecipes() {
+        try {
+            const availableRecipes = [];
+
+            Object.values(this.recipes).forEach(recipe => {
+                let canMake = true;
+                const missingIngredients = [];
+
+                Object.entries(recipe.ingredients).forEach(([foodId, required]) => {
+                    const available = this.inventory[foodId]?.quantity || 0;
+                    if (available < required.quantity) {
+                        canMake = false;
+                        missingIngredients.push({
+                            food: foodId,
+                            required: required.quantity,
+                            available: available,
+                            missing: required.quantity - available
+                        });
+                    }
+                });
+
+                availableRecipes.push({
+                    recipe: recipe,
+                    canMake: canMake,
+                    missingIngredients: missingIngredients,
+                    nutrition: this.calculateRecipeNutrition(recipe)
+                });
+            });
+
+            return availableRecipes.sort((a, b) => {
+                if (a.canMake && !b.canMake) return -1;
+                if (!a.canMake && b.canMake) return 1;
+                return a.missingIngredients.length - b.missingIngredients.length;
+            });
+        } catch (error) {
+            console.error('Error getting available recipes:', error);
+            return [];
+        }
+    }
+
+    // Add item to inventory
+    addToInventory(foodId, quantity, unit, expiryDate = null) {
+        try {
+            const foodData = this.foodDatabase[foodId];
+            if (!foodData) {
+                this.showError('Food item not found in database');
+                return false;
+            }
+
+            if (!this.inventory[foodId]) {
+                this.inventory[foodId] = {
+                    foodId: foodId,
+                    name: foodData.name,
+                    quantity: 0,
+                    unit: unit || foodData.unit,
+                    category: foodData.category,
+                    addedDate: new Date().toISOString(),
+                    expiryDate: expiryDate
+                };
+            }
+
+            this.inventory[foodId].quantity += quantity;
+            this.inventory[foodId].lastUpdated = new Date().toISOString();
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            return true;
+        } catch (error) {
+            console.error('Error adding to inventory:', error);
+            return false;
+        }
+    }
+
+    // Use ingredients from inventory (when cooking a recipe)
+    useIngredientsFromInventory(recipe) {
+        try {
+            Object.entries(recipe.ingredients).forEach(([foodId, required]) => {
+                if (this.inventory[foodId]) {
+                    this.inventory[foodId].quantity = Math.max(0,
+                        this.inventory[foodId].quantity - required.quantity
+                    );
+
+                    // Remove from inventory if quantity becomes 0
+                    if (this.inventory[foodId].quantity === 0) {
+                        delete this.inventory[foodId];
+                    }
+                }
+            });
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            return true;
+        } catch (error) {
+            console.error('Error using ingredients from inventory:', error);
+            return false;
+        }
+    }
+
+    // Add to shopping list
+    addToShoppingList(foodId, quantity, unit, estimatedCost = 0) {
+        try {
+            const foodData = this.foodDatabase[foodId];
+            if (!foodData) {
+                this.showError('Food item not found in database');
+                return false;
+            }
+
+            const itemId = Date.now().toString();
+            this.shoppingList[itemId] = {
+                id: itemId,
+                foodId: foodId,
+                name: foodData.name,
+                quantity: quantity,
+                unit: unit || foodData.unit,
+                category: foodData.category,
+                estimatedCost: estimatedCost,
+                purchased: false,
+                addedDate: new Date().toISOString()
+            };
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            return true;
+        } catch (error) {
+            console.error('Error adding to shopping list:', error);
+            return false;
+        }
+    }
+
+    // Get nutrition log for a specific date
+    getNutritionLogForDate(date) {
+        try {
+            const dateKey = this.getDateKey(date);
+            return this.nutritionLog[dateKey] || {
+                meals: [],
+                totalNutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+                waterIntake: 0,
+                exerciseMinutes: 0
+            };
+        } catch (error) {
+            console.error('Error getting nutrition log for date:', error);
+            return {
+                meals: [],
+                totalNutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+                waterIntake: 0,
+                exerciseMinutes: 0
+            };
+        }
+    }
+
+    // Log a meal
+    logMeal(date, recipeId, servings = 1, mealType = 'main') {
+        try {
+            const recipe = this.recipes[recipeId];
+            if (!recipe) {
+                this.showError('Recipe not found');
+                return false;
+            }
+
+            const dateKey = this.getDateKey(date);
+            if (!this.nutritionLog[dateKey]) {
+                this.nutritionLog[dateKey] = {
+                    meals: [],
+                    totalNutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+                    waterIntake: 0,
+                    exerciseMinutes: 0
+                };
+            }
+
+            const recipeNutrition = this.calculateRecipeNutrition(recipe);
+            const mealNutrition = {
+                calories: recipeNutrition.calories * servings,
+                protein: recipeNutrition.protein * servings,
+                carbs: recipeNutrition.carbs * servings,
+                fat: recipeNutrition.fat * servings,
+                fiber: recipeNutrition.fiber * servings
+            };
+
+            const meal = {
+                id: Date.now().toString(),
+                recipeId: recipeId,
+                recipeName: recipe.name,
+                servings: servings,
+                mealType: mealType,
+                nutrition: mealNutrition,
+                timestamp: new Date().toISOString()
+            };
+
+            this.nutritionLog[dateKey].meals.push(meal);
+
+            // Update total nutrition for the day
+            Object.keys(mealNutrition).forEach(key => {
+                this.nutritionLog[dateKey].totalNutrition[key] += mealNutrition[key];
+            });
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            return true;
+        } catch (error) {
+            console.error('Error logging meal:', error);
+            return false;
+        }
+    }
 }
 
 // Initialize the tracker when DOM is loaded
