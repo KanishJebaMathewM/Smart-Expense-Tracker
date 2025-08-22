@@ -6698,23 +6698,23 @@ class SmartExpenseTracker {
                     </div>
                     <div class="summary-content">
                         <div class="summary-stat">
-                            <span class="stat-value">₹${nutritionSummary.nutritionExpenses.toFixed(0)}</span>
-                            <span class="stat-label">Food Expenses</span>
+                            <span class="stat-value">${nutritionSummary.expenseCount}</span>
+                            <span class="stat-label">Food Expense Entries</span>
                         </div>
                         <div class="summary-details">
                             <span>Food % of Total: ${nutritionSummary.nutritionPercentage.toFixed(1)}%</span>
-                            <span>Grocery Entries: ${nutritionSummary.expenseCount}</span>
-                            <span>Avg Purchase: ₹${nutritionSummary.avgExpenseAmount.toFixed(0)}</span>
+                            <span>Shopping Items: ${Object.keys(this.shoppingList || {}).length}</span>
+                            <span>Recipes Available: ${Object.keys(this.recipes || {}).length}</span>
                         </div>
                     </div>
                     <div class="integration-actions">
-                        <button class="btn btn-small" onclick="tracker.showGroceryPurchaseModal()">
+                        <button class="btn btn-small" onclick="tracker.showShoppingModal()">
                             <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 4px;"></div>
-                            Add Grocery
+                            Add to Shopping List
                         </button>
                         <button class="btn btn-small" onclick="tracker.purchaseShoppingItems()">
                             <div class="icon-bg icon-shopping-list xsmall" style="display: inline-block; margin-right: 4px;"></div>
-                            Buy Shopping List
+                            Mark Items Purchased
                         </button>
                     </div>
                 </div>
