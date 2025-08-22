@@ -1178,10 +1178,11 @@ class SmartExpenseTracker {
         }
     }
 
-    // Generate insights based on spending patterns
-    generateInsights(income, totalSpent, balance, categoryTotals) {
+    // Generate insights based on spending patterns and task data
+    generateInsights(income, totalSpent, balance, categoryTotals, taskData = null) {
         const insights = [];
 
+        // Financial insights
         if (balance < 0) {
             insights.push('<p><span class="warning-icon">⚠</span> You\'re spending more than your income. Consider reducing expenses.</p>');
         } else if (balance / income < 0.1) {
@@ -1201,8 +1202,43 @@ class SmartExpenseTracker {
             insights.push('<p><span class="info-icon">i</span> You\'re spending over 80% of your income. Consider creating a budget to track expenses better.</p>');
         }
 
+        // Task-related insights
+        if (taskData) {
+            const { tasks, completedTasks, pendingTasks, overdueTasks } = taskData;
+
+            if (tasks.length > 0) {
+                const completionRate = (completedTasks.length / tasks.length) * 100;
+
+                if (completionRate >= 80) {
+                    insights.push('<p><span class="success-icon">✓</span> Excellent task completion rate! You\'re staying on top of your goals.</p>');
+                } else if (completionRate < 50) {
+                    insights.push('<p><span class="warning-icon">⚠</span> Low task completion rate. Consider reviewing your task priorities and deadlines.</p>');
+                }
+
+                if (overdueTasks.length > 0) {
+                    insights.push(`<p><span class="warning-icon">⚠</span> You have ${overdueTasks.length} overdue task${overdueTasks.length > 1 ? 's' : ''}. Consider reviewing and updating your deadlines.</p>`);
+                }
+
+                if (pendingTasks.length > 10) {
+                    insights.push('<p><span class="info-icon">i</span> You have many pending tasks. Consider prioritizing the most important ones to avoid overwhelm.</p>');
+                }
+
+                const budgetTasks = tasks.filter(task => task.budget && task.budget > 0);
+                const completedBudgetTasks = completedTasks.filter(task => task.budget && task.budget > 0);
+
+                if (budgetTasks.length > 0) {
+                    const budgetCompletionRate = (completedBudgetTasks.length / budgetTasks.length) * 100;
+                    if (budgetCompletionRate >= 75) {
+                        insights.push('<p><span class="success-icon">✓</span> Great progress on your budget-related tasks! You\'re making good use of your allocated funds.</p>');
+                    }
+                }
+            } else {
+                insights.push('<p><span class="info-icon">i</span> Consider creating some tasks to better organize your goals and track progress!</p>');
+            }
+        }
+
         if (insights.length === 0) {
-            insights.push('<p><span class="success-icon">✓</span> Your spending patterns look healthy! Keep up the good work.</p>');
+            insights.push('<p><span class="success-icon">✓</span> Your financial and task management patterns look healthy! Keep up the good work.</p>');
         }
 
         return insights.join('');
