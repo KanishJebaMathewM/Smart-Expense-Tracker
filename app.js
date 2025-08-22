@@ -5842,7 +5842,7 @@ class SmartExpenseTracker {
             }
 
             // Generate CSV content
-            const csvHeaders = ['Item Name', 'Quantity', 'Unit', 'Category', 'Estimated Cost', 'Status'];
+            const csvHeaders = ['Item Name', 'Quantity', 'Unit', 'Category', 'Status'];
             const csvRows = [csvHeaders.join(',')];
 
             items.forEach(item => {
@@ -5851,7 +5851,6 @@ class SmartExpenseTracker {
                     item.quantity,
                     `"${item.unit}"`,
                     `"${item.category}"`,
-                    item.estimatedCost,
                     item.purchased ? 'Purchased' : 'Pending'
                 ];
                 csvRows.push(row.join(','));
@@ -5861,7 +5860,6 @@ class SmartExpenseTracker {
             csvRows.push('');
             csvRows.push('Summary');
             csvRows.push(`Total Items,${items.length}`);
-            csvRows.push(`Total Cost,₹${items.reduce((sum, item) => sum + item.estimatedCost, 0).toFixed(2)}`);
             csvRows.push(`Purchased,${items.filter(item => item.purchased).length}`);
             csvRows.push(`Pending,${items.filter(item => !item.purchased).length}`);
 
