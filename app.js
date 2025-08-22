@@ -6135,6 +6135,453 @@ class SmartExpenseTracker {
             console.error('Error deleting recipe:', error);
         }
     }
+
+    // ==============================================
+    // NUTRITION PLANNER HELPER METHODS
+    // ==============================================
+
+    // Render filtered inventory
+    renderFilteredInventory(filteredItems) {
+        try {
+            const inventoryList = document.getElementById('inventoryList');
+            if (!inventoryList) return;
+
+            if (filteredItems.length === 0) {
+                inventoryList.innerHTML = `
+                    <div class="inventory-placeholder">
+                        <div class="icon-bg icon-inventory xlarge"></div>
+                        <h4>No items match your filters</h4>
+                        <p>Try adjusting your filters or add more items</p>
+                        <button class="btn btn-primary" onclick="tracker.showInventoryModal()">
+                            <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Add Item
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            inventoryList.innerHTML = filteredItems.map(item => {
+                const isLowStock = item.quantity < 2;
+                const isExpiring = item.expiryDate && new Date(item.expiryDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+                return `
+                    <div class="inventory-item ${isLowStock ? 'low-stock' : ''} ${isExpiring ? 'expiring' : ''}">
+                        <div class="item-info">
+                            <div class="item-name">${this.escapeHtml(item.name)}</div>
+                            <div class="item-category">${item.category}</div>
+                        </div>
+                        <div class="item-quantity">
+                            <span class="quantity">${item.quantity}</span>
+                            <span class="unit">${item.unit}</span>
+                        </div>
+                        <div class="item-status">
+                            ${isLowStock ? '<span class="status-badge low-stock">Low Stock</span>' : ''}
+                            ${isExpiring ? '<span class="status-badge expiring">Expiring Soon</span>' : ''}
+                            ${item.expiryDate ? `<div class="expiry-date">Expires: ${new Date(item.expiryDate).toLocaleDateString()}</div>` : ''}
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn-small" onclick="tracker.showInventoryModal('${item.foodId}')">Edit</button>
+                            <button class="btn-small btn-danger" onclick="tracker.removeFromInventory('${item.foodId}')">Remove</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Error rendering filtered inventory:', error);
+        }
+    }
+
+    // Render filtered recipes
+    renderFilteredRecipes(filteredRecipes) {
+        try {
+            const recipesList = document.getElementById('recipesList');
+            if (!recipesList) return;
+
+            if (filteredRecipes.length === 0) {
+                recipesList.innerHTML = `
+                    <div class="recipes-placeholder">
+                        <div class="icon-bg icon-recipes xlarge"></div>
+                        <h4>No recipes match your filters</h4>
+                        <p>Try adjusting your filters or add more recipes</p>
+                        <button class="btn btn-primary" onclick="tracker.showRecipeModal()">
+                            <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Add Recipe
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            recipesList.innerHTML = filteredRecipes.map(({ recipe, canMake, missingIngredients, nutrition }) => {
+                return `
+                    <div class="recipe-card ${canMake ? 'can-make' : 'missing-ingredients'}">
+                        <div class="recipe-header">
+                            <h4 class="recipe-name">${this.escapeHtml(recipe.name)}</h4>
+                            <div class="recipe-meta">
+                                <span class="recipe-time">${recipe.prepTime} min</span>
+                                <span class="recipe-servings">${recipe.servings} servings</span>
+                                <span class="recipe-diet ${recipe.dietType}">${recipe.dietType}</span>
+                            </div>
+                        </div>
+
+                        <div class="recipe-nutrition">
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Calories:</span>
+                                <span class="nutrition-value">${Math.round(nutrition.calories)}</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Protein:</span>
+                                <span class="nutrition-value">${Math.round(nutrition.protein)}g</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Carbs:</span>
+                                <span class="nutrition-value">${Math.round(nutrition.carbs)}g</span>
+                            </div>
+                        </div>
+
+                        ${!canMake ? `
+                            <div class="missing-ingredients">
+                                <h5>Missing ingredients:</h5>
+                                <ul>
+                                    ${missingIngredients.map(missing =>
+                                        `<li>${this.foodDatabase[missing.food]?.name || missing.food}: need ${missing.missing} more</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+
+                        <div class="recipe-actions">
+                            ${canMake ? `
+                                <button class="btn btn-primary" onclick="tracker.cookRecipe('${recipe.id}')">Cook This Recipe</button>
+                            ` : `
+                                <button class="btn btn-secondary" onclick="tracker.addMissingToShoppingList('${recipe.id}')">Add Missing to Shopping</button>
+                            `}
+                            <button class="btn btn-secondary" onclick="tracker.showRecipeModal('${recipe.id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="tracker.deleteRecipe('${recipe.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Error rendering filtered recipes:', error);
+        }
+    }
+
+    // Get current week key
+    getCurrentWeekKey() {
+        const today = new Date();
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - today.getDay() + 1);
+        return monday.toISOString().split('T')[0];
+    }
+
+    // Format week date
+    formatWeekDate(weekKey) {
+        const date = new Date(weekKey);
+        const sunday = new Date(date);
+        sunday.setDate(date.getDate() + 6);
+        return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    }
+
+    // Calculate week nutrition
+    calculateWeekNutrition(weekPlan) {
+        const totalNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        const mealCount = Object.keys(weekPlan).length;
+        let estimatedCost = 0;
+
+        Object.values(weekPlan).forEach(meal => {
+            totalNutrition.calories += meal.calories || 0;
+            totalNutrition.protein += meal.protein || 0;
+            totalNutrition.carbs += meal.carbs || 0;
+            totalNutrition.fat += meal.fat || 0;
+
+            // Estimate cost based on recipe
+            const recipe = this.recipes[meal.recipeId];
+            if (recipe) {
+                estimatedCost += this.estimateRecipeCost(recipe);
+            }
+        });
+
+        return {
+            avgCalories: mealCount > 0 ? totalNutrition.calories / 7 : 0,
+            avgProtein: mealCount > 0 ? totalNutrition.protein / 7 : 0,
+            avgCarbs: mealCount > 0 ? totalNutrition.carbs / 7 : 0,
+            avgFat: mealCount > 0 ? totalNutrition.fat / 7 : 0,
+            estimatedCost: estimatedCost
+        };
+    }
+
+    // Update shopping summary
+    updateShoppingSummary(items) {
+        try {
+            const totalItems = items.length;
+            const purchasedItems = items.filter(item => item.purchased).length;
+            const totalCost = items.reduce((sum, item) => sum + item.estimatedCost, 0);
+
+            this.updateElement('totalShoppingItems', totalItems.toString());
+            this.updateElement('purchasedItems', purchasedItems.toString());
+            this.updateElement('estimatedShoppingCost', `₹${totalCost.toFixed(2)}`);
+        } catch (error) {
+            console.error('Error updating shopping summary:', error);
+        }
+    }
+
+    // Update nutrition progress bars
+    updateNutritionProgress(totalNutrition) {
+        try {
+            const targets = this.userPreferences;
+
+            // Update progress bars
+            const calorieProgress = Math.min((totalNutrition.calories / targets.calorieTarget) * 100, 100);
+            const proteinProgress = Math.min((totalNutrition.protein / targets.proteinTarget) * 100, 100);
+            const carbsProgress = Math.min((totalNutrition.carbs / targets.carbTarget) * 100, 100);
+            const fatProgress = Math.min((totalNutrition.fat / targets.fatTarget) * 100, 100);
+
+            this.updateElement('calorieProgress', null);
+            this.updateElement('proteinProgress', null);
+            this.updateElement('carbsProgress', null);
+            this.updateElement('fatProgress', null);
+
+            // Update progress bar widths
+            const calorieBar = document.getElementById('calorieProgress');
+            const proteinBar = document.getElementById('proteinProgress');
+            const carbsBar = document.getElementById('carbsProgress');
+            const fatBar = document.getElementById('fatProgress');
+
+            if (calorieBar) calorieBar.style.width = `${calorieProgress}%`;
+            if (proteinBar) proteinBar.style.width = `${proteinProgress}%`;
+            if (carbsBar) carbsBar.style.width = `${carbsProgress}%`;
+            if (fatBar) fatBar.style.width = `${fatProgress}%`;
+
+            // Update current values
+            this.updateElement('currentCalories', Math.round(totalNutrition.calories).toString());
+            this.updateElement('currentProtein', Math.round(totalNutrition.protein).toString());
+            this.updateElement('currentCarbs', Math.round(totalNutrition.carbs).toString());
+            this.updateElement('currentFat', Math.round(totalNutrition.fat).toString());
+
+            // Update targets
+            this.updateElement('targetCalories', targets.calorieTarget.toString());
+            this.updateElement('targetProtein', targets.proteinTarget.toString());
+            this.updateElement('targetCarbs', targets.carbTarget.toString());
+            this.updateElement('targetFat', targets.fatTarget.toString());
+        } catch (error) {
+            console.error('Error updating nutrition progress:', error);
+        }
+    }
+
+    // Get weekly nutrition data
+    getWeeklyNutritionData() {
+        try {
+            const weekData = [];
+            const today = new Date();
+
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dayLog = this.getNutritionLogForDate(date);
+
+                weekData.push({
+                    date: date.toISOString().split('T')[0],
+                    dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+                    nutrition: dayLog.totalNutrition
+                });
+            }
+
+            return weekData;
+        } catch (error) {
+            console.error('Error getting weekly nutrition data:', error);
+            return [];
+        }
+    }
+
+    // Generate nutrition insights
+    generateNutritionInsights(todayLog, weeklyData) {
+        const insights = {
+            today: [],
+            weekly: [],
+            recommendations: []
+        };
+
+        try {
+            const today = todayLog.totalNutrition;
+            const targets = this.userPreferences;
+
+            // Today's insights
+            if (today.calories === 0) {
+                insights.today.push({ type: 'warning', message: 'No meals logged today. Start tracking your nutrition!' });
+            } else if (today.calories < targets.calorieTarget * 0.8) {
+                insights.today.push({ type: 'warning', message: 'Calorie intake is below target. Consider adding a healthy snack.' });
+            } else if (today.calories > targets.calorieTarget * 1.2) {
+                insights.today.push({ type: 'caution', message: 'Calorie intake is above target. Consider lighter meals.' });
+            } else {
+                insights.today.push({ type: 'success', message: 'Great job! Your calorie intake is on target.' });
+            }
+
+            if (today.protein < targets.proteinTarget * 0.8) {
+                insights.today.push({ type: 'info', message: 'Protein intake is low. Add eggs, chicken, or legumes to your meals.' });
+            }
+
+            // Weekly insights
+            const weekAvg = {
+                calories: weeklyData.reduce((sum, day) => sum + day.nutrition.calories, 0) / 7,
+                protein: weeklyData.reduce((sum, day) => sum + day.nutrition.protein, 0) / 7
+            };
+
+            if (weekAvg.calories > 0) {
+                insights.weekly.push({
+                    type: 'info',
+                    message: `Average daily calories this week: ${Math.round(weekAvg.calories)} kcal`
+                });
+
+                if (weekAvg.protein < targets.proteinTarget * 0.8) {
+                    insights.weekly.push({
+                        type: 'warning',
+                        message: 'Weekly protein average is below target. Focus on protein-rich foods.'
+                    });
+                }
+            }
+
+            // Recommendations
+            const availableRecipes = this.getAvailableRecipes().filter(r => r.canMake);
+            if (availableRecipes.length === 0) {
+                insights.recommendations.push({
+                    type: 'action',
+                    message: 'Stock up on ingredients to unlock more recipe options.'
+                });
+            } else {
+                const highProteinRecipes = availableRecipes.filter(r => r.nutrition.protein > 20);
+                if (highProteinRecipes.length > 0 && today.protein < targets.proteinTarget * 0.8) {
+                    insights.recommendations.push({
+                        type: 'success',
+                        message: `Try "${highProteinRecipes[0].recipe.name}" for a protein boost!`
+                    });
+                }
+            }
+
+            insights.recommendations.push({
+                type: 'info',
+                message: 'Plan your meals in advance using the Meal Plan tab for better nutrition balance.'
+            });
+
+        } catch (error) {
+            console.error('Error generating nutrition insights:', error);
+        }
+
+        return insights;
+    }
+
+    // Get insight icon
+    getInsightIcon(type) {
+        const icons = {
+            success: '✓',
+            warning: '⚠',
+            caution: '🚨',
+            info: '📊',
+            action: '🎯'
+        };
+        return icons[type] || '📊';
+    }
+
+    // Estimate ingredient cost (basic estimation)
+    estimateIngredientCost(foodId, quantity) {
+        try {
+            const baseCosts = {
+                'rice': 2, 'eggs': 8, 'chicken': 15, 'onion': 3, 'tomato': 4,
+                'milk': 0.6, 'oil': 1.5, 'potato': 2.5, 'paneer': 25
+            };
+            const baseCost = baseCosts[foodId] || 5; // Default cost per unit
+            return baseCost * quantity;
+        } catch (error) {
+            console.error('Error estimating cost:', error);
+            return 0;
+        }
+    }
+
+    // Estimate recipe cost
+    estimateRecipeCost(recipe) {
+        try {
+            let totalCost = 0;
+            Object.entries(recipe.ingredients).forEach(([foodId, ingredient]) => {
+                totalCost += this.estimateIngredientCost(foodId, ingredient.quantity);
+            });
+            return totalCost;
+        } catch (error) {
+            console.error('Error estimating recipe cost:', error);
+            return 0;
+        }
+    }
+
+    // Toggle shopping item purchased status
+    toggleShoppingItem(itemId) {
+        try {
+            if (this.shoppingList[itemId]) {
+                this.shoppingList[itemId].purchased = !this.shoppingList[itemId].purchased;
+                this.shoppingList[itemId].updatedAt = new Date().toISOString();
+
+                this.hasUnsavedChanges = true;
+                this.debouncedSave();
+
+                this.renderShoppingList();
+                this.updateNutritionOverview();
+            }
+        } catch (error) {
+            console.error('Error toggling shopping item:', error);
+        }
+    }
+
+    // Remove shopping item
+    async removeShoppingItem(itemId) {
+        try {
+            const item = this.shoppingList[itemId];
+            if (!item) return;
+
+            const shouldRemove = await confirmAsync(`Remove ${item.name} from shopping list?`, {
+                title: 'Remove Item',
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-danger'
+            });
+
+            if (shouldRemove) {
+                delete this.shoppingList[itemId];
+                this.hasUnsavedChanges = true;
+                this.debouncedSave();
+
+                this.renderShoppingList();
+                this.updateNutritionOverview();
+                this.showSuccess('Item removed from shopping list');
+            }
+        } catch (error) {
+            this.showError('Failed to remove shopping item: ' + error.message);
+            console.error('Error removing shopping item:', error);
+        }
+    }
+
+    // Placeholder methods for less critical features
+    selectMealSlot(weekKey, mealKey) {
+        console.log('Meal slot selection - to be implemented:', weekKey, mealKey);
+    }
+
+    removePlannedMeal(weekKey, mealKey) {
+        console.log('Remove planned meal - to be implemented:', weekKey, mealKey);
+    }
+
+    previousWeek() {
+        console.log('Previous week navigation - to be implemented');
+    }
+
+    nextWeek() {
+        console.log('Next week navigation - to be implemented');
+    }
+
+    editShoppingItem(itemId) {
+        console.log('Edit shopping item - to be implemented:', itemId);
+    }
+
+    renderNutritionCharts(weeklyData, todayNutrition) {
+        console.log('Nutrition charts rendering - to be implemented');
+    }
 }
 
 // Initialize the tracker when DOM is loaded
