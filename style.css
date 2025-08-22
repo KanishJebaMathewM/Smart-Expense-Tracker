@@ -3051,7 +3051,8 @@ body {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: var(--spacing-4) var(--spacing-5);
     border: 2px solid var(--border-color);
@@ -3063,6 +3064,8 @@ body {
     color: var(--text-primary) !important;
     border: 2px solid var(--border-accent) !important;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-family: inherit;
+    resize: vertical;
 }
 
 .form-group input:focus,
