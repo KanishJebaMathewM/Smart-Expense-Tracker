@@ -6311,11 +6311,11 @@ class SmartExpenseTracker {
         try {
             const totalItems = items.length;
             const purchasedItems = items.filter(item => item.purchased).length;
-            const totalCost = items.reduce((sum, item) => sum + item.estimatedCost, 0);
+            const pendingItems = totalItems - purchasedItems;
 
             this.updateElement('totalShoppingItems', totalItems.toString());
             this.updateElement('purchasedItems', purchasedItems.toString());
-            this.updateElement('estimatedShoppingCost', `₹${totalCost.toFixed(2)}`);
+            this.updateElement('pendingShoppingItems', pendingItems.toString());
         } catch (error) {
             console.error('Error updating shopping summary:', error);
         }
