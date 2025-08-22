@@ -4222,8 +4222,8 @@ body {
 
 .export-option input[type="radio"]:checked + label {
     border-color: var(--primary-500);
-    background: var(--primary-50);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    background: var(--bg-primary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
 }
 
 .export-option-header {
@@ -4309,22 +4309,26 @@ body {
 
 .task-detail-item.completed {
     border-left: 4px solid var(--success-500);
-    background: var(--success-50);
+    background: var(--bg-secondary);
+    border-color: var(--success-500);
 }
 
 .task-detail-item.pending {
     border-left: 4px solid var(--warning-500);
-    background: var(--warning-50);
+    background: var(--bg-secondary);
+    border-color: var(--warning-500);
 }
 
 .task-detail-item.in-progress {
     border-left: 4px solid var(--primary-500);
-    background: var(--primary-50);
+    background: var(--bg-secondary);
+    border-color: var(--primary-500);
 }
 
 .task-detail-item.overdue {
     border-left: 4px solid var(--error-500);
-    background: var(--error-50);
+    background: var(--bg-secondary);
+    border-color: var(--error-500);
 }
 
 .task-detail-header {
@@ -4353,23 +4357,23 @@ body {
 }
 
 .task-priority.low {
-    background: var(--success-100);
-    color: var(--success-700);
+    background: var(--success-600);
+    color: var(--text-inverse);
 }
 
 .task-priority.medium {
-    background: var(--warning-100);
-    color: var(--warning-700);
+    background: var(--warning-600);
+    color: var(--text-inverse);
 }
 
 .task-priority.high {
-    background: var(--error-100);
-    color: var(--error-700);
+    background: var(--error-600);
+    color: var(--text-inverse);
 }
 
 .task-priority.urgent {
-    background: var(--error-200);
-    color: var(--error-800);
+    background: var(--error-700);
+    color: var(--text-inverse);
     animation: pulse 2s infinite;
 }
 
@@ -4426,8 +4430,8 @@ body {
 }
 
 .task-status-badge.completed {
-    background: var(--success-100);
-    color: var(--success-700);
+    background: var(--success-600);
+    color: var(--text-inverse);
 }
 
 @keyframes pulse {
