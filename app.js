@@ -5889,40 +5889,251 @@ class SmartExpenseTracker {
         }
     }
 
+    // Filter inventory
     filterInventory() {
-        console.log('Inventory filtering - to be implemented');
+        try {
+            const categoryFilter = document.getElementById('inventoryCategory')?.value || 'all';
+            const lowStockOnly = document.getElementById('lowStockFilter')?.classList.contains('active') || false;
+            const expiringOnly = document.getElementById('expiringFilter')?.classList.contains('active') || false;
+
+            let filteredItems = Object.values(this.inventory);
+
+            // Apply category filter
+            if (categoryFilter !== 'all') {
+                filteredItems = filteredItems.filter(item => item.category === categoryFilter);
+            }
+
+            // Apply low stock filter
+            if (lowStockOnly) {
+                filteredItems = filteredItems.filter(item => item.quantity < 2);
+            }
+
+            // Apply expiring filter
+            if (expiringOnly) {
+                const oneWeekFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                filteredItems = filteredItems.filter(item => {
+                    return item.expiryDate && new Date(item.expiryDate) <= oneWeekFromNow;
+                });
+            }
+
+            this.renderFilteredInventory(filteredItems);
+        } catch (error) {
+            console.error('Error filtering inventory:', error);
+        }
     }
 
+    // Toggle low stock filter
     toggleLowStockFilter() {
-        console.log('Low stock filter toggle - to be implemented');
+        try {
+            const filterBtn = document.getElementById('lowStockFilter');
+            if (filterBtn) {
+                filterBtn.classList.toggle('active');
+                this.filterInventory();
+            }
+        } catch (error) {
+            console.error('Error toggling low stock filter:', error);
+        }
     }
 
+    // Toggle expiring filter
     toggleExpiringFilter() {
-        console.log('Expiring filter toggle - to be implemented');
+        try {
+            const filterBtn = document.getElementById('expiringFilter');
+            if (filterBtn) {
+                filterBtn.classList.toggle('active');
+                this.filterInventory();
+            }
+        } catch (error) {
+            console.error('Error toggling expiring filter:', error);
+        }
     }
 
+    // Filter recipes
     filterRecipes() {
-        console.log('Recipe filtering - to be implemented');
+        try {
+            const dietFilter = document.getElementById('recipeDiet')?.value || 'all';
+            const categoryFilter = document.getElementById('recipeCategory')?.value || 'all';
+            const availableOnly = document.getElementById('availableOnlyFilter')?.classList.contains('active') || false;
+
+            let availableRecipes = this.getAvailableRecipes();
+
+            // Apply diet filter
+            if (dietFilter !== 'all') {
+                availableRecipes = availableRecipes.filter(item => item.recipe.dietType === dietFilter);
+            }
+
+            // Apply category filter
+            if (categoryFilter !== 'all') {
+                availableRecipes = availableRecipes.filter(item => item.recipe.category === categoryFilter);
+            }
+
+            // Apply available only filter
+            if (availableOnly) {
+                availableRecipes = availableRecipes.filter(item => item.canMake);
+            }
+
+            this.renderFilteredRecipes(availableRecipes);
+        } catch (error) {
+            console.error('Error filtering recipes:', error);
+        }
     }
 
+    // Toggle available recipes filter
     toggleAvailableRecipesFilter() {
-        console.log('Available recipes filter toggle - to be implemented');
+        try {
+            const filterBtn = document.getElementById('availableOnlyFilter');
+            if (filterBtn) {
+                filterBtn.classList.toggle('active');
+                this.filterRecipes();
+            }
+        } catch (error) {
+            console.error('Error toggling available recipes filter:', error);
+        }
     }
 
-    removeFromInventory(foodId) {
-        console.log('Remove from inventory - to be implemented:', foodId);
+    // Remove from inventory
+    async removeFromInventory(foodId) {
+        try {
+            const item = this.inventory[foodId];
+            if (!item) return;
+
+            const shouldRemove = await confirmAsync(`Remove ${item.name} from inventory?`, {
+                title: 'Remove Item',
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-danger'
+            });
+
+            if (shouldRemove) {
+                delete this.inventory[foodId];
+                this.hasUnsavedChanges = true;
+                this.debouncedSave();
+
+                this.renderInventory();
+                this.updateNutritionOverview();
+                this.showSuccess('Item removed from inventory');
+            }
+        } catch (error) {
+            this.showError('Failed to remove item: ' + error.message);
+            console.error('Error removing from inventory:', error);
+        }
     }
 
-    cookRecipe(recipeId) {
-        console.log('Cook recipe - to be implemented:', recipeId);
+    // Cook recipe
+    async cookRecipe(recipeId) {
+        try {
+            const recipe = this.recipes[recipeId];
+            if (!recipe) {
+                this.showError('Recipe not found');
+                return;
+            }
+
+            // Check if we have all ingredients
+            const availableRecipes = this.getAvailableRecipes();
+            const recipeData = availableRecipes.find(r => r.recipe.id === recipeId);
+
+            if (!recipeData || !recipeData.canMake) {
+                this.showError('Cannot cook this recipe. Missing ingredients.');
+                return;
+            }
+
+            const shouldCook = await confirmAsync(`Cook ${recipe.name}? This will use ingredients from your inventory.`, {
+                title: 'Cook Recipe',
+                confirmText: 'Cook',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-primary'
+            });
+
+            if (shouldCook) {
+                // Use ingredients from inventory
+                this.useIngredientsFromInventory(recipe);
+
+                // Log the meal
+                const today = new Date();
+                this.logMeal(today, recipeId, 1, 'main');
+
+                // Re-render everything
+                this.renderInventory();
+                this.renderRecipes();
+                this.updateNutritionOverview();
+                this.renderNutritionInsights();
+
+                this.showSuccess(`${recipe.name} cooked successfully! Nutrition logged for today.`);
+            }
+        } catch (error) {
+            this.showError('Failed to cook recipe: ' + error.message);
+            console.error('Error cooking recipe:', error);
+        }
     }
 
+    // Add missing ingredients to shopping list
     addMissingToShoppingList(recipeId) {
-        console.log('Add missing ingredients to shopping - to be implemented:', recipeId);
+        try {
+            const availableRecipes = this.getAvailableRecipes();
+            const recipeData = availableRecipes.find(r => r.recipe.id === recipeId);
+
+            if (!recipeData) {
+                this.showError('Recipe not found');
+                return;
+            }
+
+            if (recipeData.canMake) {
+                this.showInfo('This recipe can already be made with current inventory');
+                return;
+            }
+
+            let addedCount = 0;
+            recipeData.missingIngredients.forEach(missing => {
+                const foodData = this.foodDatabase[missing.food];
+                if (foodData) {
+                    // Estimate cost (basic estimation)
+                    const estimatedCost = this.estimateIngredientCost(missing.food, missing.missing);
+
+                    if (this.addToShoppingList(missing.food, missing.missing, foodData.unit, estimatedCost)) {
+                        addedCount++;
+                    }
+                }
+            });
+
+            if (addedCount > 0) {
+                this.renderShoppingList();
+                this.updateNutritionOverview();
+                this.showSuccess(`Added ${addedCount} missing ingredients to shopping list`);
+            } else {
+                this.showError('Failed to add ingredients to shopping list');
+            }
+        } catch (error) {
+            this.showError('Failed to add missing ingredients: ' + error.message);
+            console.error('Error adding missing ingredients to shopping list:', error);
+        }
     }
 
-    deleteRecipe(recipeId) {
-        console.log('Delete recipe - to be implemented:', recipeId);
+    // Delete recipe
+    async deleteRecipe(recipeId) {
+        try {
+            const recipe = this.recipes[recipeId];
+            if (!recipe) return;
+
+            const shouldDelete = await confirmAsync(`Delete recipe "${recipe.name}"?`, {
+                title: 'Delete Recipe',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-danger'
+            });
+
+            if (shouldDelete) {
+                delete this.recipes[recipeId];
+                this.hasUnsavedChanges = true;
+                this.debouncedSave();
+
+                this.renderRecipes();
+                this.updateNutritionOverview();
+                this.showSuccess('Recipe deleted successfully');
+            }
+        } catch (error) {
+            this.showError('Failed to delete recipe: ' + error.message);
+            console.error('Error deleting recipe:', error);
+        }
     }
 }
 
