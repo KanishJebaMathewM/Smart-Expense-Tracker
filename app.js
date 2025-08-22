@@ -1876,7 +1876,7 @@ class SmartExpenseTracker {
                         <div class="report-card">
                             <h4>${this.getUIIcon('trending-up', 'small')} Spending Analysis</h4>
                             <p><strong>Top Category:</strong> ${topCategory}</p>
-                            <p><strong>Category Amount:</strong> ���${(categoryTotals[topCategory] || 0).toLocaleString()}</p>
+                            <p><strong>Category Amount:</strong> ₹${(categoryTotals[topCategory] || 0).toLocaleString()}</p>
                             <p><strong>Avg Daily Spending:</strong> ₹${avgDailySpending.toFixed(0)}</p>
                             <p><strong>Days with Expenses:</strong> ${Object.keys(dailyTotals).length}</p>
                         </div>
@@ -2896,8 +2896,11 @@ class SmartExpenseTracker {
                 modal.classList.add('active');
                 overlay.classList.add('active');
 
-                // Bind profile events
+                // Bind profile events only once
+            if (!this.profileEventsBound) {
                 this.bindProfileEvents();
+                this.profileEventsBound = true;
+            }
             }
         } catch (error) {
             console.error('Error showing profile:', error);
@@ -2994,15 +2997,28 @@ class SmartExpenseTracker {
         try {
             // Profile picture upload
             const profilePictureInput = document.getElementById('profilePictureInput');
-            profilePictureInput.addEventListener('change', (e) => this.handleProfilePictureUpload(e));
+            if (profilePictureInput) {
+                // Remove existing listeners to prevent duplicates
+                profilePictureInput.replaceWith(profilePictureInput.cloneNode(true));
+                const newInput = document.getElementById('profilePictureInput');
+                newInput.addEventListener('change', (e) => this.handleProfilePictureUpload(e));
+            }
 
             // Save profile button
             const saveProfileBtn = document.getElementById('saveProfile');
-            saveProfileBtn.addEventListener('click', () => this.saveProfileData());
+            if (saveProfileBtn) {
+                saveProfileBtn.replaceWith(saveProfileBtn.cloneNode(true));
+                const newSaveBtn = document.getElementById('saveProfile');
+                newSaveBtn.addEventListener('click', () => this.saveProfileData());
+            }
 
             // Delete profile button
             const deleteProfileBtn = document.getElementById('deleteProfile');
-            deleteProfileBtn.addEventListener('click', () => this.deleteProfile());
+            if (deleteProfileBtn) {
+                deleteProfileBtn.replaceWith(deleteProfileBtn.cloneNode(true));
+                const newDeleteBtn = document.getElementById('deleteProfile');
+                newDeleteBtn.addEventListener('click', () => this.deleteProfile());
+            }
 
         } catch (error) {
             console.error('Error binding profile events:', error);
@@ -3122,9 +3138,16 @@ class SmartExpenseTracker {
         }
     }
 
-    deleteProfile() {
-        if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-            try {
+    async deleteProfile() {
+        try {
+            const shouldDelete = await confirmAsync('Are you sure you want to delete your account? This action cannot be undone.', {
+                title: 'Delete Account',
+                confirmText: 'Delete Account',
+                cancelText: 'Keep Account',
+                confirmClass: 'btn-danger'
+            });
+
+            if (shouldDelete) {
                 // Clear all user data
                 const currentUserId = localStorage.getItem('current_user_id');
 
@@ -3146,11 +3169,10 @@ class SmartExpenseTracker {
                 setTimeout(() => {
                     window.location.href = 'auth.html';
                 }, 2000);
-
-            } catch (error) {
-                console.error('Error deleting profile:', error);
-                this.showError('Failed to delete account');
             }
+        } catch (error) {
+            console.error('Error deleting profile:', error);
+            this.showError('Failed to delete account');
         }
     }
 
@@ -3430,10 +3452,17 @@ class SmartExpenseTracker {
         }
     }
 
-    // Delete task
-    deleteTask(taskId) {
+    // Delete task with custom confirm
+    async deleteTask(taskId) {
         try {
-            if (confirm('Are you sure you want to delete this task?')) {
+            const shouldDelete = await confirmAsync('Are you sure you want to delete this task?', {
+                title: 'Delete Task',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-danger'
+            });
+
+            if (shouldDelete) {
                 delete this.tasks[taskId];
 
                 if (this.setTasks(this.tasks)) {
