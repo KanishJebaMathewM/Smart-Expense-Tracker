@@ -955,7 +955,7 @@ class SmartExpenseTracker {
                 console.log('📋 All profile-related keys in storage:', profileKeys);
 
                 // Try to migrate from legacy storage if no user-specific data found
-                console.log('���� Checking for legacy data migration...');
+                console.log('🔄 Checking for legacy data migration...');
                 this.migrateLegacyData();
 
                 // Check if migration found anything
@@ -6560,6 +6560,49 @@ class SmartExpenseTracker {
         } catch (error) {
             this.showError('Failed to edit shopping item: ' + error.message);
             console.error('Error editing shopping item:', error);
+        }
+    }
+
+    // Update shopping item
+    updateShoppingItem(itemId) {
+        try {
+            const foodId = document.getElementById('shoppingFoodSelect').value;
+            const quantity = parseFloat(document.getElementById('shoppingQuantity').value);
+            const unit = document.getElementById('shoppingUnit').value;
+
+            if (!foodId || !quantity || quantity <= 0) {
+                this.showError('Please fill all required fields with valid values');
+                return;
+            }
+
+            const foodData = this.foodDatabase[foodId];
+            if (!foodData) {
+                this.showError('Food item not found in database');
+                return;
+            }
+
+            // Update the shopping list item
+            this.shoppingList[itemId] = {
+                ...this.shoppingList[itemId],
+                foodId: foodId,
+                name: foodData.name,
+                quantity: quantity,
+                unit: unit,
+                category: foodData.category,
+                updatedAt: new Date().toISOString()
+            };
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            this.hideShoppingModal();
+            this.renderShoppingList();
+            this.updateNutritionOverview();
+            this.showSuccess('Shopping item updated successfully!');
+
+        } catch (error) {
+            this.showError('Failed to update shopping item: ' + error.message);
+            console.error('Error updating shopping item:', error);
         }
     }
 
