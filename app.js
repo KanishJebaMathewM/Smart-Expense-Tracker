@@ -1774,6 +1774,246 @@ class SmartExpenseTracker {
         };
         return icons[type] || icons.info;
     }
+
+    // Profile functionality methods
+    showProfile() {
+        try {
+            const modal = document.getElementById('profileModal');
+            const overlay = document.getElementById('overlay');
+
+            if (modal && overlay) {
+                this.loadProfileData();
+                modal.style.display = 'block';
+                overlay.style.display = 'block';
+
+                // Bind profile events
+                this.bindProfileEvents();
+            }
+        } catch (error) {
+            console.error('Error showing profile:', error);
+        }
+    }
+
+    hideProfile() {
+        try {
+            const modal = document.getElementById('profileModal');
+            const overlay = document.getElementById('overlay');
+
+            if (modal && overlay) {
+                modal.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error hiding profile:', error);
+        }
+    }
+
+    loadProfileData() {
+        try {
+            // Get current user data
+            const currentUserId = localStorage.getItem('current_user_id');
+            const allUsers = JSON.parse(localStorage.getItem('all_family_users') || '{}');
+            const currentUser = allUsers[currentUserId];
+
+            if (!currentUser) {
+                this.showError('User data not found');
+                return;
+            }
+
+            // Load saved profile data
+            const savedProfile = JSON.parse(localStorage.getItem(`profile_data_${currentUserId}`) || '{}');
+
+            // Merge with current user data
+            this.profileData = {
+                name: currentUser.name || '',
+                email: currentUser.email || '',
+                dateOfBirth: savedProfile.dateOfBirth || '',
+                bio: savedProfile.bio || '',
+                phone: savedProfile.phone || '',
+                profilePicture: savedProfile.profilePicture || null,
+                memberSince: currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : 'Unknown',
+                lastLogin: currentUser.lastLogin ? new Date(currentUser.lastLogin).toLocaleDateString() : 'Never',
+                totalExpenses: this.getAllTimeExpenses(),
+                expenseCount: this.getAllExpenseCount()
+            };
+
+            // Populate form fields
+            document.getElementById('profileName').value = this.profileData.name;
+            document.getElementById('profileEmail').value = this.profileData.email;
+            document.getElementById('profileDOB').value = this.profileData.dateOfBirth;
+            document.getElementById('profileBio').value = this.profileData.bio;
+            document.getElementById('profilePhone').value = this.profileData.phone;
+
+            // Populate stats
+            document.getElementById('profileMemberSince').textContent = this.profileData.memberSince;
+            document.getElementById('profileLastLogin').textContent = this.profileData.lastLogin;
+            document.getElementById('profileTotalExpenses').textContent = `₹${this.profileData.totalExpenses.toLocaleString()}`;
+            document.getElementById('profileExpenseCount').textContent = this.profileData.expenseCount;
+
+            // Load profile picture
+            this.loadProfilePicture();
+
+        } catch (error) {
+            console.error('Error loading profile data:', error);
+        }
+    }
+
+    loadProfilePicture() {
+        try {
+            const profileImage = document.getElementById('profileImage');
+            const defaultIcon = document.getElementById('defaultProfileIcon');
+
+            if (this.profileData.profilePicture) {
+                profileImage.src = this.profileData.profilePicture;
+                profileImage.style.display = 'block';
+                defaultIcon.style.display = 'none';
+            } else {
+                profileImage.style.display = 'none';
+                defaultIcon.style.display = 'flex';
+            }
+        } catch (error) {
+            console.error('Error loading profile picture:', error);
+        }
+    }
+
+    bindProfileEvents() {
+        try {
+            // Profile picture upload
+            const profilePictureInput = document.getElementById('profilePictureInput');
+            profilePictureInput.addEventListener('change', (e) => this.handleProfilePictureUpload(e));
+
+            // Save profile button
+            const saveProfileBtn = document.getElementById('saveProfile');
+            saveProfileBtn.addEventListener('click', () => this.saveProfileData());
+
+            // Delete profile button
+            const deleteProfileBtn = document.getElementById('deleteProfile');
+            deleteProfileBtn.addEventListener('click', () => this.deleteProfile());
+
+        } catch (error) {
+            console.error('Error binding profile events:', error);
+        }
+    }
+
+    handleProfilePictureUpload(event) {
+        try {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                this.showError('Please select a valid image file');
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                this.showError('Image size must be less than 5MB');
+                return;
+            }
+
+            // Read file as data URL
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.profileData.profilePicture = e.target.result;
+                this.loadProfilePicture();
+                this.showSuccess('Profile picture uploaded successfully');
+            };
+            reader.readAsDataURL(file);
+
+        } catch (error) {
+            console.error('Error handling profile picture upload:', error);
+            this.showError('Failed to upload profile picture');
+        }
+    }
+
+    saveProfileData() {
+        try {
+            // Get form data
+            const name = document.getElementById('profileName').value.trim();
+            const dob = document.getElementById('profileDOB').value;
+            const bio = document.getElementById('profileBio').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+
+            // Validate required fields
+            if (!name) {
+                this.showError('Name is required');
+                return;
+            }
+
+            // Update profile data
+            this.profileData.name = name;
+            this.profileData.dateOfBirth = dob;
+            this.profileData.bio = bio;
+            this.profileData.phone = phone;
+
+            // Save to localStorage
+            const currentUserId = localStorage.getItem('current_user_id');
+            localStorage.setItem(`profile_data_${currentUserId}`, JSON.stringify(this.profileData));
+
+            // Update user data with name change
+            const allUsers = JSON.parse(localStorage.getItem('all_family_users') || '{}');
+            if (allUsers[currentUserId]) {
+                allUsers[currentUserId].name = name;
+                localStorage.setItem('all_family_users', JSON.stringify(allUsers));
+            }
+
+            // Update UI
+            document.getElementById('familyMemberName').textContent = name;
+
+            this.showSuccess('Profile updated successfully');
+            this.hideProfile();
+
+        } catch (error) {
+            console.error('Error saving profile data:', error);
+            this.showError('Failed to save profile data');
+        }
+    }
+
+    deleteProfile() {
+        if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+            try {
+                // Clear all user data
+                const currentUserId = localStorage.getItem('current_user_id');
+
+                // Remove from family users
+                const allUsers = JSON.parse(localStorage.getItem('all_family_users') || '{}');
+                delete allUsers[currentUserId];
+                localStorage.setItem('all_family_users', JSON.stringify(allUsers));
+
+                // Clear profile data
+                localStorage.removeItem(`profile_data_${currentUserId}`);
+
+                // Clear session
+                localStorage.removeItem('app_session_token');
+                localStorage.removeItem('current_user_id');
+
+                this.showSuccess('Account deleted successfully');
+
+                // Redirect to auth
+                setTimeout(() => {
+                    window.location.href = 'auth.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error deleting profile:', error);
+                this.showError('Failed to delete account');
+            }
+        }
+    }
+
+    getAllExpenseCount() {
+        try {
+            let count = 0;
+            Object.values(this.expenses).forEach(dayExpenses => {
+                count += dayExpenses.length;
+            });
+            return count;
+        } catch (error) {
+            console.error('Error getting expense count:', error);
+            return 0;
+        }
+    }
 }
 
 // Initialize the tracker when DOM is loaded
