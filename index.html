@@ -458,6 +458,104 @@
         </div>
     </div>
 
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="taskModalTitle">Add New Task</h3>
+                <button class="close-btn" onclick="tracker?.hideTaskModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="taskTitle">Task Title</label>
+                    <input type="text" id="taskTitle" placeholder="Enter task title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" placeholder="Enter task description" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority" required>
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskCategorySelect">Category</label>
+                        <select id="taskCategorySelect" required>
+                            <option value="work">Work</option>
+                            <option value="personal">Personal</option>
+                            <option value="finance">Finance</option>
+                            <option value="health">Health</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskDueDate">Due Date</label>
+                        <input type="date" id="taskDueDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskStatus">Status</label>
+                        <select id="taskStatus" required>
+                            <option value="pending" selected>Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Budget Integration -->
+                <div class="form-group budget-integration">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="hasBudget">
+                        <span class="checkmark"></span>
+                        This task involves expenses
+                    </label>
+                </div>
+
+                <div id="budgetFields" class="budget-fields" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskBudget">Budget Amount (₹)</label>
+                            <input type="number" id="taskBudget" placeholder="0.00" min="0" step="0.01">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="expenseCategory">Expense Category</label>
+                            <select id="expenseCategory">
+                                <option value="Food">Food</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Bills">Bills</option>
+                                <option value="Health">Health</option>
+                                <option value="Education">Education</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveTask" class="btn btn-primary">Add Task</button>
+                <button id="updateTask" class="btn btn-secondary" style="display: none;">Update Task</button>
+                <button class="btn btn-secondary" onclick="tracker?.hideTaskModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Profile Modal -->
     <div id="profileModal" class="modal">
         <div class="modal-content profile-modal-content">
