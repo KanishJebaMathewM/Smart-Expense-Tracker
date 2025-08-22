@@ -2390,9 +2390,7 @@ class SmartExpenseTracker {
 
             if (this.setTasks(this.tasks)) {
                 this.hideTaskModal();
-                this.renderTasks();
-                this.updateTaskStats();
-                this.updateExpenseIntegration();
+                this.refreshTaskManagerDisplay();
                 this.showSuccess('Task added successfully!');
             }
         } catch (error) {
