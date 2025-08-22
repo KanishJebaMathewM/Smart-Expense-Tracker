@@ -97,6 +97,10 @@
                         <span class="tab-icon"><div class="icon-bg icon-tasks small"></div></span>
                         <span class="tab-text">Tasks</span>
                     </button>
+                    <button class="nav-tab" data-section="nutrition">
+                        <span class="tab-icon"><div class="icon-bg icon-nutrition small"></div></span>
+                        <span class="tab-text">Nutrition</span>
+                    </button>
                 </div>
             </nav>
         </div>
@@ -267,6 +271,254 @@
                     </div>
                     <div id="reportContent" class="report-content">
                         <p class="report-placeholder">Click "Generate Monthly Report" to see detailed analysis</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Nutrition Planner Section -->
+            <section id="nutritionSection" class="app-section">
+                <div class="section-header">
+                    <h2><div class="icon-bg icon-nutrition small" style="display: inline-block; margin-right: 8px;"></div>Kitchen & Nutrition Planner</h2>
+                    <p class="section-description">Manage your kitchen inventory, plan meals, and track nutrition</p>
+                </div>
+
+                <!-- Nutrition Overview Cards -->
+                <div class="nutrition-overview">
+                    <div class="nutrition-cards">
+                        <div class="nutrition-card inventory-card">
+                            <div class="card-icon"><div class="icon-bg icon-inventory large"></div></div>
+                            <div class="card-content">
+                                <h3>Kitchen Stock</h3>
+                                <span id="inventoryItems" class="card-amount">0 items</span>
+                            </div>
+                        </div>
+
+                        <div class="nutrition-card recipes-card">
+                            <div class="card-icon"><div class="icon-bg icon-recipes large"></div></div>
+                            <div class="card-content">
+                                <h3>Available Recipes</h3>
+                                <span id="availableRecipes" class="card-amount">0 recipes</span>
+                            </div>
+                        </div>
+
+                        <div class="nutrition-card calories-card">
+                            <div class="card-icon"><div class="icon-bg icon-calories large"></div></div>
+                            <div class="card-content">
+                                <h3>Today's Calories</h3>
+                                <span id="todaysCalories" class="card-amount">0 kcal</span>
+                            </div>
+                        </div>
+
+                        <div class="nutrition-card shopping-card">
+                            <div class="card-icon"><div class="icon-bg icon-shopping-list large"></div></div>
+                            <div class="card-content">
+                                <h3>Shopping List</h3>
+                                <span id="shoppingItems" class="card-amount">0 items</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutrition Planner Tabs -->
+                <div class="nutrition-tabs">
+                    <div class="tab-buttons">
+                        <button class="nutrition-tab-btn active" data-nutrition-tab="inventory">
+                            <div class="icon-bg icon-inventory small"></div>
+                            Kitchen Stock
+                        </button>
+                        <button class="nutrition-tab-btn" data-nutrition-tab="recipes">
+                            <div class="icon-bg icon-recipes small"></div>
+                            Recipes
+                        </button>
+                        <button class="nutrition-tab-btn" data-nutrition-tab="meal-plan">
+                            <div class="icon-bg icon-meal-plan small"></div>
+                            Meal Plan
+                        </button>
+                        <button class="nutrition-tab-btn" data-nutrition-tab="shopping">
+                            <div class="icon-bg icon-shopping-list small"></div>
+                            Shopping List
+                        </button>
+                        <button class="nutrition-tab-btn" data-nutrition-tab="insights">
+                            <div class="icon-bg icon-insights small"></div>
+                            Health Insights
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Inventory Manager Tab -->
+                <div id="inventoryTab" class="nutrition-tab-content active">
+                    <div class="tab-header">
+                        <h3>Kitchen Stock Manager</h3>
+                        <button id="addInventoryBtn" class="btn btn-primary">
+                            <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Add Item
+                        </button>
+                    </div>
+
+                    <div class="inventory-filters">
+                        <select id="inventoryCategory" class="filter-select">
+                            <option value="all">All Categories</option>
+                            <option value="grains">Grains & Cereals</option>
+                            <option value="vegetables">Vegetables</option>
+                            <option value="protein">Proteins</option>
+                            <option value="dairy">Dairy</option>
+                            <option value="fruits">Fruits</option>
+                            <option value="fats">Oils & Fats</option>
+                            <option value="spices">Spices</option>
+                        </select>
+                        <button id="lowStockFilter" class="filter-btn">Low Stock Only</button>
+                        <button id="expiringFilter" class="filter-btn">Expiring Soon</button>
+                    </div>
+
+                    <div id="inventoryList" class="inventory-list">
+                        <div class="inventory-placeholder">
+                            <div class="icon-bg icon-inventory xlarge"></div>
+                            <h4>Your kitchen stock is empty</h4>
+                            <p>Start by adding items you have in your kitchen</p>
+                            <button class="btn btn-primary" onclick="tracker.showInventoryModal()">
+                                <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                                Add First Item
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recipes Tab -->
+                <div id="recipesTab" class="nutrition-tab-content">
+                    <div class="tab-header">
+                        <h3>Recipe Suggestions</h3>
+                        <button id="addRecipeBtn" class="btn btn-primary">
+                            <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Add Recipe
+                        </button>
+                    </div>
+
+                    <div class="recipe-filters">
+                        <select id="recipeDiet" class="filter-select">
+                            <option value="all">All Diets</option>
+                            <option value="veg">Vegetarian</option>
+                            <option value="non-veg">Non-Vegetarian</option>
+                        </select>
+                        <select id="recipeCategory" class="filter-select">
+                            <option value="all">All Categories</option>
+                            <option value="breakfast">Breakfast</option>
+                            <option value="main">Main Course</option>
+                            <option value="snack">Snacks</option>
+                            <option value="dessert">Dessert</option>
+                        </select>
+                        <button id="availableOnlyFilter" class="filter-btn active">Can Make Now</button>
+                    </div>
+
+                    <div id="recipesList" class="recipes-list">
+                        <!-- Recipes will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Meal Plan Tab -->
+                <div id="mealPlanTab" class="nutrition-tab-content">
+                    <div class="tab-header">
+                        <h3>Weekly Meal Planner</h3>
+                        <button id="generateMealPlanBtn" class="btn btn-primary">
+                            <div class="icon-bg icon-magic xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Auto-Generate Plan
+                        </button>
+                    </div>
+
+                    <div id="mealPlanGrid" class="meal-plan-grid">
+                        <!-- 7-day meal plan grid will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Shopping List Tab -->
+                <div id="shoppingTab" class="nutrition-tab-content">
+                    <div class="tab-header">
+                        <h3>Shopping List</h3>
+                        <div class="shopping-actions">
+                            <button id="addShoppingItemBtn" class="btn btn-secondary">
+                                <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                                Add Item
+                            </button>
+                            <button id="exportShoppingListBtn" class="btn btn-primary">
+                                <div class="icon-bg icon-export xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                                Export List
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="shopping-summary">
+                        <div class="summary-item">
+                            <span>Total Items:</span>
+                            <span id="totalShoppingItems">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Estimated Cost:</span>
+                            <span id="estimatedShoppingCost">₹0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Purchased:</span>
+                            <span id="purchasedItems">0</span>
+                        </div>
+                    </div>
+
+                    <div id="shoppingList" class="shopping-list">
+                        <!-- Shopping list items will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Health Insights Tab -->
+                <div id="insightsTab" class="nutrition-tab-content">
+                    <div class="tab-header">
+                        <h3>Health Insights</h3>
+                        <button id="setNutritionGoalsBtn" class="btn btn-primary">
+                            <div class="icon-bg icon-target xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Set Goals
+                        </button>
+                    </div>
+
+                    <div class="nutrition-progress">
+                        <div class="progress-card">
+                            <h4>Daily Calorie Goal</h4>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="calorieProgress" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="currentCalories">0</span> / <span id="targetCalories">2000</span> kcal
+                            </div>
+                        </div>
+
+                        <div class="progress-card">
+                            <h4>Protein Goal</h4>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="proteinProgress" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="currentProtein">0</span> / <span id="targetProtein">150</span> g
+                            </div>
+                        </div>
+
+                        <div class="progress-card">
+                            <h4>Carbs Goal</h4>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="carbsProgress" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="currentCarbs">0</span> / <span id="targetCarbs">250</span> g
+                            </div>
+                        </div>
+
+                        <div class="progress-card">
+                            <h4>Fat Goal</h4>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="fatProgress" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="currentFat">0</span> / <span id="targetFat">65</span> g
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="nutritionInsights" class="nutrition-insights">
+                        <!-- Nutrition insights and recommendations will be populated here -->
                     </div>
                 </div>
             </section>
