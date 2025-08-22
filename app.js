@@ -224,10 +224,22 @@ class SmartExpenseTracker {
         }
     }
     
-    // Safe event listener helper
+    // Safe event listener helper with caching
     safeAddEventListener(elementId, event, handler) {
         try {
-            const element = document.getElementById(elementId);
+            // Cache DOM elements to avoid repeated queries
+            if (!this.elementCache) {
+                this.elementCache = new Map();
+            }
+
+            let element = this.elementCache.get(elementId);
+            if (!element) {
+                element = document.getElementById(elementId);
+                if (element) {
+                    this.elementCache.set(elementId, element);
+                }
+            }
+
             if (element) {
                 element.addEventListener(event, handler);
             } else {
@@ -421,22 +433,34 @@ class SmartExpenseTracker {
         }
     }
 
-    // Setup auto-save functionality
+    // Setup auto-save functionality with debouncing
     setupAutoSave() {
         try {
-            // Auto-save every 30 seconds
-            setInterval(() => {
+            // Debounced save function to prevent excessive saves
+            this.debouncedSave = this.debounce(() => {
                 if (this.currentProfile) {
                     this.saveProfileData();
                 }
-            }, 30000);
+            }, 5000); // Save 5 seconds after last change
+
+            // Auto-save every 2 minutes as backup
+            setInterval(() => {
+                if (this.currentProfile && this.hasUnsavedChanges) {
+                    this.saveProfileData();
+                    this.hasUnsavedChanges = false;
+                }
+            }, 120000);
 
             // Save on page visibility change (when user switches tabs)
             document.addEventListener('visibilitychange', () => {
-                if (document.hidden && this.currentProfile) {
+                if (document.hidden && this.currentProfile && this.hasUnsavedChanges) {
                     this.saveProfileData();
+                    this.hasUnsavedChanges = false;
                 }
             });
+
+            // Initialize change tracking
+            this.hasUnsavedChanges = false;
 
             console.log('Auto-save functionality enabled');
         } catch (error) {
@@ -2245,8 +2269,20 @@ class SmartExpenseTracker {
     
     updateElement(elementId, content) {
         try {
-            const element = document.getElementById(elementId);
-            if (element) {
+            // Use cached elements for better performance
+            if (!this.elementCache) {
+                this.elementCache = new Map();
+            }
+
+            let element = this.elementCache.get(elementId);
+            if (!element) {
+                element = document.getElementById(elementId);
+                if (element) {
+                    this.elementCache.set(elementId, element);
+                }
+            }
+
+            if (element && element.textContent !== content) {
                 element.textContent = content;
             }
         } catch (error) {
