@@ -814,6 +814,13 @@ class SmartExpenseTracker {
             
             if (name && amount && amount > 0) {
                 const expense = { name, category, amount };
+
+                // Link to task if adding expense for a specific task
+                if (window.currentTaskForExpense) {
+                    expense.linkedTaskId = window.currentTaskForExpense;
+                    window.currentTaskForExpense = null; // Clear the task link
+                }
+
                 if (this.addExpenseForDate(this.selectedDate, expense)) {
                     this.clearExpenseForm();
                     this.renderExpensesList(this.selectedDate);
@@ -821,6 +828,7 @@ class SmartExpenseTracker {
                     this.updateAnalytics();
                     this.renderCalendar();
                     this.renderCharts();
+                    this.updateExpenseIntegration(); // Update task-expense integration
                     this.showSuccess('Expense added successfully!');
                 }
             } else {
