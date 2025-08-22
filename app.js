@@ -5254,14 +5254,13 @@ class SmartExpenseTracker {
             const foodId = document.getElementById('shoppingFoodSelect').value;
             const quantity = parseFloat(document.getElementById('shoppingQuantity').value);
             const unit = document.getElementById('shoppingUnit').value;
-            const estimatedCost = parseFloat(document.getElementById('estimatedCost').value) || 0;
 
             if (!foodId || !quantity || quantity <= 0) {
                 this.showError('Please fill all required fields with valid values');
                 return;
             }
 
-            if (this.addToShoppingList(foodId, quantity, unit, estimatedCost)) {
+            if (this.addToShoppingList(foodId, quantity, unit)) {
                 this.hideShoppingModal();
                 this.renderShoppingList();
                 this.updateNutritionOverview();
