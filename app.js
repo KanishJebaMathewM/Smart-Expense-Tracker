@@ -373,7 +373,15 @@ class SmartExpenseTracker {
     // Load profile-specific data (user-specific)
     loadProfileData() {
         try {
-            if (!this.currentProfile) return;
+            // Always ensure data structures exist first
+            this.income = this.income || {};
+            this.expenses = this.expenses || {};
+
+            // If no current profile, keep empty structures but don't return early
+            if (!this.currentProfile) {
+                console.log('No current profile, using empty data structures');
+                return;
+            }
 
             const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id);
             const profileData = localStorage.getItem(userSpecificKey);
@@ -391,6 +399,7 @@ class SmartExpenseTracker {
         } catch (error) {
             this.showError('Failed to load profile data: ' + error.message);
             console.error('Profile data loading error:', error);
+            // Always ensure data structures exist, even on error
             this.income = {};
             this.expenses = {};
         }
