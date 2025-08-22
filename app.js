@@ -2701,23 +2701,29 @@ class SmartExpenseTracker {
                     tasksWithBudgetElement.innerHTML = '<p class="placeholder-text">No budget-related tasks yet</p>';
                 } else {
                     tasksWithBudgetElement.innerHTML = tasksWithBudget.map(task => {
-                        const budgetStatus = task.actualExpense > task.budget ? 'over-budget' : 'within-budget';
-                        const percentage = ((task.actualExpense / task.budget) * 100).toFixed(1);
+                        const isCompleted = task.status === 'completed';
+                        const actualExpense = isCompleted ? task.budget : (task.actualExpense || 0);
+                        const budgetStatus = isCompleted ? 'completed' : (task.actualExpense > task.budget ? 'over-budget' : 'within-budget');
+                        const percentage = ((actualExpense / task.budget) * 100).toFixed(1);
 
                         return `
                             <div class="integration-item ${budgetStatus}">
-                                <div class="integration-title">${this.escapeHtml(task.title)}</div>
+                                <div class="integration-title">
+                                    ${this.escapeHtml(task.title)}
+                                    ${isCompleted ? '<span class="task-status-badge completed">✓ Completed</span>' : ''}
+                                </div>
                                 <div class="integration-budget">
-                                    Budget: ₹${task.budget} | Spent: ₹${task.actualExpense || 0} (${percentage}%)
+                                    Budget: ₹${task.budget} | Spent: ₹${actualExpense} (${percentage}%)
+                                    ${isCompleted ? '<br><em>Full budget marked as spent upon completion</em>' : ''}
                                 </div>
                                 <div class="integration-progress">
                                     <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${Math.min(percentage, 100)}%"></div>
+                                        <div class="progress-fill ${isCompleted ? 'completed' : ''}" style="width: ${Math.min(percentage, 100)}%"></div>
                                     </div>
                                 </div>
                                 <div class="integration-actions">
                                     <button class="btn-small" onclick="tracker.viewTaskExpenses('${task.id}')">View Expenses</button>
-                                    <button class="btn-small" onclick="tracker.addExpenseForTask('${task.id}')">Add Expense</button>
+                                    ${!isCompleted ? `<button class="btn-small" onclick="tracker.addExpenseForTask('${task.id}')">Add Expense</button>` : ''}
                                 </div>
                             </div>
                         `;
