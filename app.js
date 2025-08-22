@@ -3024,6 +3024,138 @@ class SmartExpenseTracker {
         }
     }
 
+    // Get completed tasks for a specific date
+    getCompletedTasksForDate(date) {
+        try {
+            const dateString = date.toDateString();
+            const completedTasks = [];
+
+            Object.values(this.tasks).forEach(task => {
+                if (task.status === 'completed' && task.completedAt) {
+                    const completedDate = new Date(task.completedAt);
+                    if (completedDate.toDateString() === dateString) {
+                        completedTasks.push(task);
+                    }
+                }
+            });
+
+            return completedTasks;
+        } catch (error) {
+            console.error('Error getting completed tasks for date:', error);
+            return [];
+        }
+    }
+
+    // Show detailed modal for date with both expenses and completed tasks
+    showDateDetailsModal(date, totalExpenses, completedTasks) {
+        try {
+            const budgetTasks = completedTasks.filter(task => task.budget && task.budget > 0);
+            const regularTasks = completedTasks.filter(task => !task.budget || task.budget === 0);
+
+            const modalHtml = `
+                <div id="dateDetailsModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>${date.toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            })}</h3>
+                            <button class="close-btn" onclick="tracker.hideDateDetailsModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="date-summary">
+                                <div class="summary-item">
+                                    <span class="summary-label">Expenses:</span>
+                                    <span class="summary-value">₹${totalExpenses.toFixed(2)}</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Tasks Completed:</span>
+                                    <span class="summary-value">${completedTasks.length}</span>
+                                </div>
+                                ${budgetTasks.length > 0 ? `
+                                    <div class="summary-item">
+                                        <span class="summary-label">Budget Tasks:</span>
+                                        <span class="summary-value">${budgetTasks.length}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            ${budgetTasks.length > 0 ? `
+                                <div class="task-section">
+                                    <h4><div class="icon-bg icon-integration small" style="display: inline-block; margin-right: 8px;"></div>Budget Tasks Completed</h4>
+                                    <div class="task-list">
+                                        ${budgetTasks.map(task => `
+                                            <div class="task-summary-item">
+                                                <div class="task-info">
+                                                    <div class="task-name">${this.escapeHtml(task.title)}</div>
+                                                    <div class="task-meta">${task.category} • ${task.priority} priority</div>
+                                                </div>
+                                                <div class="task-budget">
+                                                    <div class="budget-info">
+                                                        Budget: ₹${task.budget}
+                                                        ${task.actualExpense ? `<br>Spent: ₹${task.actualExpense}` : ''}
+                                                        ${task.budgetVariance !== undefined ?
+                                                            `<br><span class="${task.budgetVariance >= 0 ? 'positive' : 'negative'}">
+                                                                ${task.budgetVariance >= 0 ? 'Under' : 'Over'} by ₹${Math.abs(task.budgetVariance).toFixed(2)}
+                                                            </span>` : ''
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${regularTasks.length > 0 ? `
+                                <div class="task-section">
+                                    <h4><div class="icon-bg icon-task-completed small" style="display: inline-block; margin-right: 8px;"></div>Other Tasks Completed</h4>
+                                    <div class="task-list">
+                                        ${regularTasks.map(task => `
+                                            <div class="task-summary-item">
+                                                <div class="task-info">
+                                                    <div class="task-name">${this.escapeHtml(task.title)}</div>
+                                                    <div class="task-meta">${task.category} • ${task.priority} priority</div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" onclick="tracker.showExpenseModal(new Date('${date.toISOString()}'))">
+                                <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                                Add Expense
+                            </button>
+                            <button class="btn btn-secondary" onclick="tracker.hideDateDetailsModal()">Close</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="dateDetailsOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        } catch (error) {
+            console.error('Error showing date details modal:', error);
+        }
+    }
+
+    // Hide date details modal
+    hideDateDetailsModal() {
+        try {
+            const modal = document.getElementById('dateDetailsModal');
+            const overlay = document.getElementById('dateDetailsOverlay');
+
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding date details modal:', error);
+        }
+    }
+
     // Update task-expense summary on dashboard
     updateTaskExpenseSummary() {
         try {
