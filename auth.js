@@ -1076,3 +1076,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Make auth system globally available
 window.authSystem = authSystem;
+
+// Auto-logout functionality when window is closed or user leaves
+window.addEventListener('beforeunload', () => {
+    // Clear session data on window close
+    localStorage.removeItem('app_session_token');
+    localStorage.removeItem('current_user_id');
+});
+
+// Also handle when user navigates away from the page
+window.addEventListener('pagehide', () => {
+    // Clear session data on page hide
+    localStorage.removeItem('app_session_token');
+    localStorage.removeItem('current_user_id');
+});
+
+// Handle visibility change (when tab becomes hidden)
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        // Optional: Could implement auto-logout after a certain time of inactivity
+        // For now, we'll keep the session but this is where you could add timeout logic
+    }
+});
