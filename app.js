@@ -1019,6 +1019,19 @@ class SmartExpenseTracker {
             const categoryTotals = this.getCategoryTotals();
             const dailyTotals = this.getDailyTotals();
 
+            // Get task data for this month
+            const tasks = Object.values(this.tasks);
+            const completedTasks = tasks.filter(task => {
+                if (task.status !== 'completed' || !task.completedAt) return false;
+                const completedDate = new Date(task.completedAt);
+                return completedDate.getMonth() === this.currentMonth && completedDate.getFullYear() === this.currentYear;
+            });
+            const pendingTasks = tasks.filter(task => task.status === 'pending');
+            const inProgressTasks = tasks.filter(task => task.status === 'in-progress');
+            const overdueTasks = tasks.filter(task => this.isTaskOverdue(task));
+            const budgetTasks = tasks.filter(task => task.budget && task.budget > 0);
+            const completedBudgetTasks = completedTasks.filter(task => task.budget && task.budget > 0);
+
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -1032,6 +1045,7 @@ class SmartExpenseTracker {
                 totalSpent / Object.keys(dailyTotals).length : 0;
 
             const savingsRate = income > 0 ? ((balance / income) * 100).toFixed(1) : 0;
+            const taskCompletionRate = tasks.length > 0 ? ((completedTasks.length / tasks.length) * 100).toFixed(1) : 0;
 
             reportContent.innerHTML = `<div class="report-summary">
                     <h3>${this.getUIIcon('analytics', 'small')} Monthly Report - ${monthNames[this.currentMonth]} ${this.currentYear}</h3>
@@ -1055,6 +1069,24 @@ class SmartExpenseTracker {
                         </div>
 
                         <div class="report-card">
+                            <h4><div class="icon-bg icon-tasks small" style="display: inline-block; margin-right: 8px;"></div>Task Overview</h4>
+                            <p><strong>Total Tasks:</strong> ${tasks.length}</p>
+                            <p><strong>Completed This Month:</strong> ${completedTasks.length}</p>
+                            <p><strong>Pending Tasks:</strong> ${pendingTasks.length}</p>
+                            <p><strong>In Progress:</strong> ${inProgressTasks.length}</p>
+                            ${overdueTasks.length > 0 ? `<p><strong class="overdue">Overdue:</strong> ${overdueTasks.length}</p>` : ''}
+                            <p><strong>Completion Rate:</strong> ${taskCompletionRate}%</p>
+                        </div>
+
+                        <div class="report-card">
+                            <h4><div class="icon-bg icon-integration small" style="display: inline-block; margin-right: 8px;"></div>Budget Tasks</h4>
+                            <p><strong>Total Budget Tasks:</strong> ${budgetTasks.length}</p>
+                            <p><strong>Completed Budget Tasks:</strong> ${completedBudgetTasks.length}</p>
+                            <p><strong>Total Budget Amount:</strong> ₹${budgetTasks.reduce((sum, task) => sum + (task.budget || 0), 0).toLocaleString()}</p>
+                            <p><strong>Completed Budget Amount:</strong> ₹${completedBudgetTasks.reduce((sum, task) => sum + (task.budget || 0), 0).toLocaleString()}</p>
+                        </div>
+
+                        <div class="report-card">
                             <h4>${this.getUIIcon('reports', 'small')} Category Breakdown</h4>
                             ${Object.entries(categoryTotals).map(([category, amount]) =>
                                 `<p><strong>${category}:</strong> ₹${amount.toLocaleString()}</p>`
@@ -1063,13 +1095,83 @@ class SmartExpenseTracker {
 
                         <div class="report-card">
                             <h4><div class="icon-bg icon-insights xsmall" style="display: inline-block; margin-right: 8px;"></div>Insights & Tips</h4>
-                            ${this.generateInsights(income, totalSpent, balance, categoryTotals)}
+                            ${this.generateInsights(income, totalSpent, balance, categoryTotals, { tasks, completedTasks, pendingTasks, overdueTasks })}
+                        </div>
+                    </div>
+
+                    <!-- Detailed Task Lists -->
+                    <div class="report-task-details">
+                        <h3><div class="icon-bg icon-tasks small" style="display: inline-block; margin-right: 8px;"></div>Task Details</h3>
+
+                        <div class="task-detail-grid">
+                            <div class="task-detail-section">
+                                <h4>✅ Completed Tasks This Month (${completedTasks.length})</h4>
+                                ${completedTasks.length === 0 ?
+                                    '<p class="no-tasks">No tasks completed this month</p>' :
+                                    completedTasks.map(task => `
+                                        <div class="task-detail-item completed">
+                                            <div class="task-detail-header">
+                                                <strong>${this.escapeHtml(task.title)}</strong>
+                                                <span class="task-priority ${task.priority}">${task.priority}</span>
+                                            </div>
+                                            <div class="task-detail-meta">
+                                                <span>Category: ${task.category}</span>
+                                                <span>Completed: ${new Date(task.completedAt).toLocaleDateString()}</span>
+                                                ${task.budget ? `<span>Budget: ₹${task.budget} (Fully Spent)</span>` : ''}
+                                            </div>
+                                            ${task.description ? `<p class="task-detail-desc">${this.escapeHtml(task.description)}</p>` : ''}
+                                        </div>
+                                    `).join('')
+                                }
+                            </div>
+
+                            <div class="task-detail-section">
+                                <h4>⏳ Pending Tasks (${pendingTasks.length})</h4>
+                                ${pendingTasks.length === 0 ?
+                                    '<p class="no-tasks">No pending tasks</p>' :
+                                    pendingTasks.map(task => `
+                                        <div class="task-detail-item pending ${this.isTaskOverdue(task) ? 'overdue' : ''}">
+                                            <div class="task-detail-header">
+                                                <strong>${this.escapeHtml(task.title)}</strong>
+                                                <span class="task-priority ${task.priority}">${task.priority}</span>
+                                                ${this.isTaskOverdue(task) ? '<span class="overdue-badge">OVERDUE</span>' : ''}
+                                            </div>
+                                            <div class="task-detail-meta">
+                                                <span>Category: ${task.category}</span>
+                                                ${task.dueDate ? `<span>Due: ${new Date(task.dueDate).toLocaleDateString()}</span>` : '<span>No due date</span>'}
+                                                ${task.budget ? `<span>Budget: ₹${task.budget}</span>` : ''}
+                                            </div>
+                                            ${task.description ? `<p class="task-detail-desc">${this.escapeHtml(task.description)}</p>` : ''}
+                                        </div>
+                                    `).join('')
+                                }
+                            </div>
+
+                            ${inProgressTasks.length > 0 ? `
+                                <div class="task-detail-section">
+                                    <h4>🔄 In Progress Tasks (${inProgressTasks.length})</h4>
+                                    ${inProgressTasks.map(task => `
+                                        <div class="task-detail-item in-progress">
+                                            <div class="task-detail-header">
+                                                <strong>${this.escapeHtml(task.title)}</strong>
+                                                <span class="task-priority ${task.priority}">${task.priority}</span>
+                                            </div>
+                                            <div class="task-detail-meta">
+                                                <span>Category: ${task.category}</span>
+                                                ${task.dueDate ? `<span>Due: ${new Date(task.dueDate).toLocaleDateString()}</span>` : '<span>No due date</span>'}
+                                                ${task.budget ? `<span>Budget: ₹${task.budget} | Spent: ₹${task.actualExpense || 0}</span>` : ''}
+                                            </div>
+                                            ${task.description ? `<p class="task-detail-desc">${this.escapeHtml(task.description)}</p>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
             `;
 
-            this.showSuccess('Monthly report generated successfully!');
+            this.showSuccess('Monthly report with task details generated successfully!');
         } catch (error) {
             this.showError('Failed to generate report: ' + error.message);
             console.error('Report generation error:', error);
