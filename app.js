@@ -2477,9 +2477,7 @@ class SmartExpenseTracker {
                 delete this.tasks[taskId];
 
                 if (this.setTasks(this.tasks)) {
-                    this.renderTasks();
-                    this.updateTaskStats();
-                    this.updateExpenseIntegration();
+                    this.refreshTaskManagerDisplay();
                     this.showSuccess('Task deleted successfully!');
                 }
             }
