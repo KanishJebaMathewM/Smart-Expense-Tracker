@@ -149,7 +149,7 @@
     position: relative;
 }
 .icon-home::before {
-    content: '����';
+    content: '🏠';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -1309,6 +1309,16 @@ body {
 .savings-card .card-icon {
     background: linear-gradient(135deg, var(--secondary-100), var(--secondary-200));
     color: var(--secondary-700);
+}
+
+.tasks-card .card-icon {
+    background: linear-gradient(135deg, var(--primary-100), var(--primary-200));
+    color: var(--primary-700);
+}
+
+.budget-tasks-card .card-icon {
+    background: linear-gradient(135deg, var(--warning-100), var(--warning-200));
+    color: var(--warning-700);
 }
 
 .dashboard-card:hover .card-icon {
