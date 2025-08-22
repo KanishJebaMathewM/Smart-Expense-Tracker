@@ -2407,7 +2407,6 @@ class SmartExpenseTracker {
                 name: currentUser.name || '',
                 email: currentUser.email || '',
                 dateOfBirth: savedProfile.dateOfBirth || '',
-                bio: savedProfile.bio || '',
                 phone: savedProfile.phone || '',
                 profilePicture: savedProfile.profilePicture || null,
                 memberSince: currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : 'Unknown',
