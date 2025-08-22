@@ -5611,6 +5611,12 @@ class SmartExpenseTracker {
                             <span>${Math.round(weekSummary.avgCarbs)}g</span>
                         </div>
                     </div>
+                    <div class="meal-plan-actions">
+                        <button class="btn btn-secondary" onclick="tracker.createMealPrepTasks()">
+                            <div class="icon-bg icon-tasks xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Create Meal Prep Tasks
+                        </button>
+                    </div>
                 </div>
             `;
 
