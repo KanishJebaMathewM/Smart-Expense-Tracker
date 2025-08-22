@@ -991,7 +991,7 @@ class SmartExpenseTracker {
 
                 // Try to create a profile if we have user data
                 if (this.currentUser) {
-                    console.log('🔄 Attempting to create emergency profile for save...');
+                    console.log('�� Attempting to create emergency profile for save...');
                     try {
                         this.ensureDefaultProfile();
                         if (this.currentProfile) {
@@ -6279,27 +6279,19 @@ class SmartExpenseTracker {
     calculateWeekNutrition(weekPlan) {
         const totalNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
         const mealCount = Object.keys(weekPlan).length;
-        let estimatedCost = 0;
 
         Object.values(weekPlan).forEach(meal => {
             totalNutrition.calories += meal.calories || 0;
             totalNutrition.protein += meal.protein || 0;
             totalNutrition.carbs += meal.carbs || 0;
             totalNutrition.fat += meal.fat || 0;
-
-            // Estimate cost based on recipe
-            const recipe = this.recipes[meal.recipeId];
-            if (recipe) {
-                estimatedCost += this.estimateRecipeCost(recipe);
-            }
         });
 
         return {
             avgCalories: mealCount > 0 ? totalNutrition.calories / 7 : 0,
             avgProtein: mealCount > 0 ? totalNutrition.protein / 7 : 0,
             avgCarbs: mealCount > 0 ? totalNutrition.carbs / 7 : 0,
-            avgFat: mealCount > 0 ? totalNutrition.fat / 7 : 0,
-            estimatedCost: estimatedCost
+            avgFat: mealCount > 0 ? totalNutrition.fat / 7 : 0
         };
     }
 
