@@ -401,6 +401,7 @@ class SmartExpenseTracker {
             // Always ensure data structures exist first
             this.income = this.income || {};
             this.expenses = this.expenses || {};
+            this.tasks = this.tasks || {};
 
             // If no current profile, keep empty structures but don't return early
             if (!this.currentProfile) {
@@ -415,9 +416,11 @@ class SmartExpenseTracker {
                 const data = JSON.parse(profileData);
                 this.income = data.income || {};
                 this.expenses = data.expenses || {};
+                this.tasks = data.tasks || {};
             } else {
                 this.income = {};
                 this.expenses = {};
+                this.tasks = {};
             }
 
             console.log(`Profile data loaded successfully for user: ${this.currentUser?.name}`);
@@ -427,6 +430,7 @@ class SmartExpenseTracker {
             // Always ensure data structures exist, even on error
             this.income = {};
             this.expenses = {};
+            this.tasks = {};
         }
     }
 
