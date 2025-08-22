@@ -272,6 +272,7 @@ class SmartExpenseTracker {
             this.updateAnalytics();
             this.renderCharts();
             this.updateFamilyMemberDisplay();
+            this.initTaskManager();
             this.checkFirstTimeSetup();
 
             console.log('Main tracker initialized successfully');
