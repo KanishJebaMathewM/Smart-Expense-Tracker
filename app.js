@@ -177,7 +177,7 @@ class SmartExpenseTracker {
                 }
             }
 
-            console.log('⚠�� User not found in family system, trying legacy system...');
+            console.log('⚠️ User not found in family system, trying legacy system...');
 
             // Fallback to legacy system
             const userData = localStorage.getItem('user_account_data');
@@ -583,11 +583,25 @@ class SmartExpenseTracker {
     // Ensure user has at least one profile
     ensureDefaultProfile() {
         try {
+            console.log('🔧 Ensuring default profile...');
+
+            if (!this.currentUser) {
+                console.error('❌ Cannot ensure profile: No current user');
+                return;
+            }
+
             const profiles = this.getProfiles();
             const userSpecificCurrentProfileKey = this.getUserSpecificKey(this.STORAGE_KEYS.CURRENT_PROFILE);
 
+            console.log('Profile check:', {
+                existingProfilesCount: Object.keys(profiles).length,
+                userSpecificKey: userSpecificCurrentProfileKey,
+                currentUser: this.currentUser?.name
+            });
+
             if (Object.keys(profiles).length === 0) {
                 // Create default profile for the user
+                console.log('📝 Creating new default profile...');
                 const defaultProfile = {
                     id: 'profile_default',
                     name: this.currentUser?.name || 'My Profile',
@@ -597,13 +611,14 @@ class SmartExpenseTracker {
                 };
 
                 profiles[defaultProfile.id] = defaultProfile;
-                this.saveProfiles(profiles);
+                const profilesSaved = this.saveProfiles(profiles);
                 this.currentProfile = defaultProfile;
                 localStorage.setItem(userSpecificCurrentProfileKey, defaultProfile.id);
 
-                console.log('Created default profile for user:', this.currentUser?.name);
+                console.log('✅ Created default profile for user:', this.currentUser?.name, 'Saved:', profilesSaved);
             } else {
                 // Load existing profile or first available profile
+                console.log('📂 Loading existing profile...');
                 const currentProfileId = localStorage.getItem(userSpecificCurrentProfileKey);
                 const profile = profiles[currentProfileId] || Object.values(profiles)[0];
 
@@ -617,11 +632,19 @@ class SmartExpenseTracker {
                 profiles[profile.id] = profile;
                 this.saveProfiles(profiles);
 
-                console.log(`Loaded existing profile: ${profile.name}`);
+                console.log(`✅ Loaded existing profile: ${profile.name}`);
+            }
+
+            // Verify profile was set
+            if (this.currentProfile) {
+                console.log('✅ Profile successfully ensured:', this.currentProfile.id);
+            } else {
+                console.error('❌ Profile was not set after ensure operation');
             }
         } catch (error) {
-            console.error('Error ensuring default profile:', error);
+            console.error('❌ Error ensuring default profile:', error);
             // Fallback: create a minimal profile to prevent crashes
+            console.log('🆘 Creating fallback profile...');
             this.currentProfile = {
                 id: 'profile_fallback',
                 name: this.currentUser?.name || 'My Profile',
@@ -629,6 +652,7 @@ class SmartExpenseTracker {
                 createdAt: new Date().toISOString(),
                 lastAccessed: new Date().toISOString()
             };
+            console.log('✅ Fallback profile created');
         }
     }
     
