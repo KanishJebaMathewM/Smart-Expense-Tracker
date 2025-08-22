@@ -907,6 +907,7 @@ class SmartExpenseTracker {
                             this.updateAnalytics();
                             this.renderCalendar();
                             this.renderCharts();
+                            this.updateExpenseIntegration(); // Update task-expense integration
                             this.showSuccess('Expense updated successfully!');
                         }
                     }
