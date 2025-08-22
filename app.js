@@ -269,7 +269,16 @@ class SmartExpenseTracker {
         // This ensures the same key is generated regardless of session
         const userIdentifier = this.currentUser?.email || this.currentUser?.userId || 'default';
         const cleanIdentifier = userIdentifier.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-        return `${baseKey}_${cleanIdentifier}`;
+        const key = `${baseKey}_${cleanIdentifier}`;
+
+        console.log('Generated storage key:', {
+            baseKey: baseKey,
+            userIdentifier: userIdentifier,
+            cleanIdentifier: cleanIdentifier,
+            finalKey: key
+        });
+
+        return key;
     }
 
     // Logout (redirect to auth)
