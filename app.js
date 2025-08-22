@@ -670,7 +670,7 @@ class SmartExpenseTracker {
                         this.tasks = JSON.parse(legacyTasks);
                         console.log('✅ Migrated legacy tasks data');
                     } catch (e) {
-                        console.error('❌ Failed to migrate tasks data:', e);
+                        console.error('�� Failed to migrate tasks data:', e);
                     }
                 }
             }
@@ -6477,34 +6477,6 @@ class SmartExpenseTracker {
         return icons[type] || '📊';
     }
 
-    // Estimate ingredient cost (basic estimation)
-    estimateIngredientCost(foodId, quantity) {
-        try {
-            const baseCosts = {
-                'rice': 2, 'eggs': 8, 'chicken': 15, 'onion': 3, 'tomato': 4,
-                'milk': 0.6, 'oil': 1.5, 'potato': 2.5, 'paneer': 25
-            };
-            const baseCost = baseCosts[foodId] || 5; // Default cost per unit
-            return baseCost * quantity;
-        } catch (error) {
-            console.error('Error estimating cost:', error);
-            return 0;
-        }
-    }
-
-    // Estimate recipe cost
-    estimateRecipeCost(recipe) {
-        try {
-            let totalCost = 0;
-            Object.entries(recipe.ingredients).forEach(([foodId, ingredient]) => {
-                totalCost += this.estimateIngredientCost(foodId, ingredient.quantity);
-            });
-            return totalCost;
-        } catch (error) {
-            console.error('Error estimating recipe cost:', error);
-            return 0;
-        }
-    }
 
     // Toggle shopping item purchased status
     toggleShoppingItem(itemId) {
