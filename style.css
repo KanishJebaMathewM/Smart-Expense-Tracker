@@ -3069,7 +3069,8 @@ body {
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: var(--primary-500);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.1);
