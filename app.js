@@ -826,10 +826,15 @@ class SmartExpenseTracker {
                     this.renderExpensesList(this.selectedDate);
                     this.updateDashboard();
                     this.updateAnalytics();
-                    this.renderCalendar();
+                    this.renderCalendar(); // Update calendar to show expense changes
                     this.renderCharts();
                     this.updateExpenseIntegration(); // Update task-expense integration
-                    this.showSuccess('Expense added successfully!');
+
+                    if (expense.linkedTaskId) {
+                        this.showSuccess('Expense added and linked to task successfully!');
+                    } else {
+                        this.showSuccess('Expense added successfully!');
+                    }
                 }
             } else {
                 this.showError('Please enter valid expense details');
