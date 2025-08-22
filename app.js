@@ -30,7 +30,7 @@ class SmartExpenseTracker {
                 'Education': 'icon-education',
                 'Other': 'icon-bills'
             };
-            const iconClass = iconMap[category] || 'icon-money';
+            const iconClass = iconMap[category] || 'icon-bills';
             const sizeClass = size ? ` ${size}` : '';
             return `<div class="icon-bg ${iconClass}${sizeClass}"></div>`;
         };
@@ -38,13 +38,22 @@ class SmartExpenseTracker {
         this.getUIIcon = (type, size = '') => {
             const iconMap = {
                 'user': 'icon-user',
-                'money': 'icon-money',
+                'money': 'icon-app-logo',
+                'income': 'icon-income',
+                'expense': 'icon-expense',
+                'savings': 'icon-savings',
+                'balance': 'icon-balance',
                 'analytics': 'icon-analytics',
                 'reports': 'icon-bills',
-                'trending-up': 'icon-analytics',
-                'trending-down': 'icon-money'
+                'trending-up': 'icon-income',
+                'trending-down': 'icon-expense',
+                'logout': 'icon-logout',
+                'upload': 'icon-upload',
+                'welcome': 'icon-welcome',
+                'add': 'icon-add',
+                'total': 'icon-total'
             };
-            const iconClass = iconMap[type] || 'icon-money';
+            const iconClass = iconMap[type] || 'icon-app-logo';
             const sizeClass = size ? ` ${size}` : '';
             return `<div class="icon-bg ${iconClass}${sizeClass}"></div>`;
         };
