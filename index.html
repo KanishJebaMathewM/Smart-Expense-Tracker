@@ -948,34 +948,8 @@
                 // If no session or no current user, redirect to auth
         if (!sessionData || !currentUserId) {
             console.log('❌ No session or current user found, redirecting to auth');
-            // TEMPORARILY DISABLED FOR TESTING NUTRITION PLANNER
-            // window.location.href = 'auth.html';
-            // return;
-
-            // Create a test user for development
-            const testUser = {
-                userId: 'test_user_123',
-                name: 'Test User',
-                email: 'test@example.com',
-                createdAt: new Date().toISOString(),
-                lastLogin: new Date().toISOString()
-            };
-
-            // Set up test session
-            const testSession = {
-                userId: 'test_user_123',
-                userEmail: 'test@example.com',
-                userName: 'Test User',
-                createdAt: new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-            };
-
-            // Set test data in localStorage
-            localStorage.setItem('current_user_id', 'test_user_123');
-            localStorage.setItem('app_session_token', JSON.stringify(testSession));
-            localStorage.setItem('all_family_users', JSON.stringify({'test_user_123': testUser}));
-
-            console.log('✅ Test user created for development');
+            window.location.href = 'auth.html';
+            return;
         }
 
                 // Parse session data
@@ -994,12 +968,10 @@
                 if (currentTime >= expiryTime) {
             // Session expired - redirect to auth
             console.log('❌ Session expired, redirecting to auth');
-            // TEMPORARILY DISABLED FOR TESTING
-            // localStorage.removeItem('app_session_token');
-            // localStorage.removeItem('current_user_id');
-            // window.location.href = 'auth.html';
-            // return;
-            console.log('⚠️ Session expired but continuing for testing');
+            localStorage.removeItem('app_session_token');
+            localStorage.removeItem('current_user_id');
+            window.location.href = 'auth.html';
+            return;
         }
 
                 // Verify the session userId matches the current user ID
@@ -1037,10 +1009,8 @@
 
                 if (!currentUser) {
             console.log('❌ No valid user data found, redirecting to auth');
-            // TEMPORARILY DISABLED FOR TESTING
-            // window.location.href = 'auth.html';
-            // return;
-            console.log('⚠️ No user data but continuing for testing');
+            window.location.href = 'auth.html';
+            return;
         }
 
                 // Valid session - load main app
