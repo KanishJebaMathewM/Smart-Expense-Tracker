@@ -420,6 +420,23 @@
         })();
     </script>
 
+    <!-- Auto-logout functionality -->
+    <script>
+        // Auto-logout functionality when window is closed or user leaves
+        window.addEventListener('beforeunload', () => {
+            // Clear session data on window close
+            localStorage.removeItem('app_session_token');
+            localStorage.removeItem('current_user_id');
+        });
+
+        // Also handle when user navigates away from the page
+        window.addEventListener('pagehide', () => {
+            // Clear session data on page hide
+            localStorage.removeItem('app_session_token');
+            localStorage.removeItem('current_user_id');
+        });
+    </script>
+
     <!-- Main JavaScript Application -->
     <script src="app.js"></script>
 </body>
