@@ -1196,8 +1196,9 @@ class SmartExpenseTracker {
 
             // Add task completion indicators
             if (completedTasks.length > 0) {
+                const taskTitles = completedTasks.map(t => t.title).join('\n');
                 dateContent += `<div class="date-tasks">
-                    <span class="task-indicator" title="${completedTasks.length} task(s) completed">
+                    <span class="task-indicator" title="${completedTasks.length} task(s) completed:\n${taskTitles}">
                         <div class="icon-bg icon-task-completed xsmall"></div>
                         ${completedTasks.length}
                     </span>
@@ -1207,7 +1208,8 @@ class SmartExpenseTracker {
             // Add budget task indicator if present
             if (budgetTasksCompleted.length > 0) {
                 const totalBudget = budgetTasksCompleted.reduce((sum, task) => sum + (task.budget || 0), 0);
-                dateContent += `<div class="date-budget-tasks" title="₹${totalBudget} budget tasks completed">
+                const budgetTaskTitles = budgetTasksCompleted.map(t => `${t.title} (₹${t.budget})`).join('\n');
+                dateContent += `<div class="date-budget-tasks" title="Budget tasks completed:\n${budgetTaskTitles}">
                     <span class="budget-indicator">
                         <div class="icon-bg icon-integration xsmall"></div>
                         ₹${totalBudget.toFixed(0)}
