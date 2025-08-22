@@ -293,10 +293,36 @@ class SmartExpenseTracker {
             this.initTaskManager();
             this.checkFirstTimeSetup();
 
+            // Set up auto-save interval to prevent data loss
+            this.setupAutoSave();
+
             console.log('Main tracker initialized successfully');
         } catch (error) {
             this.showError('Failed to initialize main tracker: ' + error.message);
             console.error('Main tracker initialization error:', error);
+        }
+    }
+
+    // Setup auto-save functionality
+    setupAutoSave() {
+        try {
+            // Auto-save every 30 seconds
+            setInterval(() => {
+                if (this.currentProfile) {
+                    this.saveProfileData();
+                }
+            }, 30000);
+
+            // Save on page visibility change (when user switches tabs)
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && this.currentProfile) {
+                    this.saveProfileData();
+                }
+            });
+
+            console.log('Auto-save functionality enabled');
+        } catch (error) {
+            console.error('Failed to setup auto-save:', error);
         }
     }
 
@@ -890,6 +916,7 @@ class SmartExpenseTracker {
             const amount = parseFloat(amountInput.value);
             if (amount && amount > 0) {
                 if (this.setIncome(amount)) {
+                    this.saveProfileData(); // Save immediately after income change
                     this.updateDashboard();
                     this.hideIncomeModal();
                     this.showSuccess('Income saved successfully!');
@@ -928,6 +955,7 @@ class SmartExpenseTracker {
                 }
 
                 if (this.addExpenseForDate(this.selectedDate, expense)) {
+                    this.saveProfileData(); // Save immediately after expense addition
                     this.clearExpenseForm();
                     this.renderExpensesList(this.selectedDate);
                     this.updateDashboard();
@@ -1537,7 +1565,7 @@ class SmartExpenseTracker {
                                             <div class="task-detail-meta">
                                                 <span>Category: ${task.category}</span>
                                                 ${task.dueDate ? `<span>Due: ${new Date(task.dueDate).toLocaleDateString()}</span>` : '<span>No due date</span>'}
-                                                ${task.budget ? `<span>Budget: ��${task.budget}</span>` : ''}
+                                                ${task.budget ? `<span>Budget: ₹${task.budget}</span>` : ''}
                                             </div>
                                             ${task.description ? `<p class="task-detail-desc">${this.escapeHtml(task.description)}</p>` : ''}
                                         </div>
