@@ -230,9 +230,16 @@ class SmartExpenseTracker {
     // Logout (redirect to auth)
     logout() {
         try {
-            if (confirm('Are you sure you want to logout? You will need to enter your PIN again.')) {
+            if (confirm('Are you sure you want to logout? Your data will be preserved and available when you log back in.')) {
                 // Save current profile data before logout
-                this.saveProfileData();
+                console.log('Saving profile data before logout...');
+                const saveSuccess = this.saveProfileData();
+
+                if (saveSuccess) {
+                    console.log('Profile data saved successfully before logout');
+                } else {
+                    console.warn('Failed to save profile data before logout');
+                }
 
                 // Only clear session data, keep user data intact
                 localStorage.removeItem('app_session_token');
@@ -241,17 +248,22 @@ class SmartExpenseTracker {
                 // Note: We do NOT clear user data like expenses, tasks, income, etc.
                 // This preserves all the user's data for when they log back in
 
-                this.showSuccess('Logged out successfully. Your data is preserved.');
+                this.showSuccess('Logged out successfully. Your data is preserved and will be available when you log back in.');
 
                 // Redirect to auth page
                 setTimeout(() => {
                     window.location.href = 'auth.html';
-                }, 1000);
+                }, 1500);
             }
         } catch (error) {
             this.showError('Failed to logout: ' + error.message);
             console.error('Logout error:', error);
-            // Force redirect even on error
+            // Force redirect even on error after trying to save data
+            try {
+                this.saveProfileData();
+            } catch (saveError) {
+                console.error('Failed to save data during error logout:', saveError);
+            }
             setTimeout(() => {
                 window.location.href = 'auth.html';
             }, 2000);
@@ -359,6 +371,7 @@ class SmartExpenseTracker {
     ensureDefaultProfile() {
         try {
             const profiles = this.getProfiles();
+            const userSpecificCurrentProfileKey = this.getUserSpecificKey(this.STORAGE_KEYS.CURRENT_PROFILE);
 
             if (Object.keys(profiles).length === 0) {
                 // Create default profile for the user
@@ -373,13 +386,11 @@ class SmartExpenseTracker {
                 profiles[defaultProfile.id] = defaultProfile;
                 this.saveProfiles(profiles);
                 this.currentProfile = defaultProfile;
-                const userSpecificCurrentProfileKey = this.getUserSpecificKey(this.STORAGE_KEYS.CURRENT_PROFILE);
                 localStorage.setItem(userSpecificCurrentProfileKey, defaultProfile.id);
 
-                console.log('Created default profile');
+                console.log('Created default profile for user:', this.currentUser?.name);
             } else {
                 // Load existing profile or first available profile
-                const userSpecificCurrentProfileKey = this.getUserSpecificKey(this.STORAGE_KEYS.CURRENT_PROFILE);
                 const currentProfileId = localStorage.getItem(userSpecificCurrentProfileKey);
                 const profile = profiles[currentProfileId] || Object.values(profiles)[0];
 
@@ -388,10 +399,23 @@ class SmartExpenseTracker {
                     localStorage.setItem(userSpecificCurrentProfileKey, profile.id);
                 }
 
-                console.log(`Loaded profile: ${profile.name}`);
+                // Update last accessed time
+                profile.lastAccessed = new Date().toISOString();
+                profiles[profile.id] = profile;
+                this.saveProfiles(profiles);
+
+                console.log(`Loaded existing profile: ${profile.name}`);
             }
         } catch (error) {
             console.error('Error ensuring default profile:', error);
+            // Fallback: create a minimal profile to prevent crashes
+            this.currentProfile = {
+                id: 'profile_fallback',
+                name: this.currentUser?.name || 'My Profile',
+                icon: this.getUIIcon('user'),
+                createdAt: new Date().toISOString(),
+                lastAccessed: new Date().toISOString()
+            };
         }
     }
     
@@ -1513,7 +1537,7 @@ class SmartExpenseTracker {
                                             <div class="task-detail-meta">
                                                 <span>Category: ${task.category}</span>
                                                 ${task.dueDate ? `<span>Due: ${new Date(task.dueDate).toLocaleDateString()}</span>` : '<span>No due date</span>'}
-                                                ${task.budget ? `<span>Budget: ₹${task.budget}</span>` : ''}
+                                                ${task.budget ? `<span>Budget: ��${task.budget}</span>` : ''}
                                             </div>
                                             ${task.description ? `<p class="task-detail-desc">${this.escapeHtml(task.description)}</p>` : ''}
                                         </div>
@@ -2427,6 +2451,7 @@ class SmartExpenseTracker {
             const familyMemberName = document.getElementById('familyMemberName');
             if (familyMemberName && this.currentUser) {
                 familyMemberName.textContent = this.currentUser.name || 'Unknown User';
+                console.log(`Displaying current user: ${this.currentUser.name}`);
             }
         } catch (error) {
             console.error('Error displaying current user:', error);
