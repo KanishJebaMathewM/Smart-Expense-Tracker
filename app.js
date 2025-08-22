@@ -1248,6 +1248,11 @@ class SmartExpenseTracker {
             // Update savings rate
             const savingsRate = income > 0 ? ((balance / income) * 100).toFixed(1) : 0;
             this.updateElement('savingsRate', `${savingsRate}%`);
+
+            // Update task statistics
+            const taskStats = this.getTaskStats();
+            this.updateElement('activeTasks', (taskStats.pending + taskStats.inProgress).toString());
+            this.updateElement('budgetTasks', taskStats.withBudget.toString());
             
             // Apply color classes based on balance
             const balanceElements = [
