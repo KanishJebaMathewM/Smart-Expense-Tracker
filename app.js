@@ -507,7 +507,7 @@ class SmartExpenseTracker {
                 console.log('💾 Saving migrated data...');
                 const saveSuccess = this.saveProfileData();
                 if (saveSuccess) {
-                    console.log('��� Legacy data migration completed successfully');
+                    console.log('✅ Legacy data migration completed successfully');
                     console.log('📊 Final data summary:', {
                         income: Object.keys(this.income).length,
                         expenses: Object.keys(this.expenses).length,
@@ -738,7 +738,12 @@ class SmartExpenseTracker {
     // Save profile-specific data (user-specific)
     saveProfileData() {
         try {
-            if (!this.currentProfile) return false;
+            if (!this.currentProfile) {
+                console.warn('⚠️ Cannot save: No current profile');
+                return false;
+            }
+
+            console.log('💾 Saving profile data...');
 
             const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id);
             const profileData = {
@@ -750,12 +755,44 @@ class SmartExpenseTracker {
                 userEmail: this.currentUser?.email || 'Unknown'
             };
 
+            console.log('📊 Data being saved:', {
+                key: userSpecificKey,
+                incomeEntries: Object.keys(profileData.income).length,
+                expenseEntries: Object.keys(profileData.expenses).length,
+                taskEntries: Object.keys(profileData.tasks).length,
+                user: profileData.user,
+                userEmail: profileData.userEmail
+            });
+
+            // Show detailed expense data for debugging
+            if (Object.keys(profileData.expenses).length > 0) {
+                console.log('📝 Expense data being saved:', {
+                    dates: Object.keys(profileData.expenses),
+                    totalDays: Object.keys(profileData.expenses).length,
+                    sampleEntries: Object.keys(profileData.expenses).slice(0, 3).map(date => ({
+                        date,
+                        count: profileData.expenses[date]?.length || 0,
+                        firstExpense: profileData.expenses[date]?.[0]?.name || 'N/A'
+                    }))
+                });
+            }
+
             localStorage.setItem(userSpecificKey, JSON.stringify(profileData));
-            console.log(`Profile data saved with key: ${userSpecificKey}`);
+            console.log(`✅ Profile data saved successfully with key: ${userSpecificKey}`);
+
+            // Verify the save worked
+            const verification = localStorage.getItem(userSpecificKey);
+            if (verification) {
+                console.log('✅ Save verification successful');
+            } else {
+                console.error('❌ Save verification failed - data not found after save');
+                return false;
+            }
+
             return true;
         } catch (error) {
             this.showError('Failed to save profile data: ' + error.message);
-            console.error('Profile data saving error:', error);
+            console.error('��� Profile data saving error:', error);
             return false;
         }
     }
