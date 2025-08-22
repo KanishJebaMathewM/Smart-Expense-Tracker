@@ -494,12 +494,20 @@ class AuthenticationSystem {
             this.setCurrentUser(userId);
             this.userData = userData;
             
+            // Create session for new user
+            this.createSession();
+
             // Show success message
-            document.getElementById('successMessage').textContent = 
-                'Your account has been created successfully! You can now access the expense tracker.';
-            
+            document.getElementById('successMessage').textContent =
+                'Your account has been created successfully! Redirecting to your expense tracker...';
+
             this.switchScreen('success');
             this.showSuccess('Account created successfully!');
+
+            // Auto-proceed to app after 2 seconds
+            setTimeout(() => {
+                this.proceedToApp();
+            }, 2000);
             
         } catch (error) {
             throw new Error('Failed to create account: ' + error.message);
