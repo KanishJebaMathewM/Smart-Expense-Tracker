@@ -894,20 +894,15 @@ body {
     height: 32px;
 }
 
-/* Simple Logout Button */
-.logout-section {
+/* Logout Button in Profile Modal */
+.btn-logout {
     display: flex;
     align-items: center;
-}
-
-.logout-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-primary);
-    padding: var(--spacing-2) var(--spacing-3);
+    gap: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    padding: 10px 20px;
     border-radius: var(--border-radius);
     font-size: 0.875rem;
     font-weight: 500;
@@ -915,13 +910,13 @@ body {
     transition: all 0.2s ease;
 }
 
-.logout-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+.btn-logout:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
     transform: translateY(-1px);
 }
 
-.logout-btn:active {
+.btn-logout:active {
     transform: translateY(0);
 }
 
@@ -938,7 +933,7 @@ body {
         display: none;
     }
 
-    .logout-btn {
+    .btn-logout {
         padding: var(--spacing-2);
     }
 }
