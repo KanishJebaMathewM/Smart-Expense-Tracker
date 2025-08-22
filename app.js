@@ -2887,6 +2887,114 @@ class SmartExpenseTracker {
             return { total: 0, completed: 0, pending: 0, inProgress: 0, overdue: 0, withBudget: 0 };
         }
     }
+
+    // Update task-expense summary on dashboard
+    updateTaskExpenseSummary() {
+        try {
+            const summaryElement = document.getElementById('taskExpenseSummary');
+            if (!summaryElement) return;
+
+            const taskStats = this.getTaskStats();
+            const tasksWithBudget = Object.values(this.tasks).filter(task => task.budget && task.budget > 0);
+            const totalTaskBudget = tasksWithBudget.reduce((sum, task) => sum + (task.budget || 0), 0);
+            const totalTaskSpent = tasksWithBudget.reduce((sum, task) => sum + (task.actualExpense || 0), 0);
+            const monthlyExpenses = this.getTotalMonthlyExpenses();
+
+            if (taskStats.total === 0) {
+                summaryElement.innerHTML = `
+                    <div class="summary-message">
+                        <p>No tasks created yet. <a href="#" onclick="tracker.switchSection('tasks')" class="summary-link">Create your first task</a> to start organizing your goals!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const taskProgressPercentage = taskStats.total > 0 ? Math.round((taskStats.completed / taskStats.total) * 100) : 0;
+            const budgetProgressPercentage = totalTaskBudget > 0 ? Math.round((totalTaskSpent / totalTaskBudget) * 100) : 0;
+            const linkedExpensePercentage = monthlyExpenses > 0 ? Math.round((totalTaskSpent / monthlyExpenses) * 100) : 0;
+
+            summaryElement.innerHTML = `
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-header">
+                            <div class="icon-bg icon-tasks small"></div>
+                            <h4>Task Progress</h4>
+                        </div>
+                        <div class="summary-content">
+                            <div class="summary-stat">
+                                <span class="stat-value">${taskStats.completed}/${taskStats.total}</span>
+                                <span class="stat-label">Completed</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${taskProgressPercentage}%"></div>
+                            </div>
+                            <div class="summary-details">
+                                <span>Pending: ${taskStats.pending}</span>
+                                <span>In Progress: ${taskStats.inProgress}</span>
+                                ${taskStats.overdue > 0 ? `<span class="overdue">Overdue: ${taskStats.overdue}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-header">
+                            <div class="icon-bg icon-integration small"></div>
+                            <h4>Budget Tracking</h4>
+                        </div>
+                        <div class="summary-content">
+                            <div class="summary-stat">
+                                <span class="stat-value">₹${totalTaskSpent}/₹${totalTaskBudget}</span>
+                                <span class="stat-label">Spent/Budgeted</span>
+                            </div>
+                            ${totalTaskBudget > 0 ? `
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${Math.min(budgetProgressPercentage, 100)}%"></div>
+                                </div>
+                                <div class="summary-details">
+                                    <span>Budget Usage: ${budgetProgressPercentage}%</span>
+                                    <span class="${totalTaskBudget - totalTaskSpent >= 0 ? 'positive' : 'negative'}">
+                                        Remaining: ₹${Math.abs(totalTaskBudget - totalTaskSpent)}
+                                    </span>
+                                </div>
+                            ` : '<p class="no-data">No budget tasks created yet</p>'}
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-header">
+                            <div class="icon-bg icon-expense small"></div>
+                            <h4>Expense Integration</h4>
+                        </div>
+                        <div class="summary-content">
+                            <div class="summary-stat">
+                                <span class="stat-value">${linkedExpensePercentage}%</span>
+                                <span class="stat-label">Task-Linked Expenses</span>
+                            </div>
+                            <div class="summary-details">
+                                <span>Total Monthly: ₹${monthlyExpenses}</span>
+                                <span>Task Related: ₹${totalTaskSpent}</span>
+                                <span>Other: ₹${monthlyExpenses - totalTaskSpent}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-actions">
+                    <button class="btn btn-primary" onclick="tracker.switchSection('tasks')">
+                        <div class="icon-bg icon-tasks xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                        Manage Tasks
+                    </button>
+                    <button class="btn btn-secondary" onclick="tracker.showTaskModal()">
+                        <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                        Add New Task
+                    </button>
+                </div>
+            `;
+
+        } catch (error) {
+            console.error('Error updating task-expense summary:', error);
+        }
+    }
 }
 
 // Initialize the tracker when DOM is loaded
