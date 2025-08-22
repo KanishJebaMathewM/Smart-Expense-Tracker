@@ -5607,8 +5607,8 @@ class SmartExpenseTracker {
                             <span>${Object.keys(weekPlan).length}/21</span>
                         </div>
                         <div class="summary-item">
-                            <span>Est. Weekly Cost:</span>
-                            <span>₹${Math.round(weekSummary.estimatedCost)}</span>
+                            <span>Avg Daily Carbs:</span>
+                            <span>${Math.round(weekSummary.avgCarbs)}g</span>
                         </div>
                     </div>
                 </div>
