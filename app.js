@@ -509,6 +509,11 @@ class SmartExpenseTracker {
     
     getExpensesForDate(date) {
         try {
+            // Ensure expenses object exists
+            if (!this.expenses || typeof this.expenses !== 'object') {
+                this.expenses = {};
+            }
+
             const dateKey = this.getDateKey(date);
             return this.expenses[dateKey] || [];
         } catch (error) {
