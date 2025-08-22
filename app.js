@@ -955,7 +955,7 @@ class SmartExpenseTracker {
                 console.log('📋 All profile-related keys in storage:', profileKeys);
 
                 // Try to migrate from legacy storage if no user-specific data found
-                console.log('🔄 Checking for legacy data migration...');
+                console.log('���� Checking for legacy data migration...');
                 this.migrateLegacyData();
 
                 // Check if migration found anything
@@ -6529,7 +6529,38 @@ class SmartExpenseTracker {
     }
 
     editShoppingItem(itemId) {
-        console.log('Edit shopping item - to be implemented:', itemId);
+        try {
+            const item = this.shoppingList[itemId];
+            if (!item) {
+                this.showError('Shopping item not found');
+                return;
+            }
+
+            // Pre-fill the shopping modal with existing item data
+            this.showShoppingModal();
+
+            // Wait for modal to render, then populate fields
+            setTimeout(() => {
+                const foodSelect = document.getElementById('shoppingFoodSelect');
+                const quantityInput = document.getElementById('shoppingQuantity');
+                const unitInput = document.getElementById('shoppingUnit');
+
+                if (foodSelect) foodSelect.value = item.foodId;
+                if (quantityInput) quantityInput.value = item.quantity;
+                if (unitInput) unitInput.value = item.unit;
+
+                // Change the save button to update mode
+                const saveBtn = document.getElementById('saveShoppingItem');
+                if (saveBtn) {
+                    saveBtn.textContent = 'Update Item';
+                    saveBtn.onclick = () => this.updateShoppingItem(itemId);
+                }
+            }, 100);
+
+        } catch (error) {
+            this.showError('Failed to edit shopping item: ' + error.message);
+            console.error('Error editing shopping item:', error);
+        }
     }
 
     renderNutritionCharts(weeklyData, todayNutrition) {
