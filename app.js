@@ -1902,7 +1902,7 @@ class SmartExpenseTracker {
     getNotificationIcon(type) {
         const icons = {
             success: '✅',
-            error: '���', 
+            error: '❌', 
             warning: '⚠️',
             info: 'ℹ️'
         };
@@ -2988,10 +2988,12 @@ class SmartExpenseTracker {
         }
     }
 
-    // Add final expense for completed task
+    // Add final expense for completed task (now auto-handled in completion)
     addFinalExpenseForTask(task, completionDate) {
         try {
-            // Auto-fill expense modal for the task
+            // This method is now primarily for manual expense addition
+            // The automatic budget completion is handled in handleBudgetTaskCompletion
+
             this.showExpenseModal(completionDate);
 
             setTimeout(() => {
@@ -3000,7 +3002,7 @@ class SmartExpenseTracker {
                 const amountInput = document.getElementById('expenseAmount');
 
                 if (nameInput) {
-                    nameInput.value = `${task.title} - Final Expense`;
+                    nameInput.value = `${task.title} - Additional Expense`;
                 }
 
                 if (categorySelect && task.expenseCategory) {
@@ -3008,13 +3010,7 @@ class SmartExpenseTracker {
                 }
 
                 if (amountInput) {
-                    // Suggest remaining budget amount
-                    const remainingBudget = task.budget - (task.actualExpense || 0);
-                    if (remainingBudget > 0) {
-                        amountInput.value = remainingBudget.toFixed(2);
-                    }
                     amountInput.focus();
-                    amountInput.select();
                 }
 
                 // Store task ID for automatic linking
