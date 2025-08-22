@@ -5205,6 +5205,338 @@ class SmartExpenseTracker {
             console.error('Error hiding nutrition goals modal:', error);
         }
     }
+
+    // Save shopping item
+    saveShoppingItem() {
+        try {
+            const foodId = document.getElementById('shoppingFoodSelect').value;
+            const quantity = parseFloat(document.getElementById('shoppingQuantity').value);
+            const unit = document.getElementById('shoppingUnit').value;
+            const estimatedCost = parseFloat(document.getElementById('estimatedCost').value) || 0;
+
+            if (!foodId || !quantity || quantity <= 0) {
+                this.showError('Please fill all required fields with valid values');
+                return;
+            }
+
+            if (this.addToShoppingList(foodId, quantity, unit, estimatedCost)) {
+                this.hideShoppingModal();
+                this.renderShoppingList();
+                this.updateNutritionOverview();
+                this.showSuccess('Item added to shopping list!');
+            }
+        } catch (error) {
+            this.showError('Failed to save shopping item: ' + error.message);
+            console.error('Error saving shopping item:', error);
+        }
+    }
+
+    // Save nutrition goals
+    saveNutritionGoals() {
+        try {
+            const calorieTarget = parseInt(document.getElementById('calorieTarget').value);
+            const proteinTarget = parseInt(document.getElementById('proteinTarget').value);
+            const carbTarget = parseInt(document.getElementById('carbTarget').value);
+            const fatTarget = parseInt(document.getElementById('fatTarget').value);
+            const dietType = document.getElementById('dietTypePreference').value;
+
+            this.userPreferences = {
+                ...this.userPreferences,
+                calorieTarget,
+                proteinTarget,
+                carbTarget,
+                fatTarget,
+                dietType
+            };
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            this.hideNutritionGoalsModal();
+            this.renderNutritionInsights();
+            this.updateNutritionOverview();
+            this.showSuccess('Nutrition goals updated successfully!');
+        } catch (error) {
+            this.showError('Failed to save nutrition goals: ' + error.message);
+            console.error('Error saving nutrition goals:', error);
+        }
+    }
+
+    // Save recipe
+    saveRecipe(editingId = null) {
+        try {
+            const name = document.getElementById('recipeName').value.trim();
+            const servings = parseInt(document.getElementById('recipeServings').value);
+            const prepTime = parseInt(document.getElementById('recipePrepTime').value);
+            const dietType = document.getElementById('recipeDietType').value;
+            const category = document.getElementById('recipeCategory').value;
+            const instructions = document.getElementById('recipeInstructions').value.split('\n').filter(line => line.trim());
+
+            if (!name || !servings || !prepTime) {
+                this.showError('Please fill all required fields');
+                return;
+            }
+
+            // Get ingredients
+            const ingredients = {};
+            const ingredientItems = document.querySelectorAll('.ingredient-item');
+
+            for (let item of ingredientItems) {
+                const foodId = item.querySelector('.ingredient-select').value;
+                const quantity = parseFloat(item.querySelector('.ingredient-quantity').value);
+                const unit = item.querySelector('.ingredient-unit').value;
+
+                if (foodId && quantity && unit) {
+                    ingredients[foodId] = { quantity, unit };
+                }
+            }
+
+            if (Object.keys(ingredients).length === 0) {
+                this.showError('Please add at least one ingredient');
+                return;
+            }
+
+            const recipeId = editingId || Date.now().toString();
+            this.recipes[recipeId] = {
+                id: recipeId,
+                name,
+                ingredients,
+                instructions,
+                servings,
+                prepTime,
+                category,
+                dietType,
+                createdAt: editingId ? this.recipes[recipeId]?.createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            this.hideRecipeModal();
+            this.renderRecipes();
+            this.updateNutritionOverview();
+            this.showSuccess('Recipe saved successfully!');
+        } catch (error) {
+            this.showError('Failed to save recipe: ' + error.message);
+            console.error('Error saving recipe:', error);
+        }
+    }
+
+    // Render inventory
+    renderInventory() {
+        try {
+            const inventoryList = document.getElementById('inventoryList');
+            if (!inventoryList) return;
+
+            const inventoryItems = Object.values(this.inventory);
+
+            if (inventoryItems.length === 0) {
+                inventoryList.innerHTML = `
+                    <div class="inventory-placeholder">
+                        <div class="icon-bg icon-inventory xlarge"></div>
+                        <h4>Your kitchen stock is empty</h4>
+                        <p>Start by adding items you have in your kitchen</p>
+                        <button class="btn btn-primary" onclick="tracker.showInventoryModal()">
+                            <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Add First Item
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            inventoryList.innerHTML = inventoryItems.map(item => {
+                const isLowStock = item.quantity < 2; // Arbitrary low stock threshold
+                const isExpiring = item.expiryDate && new Date(item.expiryDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Expiring within 7 days
+
+                return `
+                    <div class="inventory-item ${isLowStock ? 'low-stock' : ''} ${isExpiring ? 'expiring' : ''}">
+                        <div class="item-info">
+                            <div class="item-name">${this.escapeHtml(item.name)}</div>
+                            <div class="item-category">${item.category}</div>
+                        </div>
+                        <div class="item-quantity">
+                            <span class="quantity">${item.quantity}</span>
+                            <span class="unit">${item.unit}</span>
+                        </div>
+                        <div class="item-status">
+                            ${isLowStock ? '<span class="status-badge low-stock">Low Stock</span>' : ''}
+                            ${isExpiring ? '<span class="status-badge expiring">Expiring Soon</span>' : ''}
+                            ${item.expiryDate ? `<div class="expiry-date">Expires: ${new Date(item.expiryDate).toLocaleDateString()}</div>` : ''}
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn-small" onclick="tracker.showInventoryModal('${item.foodId}')">Edit</button>
+                            <button class="btn-small btn-danger" onclick="tracker.removeFromInventory('${item.foodId}')">Remove</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Error rendering inventory:', error);
+        }
+    }
+
+    // Render recipes
+    renderRecipes() {
+        try {
+            const recipesList = document.getElementById('recipesList');
+            if (!recipesList) return;
+
+            const availableRecipes = this.getAvailableRecipes();
+
+            if (availableRecipes.length === 0) {
+                recipesList.innerHTML = `
+                    <div class="recipes-placeholder">
+                        <div class="icon-bg icon-recipes xlarge"></div>
+                        <h4>No recipes available</h4>
+                        <p>Add some recipes to get cooking suggestions</p>
+                        <button class="btn btn-primary" onclick="tracker.showRecipeModal()">
+                            <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Add Recipe
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            recipesList.innerHTML = availableRecipes.map(({ recipe, canMake, missingIngredients, nutrition }) => {
+                return `
+                    <div class="recipe-card ${canMake ? 'can-make' : 'missing-ingredients'}">
+                        <div class="recipe-header">
+                            <h4 class="recipe-name">${this.escapeHtml(recipe.name)}</h4>
+                            <div class="recipe-meta">
+                                <span class="recipe-time">${recipe.prepTime} min</span>
+                                <span class="recipe-servings">${recipe.servings} servings</span>
+                                <span class="recipe-diet ${recipe.dietType}">${recipe.dietType}</span>
+                            </div>
+                        </div>
+
+                        <div class="recipe-nutrition">
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Calories:</span>
+                                <span class="nutrition-value">${Math.round(nutrition.calories)}</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Protein:</span>
+                                <span class="nutrition-value">${Math.round(nutrition.protein)}g</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Carbs:</span>
+                                <span class="nutrition-value">${Math.round(nutrition.carbs)}g</span>
+                            </div>
+                        </div>
+
+                        ${!canMake ? `
+                            <div class="missing-ingredients">
+                                <h5>Missing ingredients:</h5>
+                                <ul>
+                                    ${missingIngredients.map(missing =>
+                                        `<li>${this.foodDatabase[missing.food]?.name || missing.food}: need ${missing.missing} more</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+
+                        <div class="recipe-actions">
+                            ${canMake ? `
+                                <button class="btn btn-primary" onclick="tracker.cookRecipe('${recipe.id}')">Cook This Recipe</button>
+                            ` : `
+                                <button class="btn btn-secondary" onclick="tracker.addMissingToShoppingList('${recipe.id}')">Add Missing to Shopping</button>
+                            `}
+                            <button class="btn btn-secondary" onclick="tracker.showRecipeModal('${recipe.id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="tracker.deleteRecipe('${recipe.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Error rendering recipes:', error);
+        }
+    }
+
+    // Update nutrition overview
+    updateNutritionOverview() {
+        try {
+            // Update inventory count
+            const inventoryCount = Object.keys(this.inventory).length;
+            this.updateElement('inventoryItems', `${inventoryCount} items`);
+
+            // Update available recipes count
+            const availableRecipes = this.getAvailableRecipes();
+            const canMakeCount = availableRecipes.filter(r => r.canMake).length;
+            this.updateElement('availableRecipes', `${canMakeCount} recipes`);
+
+            // Update today's calories
+            const today = new Date();
+            const todayLog = this.getNutritionLogForDate(today);
+            this.updateElement('todaysCalories', `${Math.round(todayLog.totalNutrition.calories)} kcal`);
+
+            // Update shopping list count
+            const shoppingCount = Object.keys(this.shoppingList).length;
+            this.updateElement('shoppingItems', `${shoppingCount} items`);
+
+        } catch (error) {
+            console.error('Error updating nutrition overview:', error);
+        }
+    }
+
+    // Placeholder methods for remaining functionality
+    renderMealPlan() {
+        console.log('Meal plan rendering - to be implemented');
+    }
+
+    renderShoppingList() {
+        console.log('Shopping list rendering - to be implemented');
+    }
+
+    renderNutritionInsights() {
+        console.log('Nutrition insights rendering - to be implemented');
+    }
+
+    generateWeeklyMealPlan() {
+        console.log('Weekly meal plan generation - to be implemented');
+    }
+
+    exportShoppingList() {
+        console.log('Shopping list export - to be implemented');
+    }
+
+    filterInventory() {
+        console.log('Inventory filtering - to be implemented');
+    }
+
+    toggleLowStockFilter() {
+        console.log('Low stock filter toggle - to be implemented');
+    }
+
+    toggleExpiringFilter() {
+        console.log('Expiring filter toggle - to be implemented');
+    }
+
+    filterRecipes() {
+        console.log('Recipe filtering - to be implemented');
+    }
+
+    toggleAvailableRecipesFilter() {
+        console.log('Available recipes filter toggle - to be implemented');
+    }
+
+    removeFromInventory(foodId) {
+        console.log('Remove from inventory - to be implemented:', foodId);
+    }
+
+    cookRecipe(recipeId) {
+        console.log('Cook recipe - to be implemented:', recipeId);
+    }
+
+    addMissingToShoppingList(recipeId) {
+        console.log('Add missing ingredients to shopping - to be implemented:', recipeId);
+    }
+
+    deleteRecipe(recipeId) {
+        console.log('Delete recipe - to be implemented:', recipeId);
+    }
 }
 
 // Initialize the tracker when DOM is loaded
