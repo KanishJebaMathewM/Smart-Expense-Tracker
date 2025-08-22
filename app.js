@@ -2904,6 +2904,84 @@ class SmartExpenseTracker {
         }
     }
 
+    // Handle budget task completion - update expenses and calendar
+    handleBudgetTaskCompletion(task) {
+        try {
+            const completionDate = new Date(task.completedAt);
+            const actualExpense = task.actualExpense || 0;
+
+            // If task has budget but no recorded expenses, prompt user to add final expense
+            if (actualExpense === 0) {
+                const shouldAddExpense = confirm(
+                    `Task "${task.title}" is completed with a budget of ₹${task.budget}.\n\n` +
+                    'Would you like to add the final expense amount for this task?'
+                );
+
+                if (shouldAddExpense) {
+                    this.addFinalExpenseForTask(task, completionDate);
+                    return;
+                }
+            }
+
+            // If there's a difference between budget and actual expense, ask user what to do
+            if (actualExpense > 0 && actualExpense !== task.budget) {
+                const difference = task.budget - actualExpense;
+                const message = difference > 0
+                    ? `Task completed under budget by ₹${difference.toFixed(2)}. This has been updated in your records.`
+                    : `Task completed over budget by ₹${Math.abs(difference).toFixed(2)}. This has been recorded.`;
+
+                this.showInfo(message);
+            }
+
+            // Mark task as budget-reconciled
+            task.budgetReconciled = true;
+            task.budgetVariance = task.budget - actualExpense;
+
+            console.log(`Budget task "${task.title}" completed. Budget: ₹${task.budget}, Actual: ₹${actualExpense}`);
+
+        } catch (error) {
+            console.error('Error handling budget task completion:', error);
+        }
+    }
+
+    // Add final expense for completed task
+    addFinalExpenseForTask(task, completionDate) {
+        try {
+            // Auto-fill expense modal for the task
+            this.showExpenseModal(completionDate);
+
+            setTimeout(() => {
+                const nameInput = document.getElementById('expenseName');
+                const categorySelect = document.getElementById('expenseCategory');
+                const amountInput = document.getElementById('expenseAmount');
+
+                if (nameInput) {
+                    nameInput.value = `${task.title} - Final Expense`;
+                }
+
+                if (categorySelect && task.expenseCategory) {
+                    categorySelect.value = task.expenseCategory;
+                }
+
+                if (amountInput) {
+                    // Suggest remaining budget amount
+                    const remainingBudget = task.budget - (task.actualExpense || 0);
+                    if (remainingBudget > 0) {
+                        amountInput.value = remainingBudget.toFixed(2);
+                    }
+                    amountInput.focus();
+                    amountInput.select();
+                }
+
+                // Store task ID for automatic linking
+                window.currentTaskForExpense = task.id;
+            }, 200);
+
+        } catch (error) {
+            console.error('Error adding final expense for task:', error);
+        }
+    }
+
     // Update task-expense summary on dashboard
     updateTaskExpenseSummary() {
         try {
@@ -2959,7 +3037,7 @@ class SmartExpenseTracker {
                         </div>
                         <div class="summary-content">
                             <div class="summary-stat">
-                                <span class="stat-value">���${totalTaskSpent}/₹${totalTaskBudget}</span>
+                                <span class="stat-value">₹${totalTaskSpent}/₹${totalTaskBudget}</span>
                                 <span class="stat-label">Spent/Budgeted</span>
                             </div>
                             ${totalTaskBudget > 0 ? `
