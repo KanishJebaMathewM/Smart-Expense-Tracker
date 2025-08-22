@@ -356,6 +356,14 @@ class SmartExpenseTracker {
             // Logout button event
             this.safeAddEventListener('logoutBtn', 'click', () => this.logout());
 
+            // Task manager events
+            this.safeAddEventListener('addTaskBtn', 'click', () => this.showTaskModal());
+            this.safeAddEventListener('saveTask', 'click', () => this.saveTask());
+            this.safeAddEventListener('updateTask', 'click', () => this.updateTask());
+            this.safeAddEventListener('taskFilter', 'change', (e) => this.filterTasks(e.target.value, 'status'));
+            this.safeAddEventListener('taskCategory', 'change', (e) => this.filterTasks(e.target.value, 'category'));
+            this.safeAddEventListener('hasBudget', 'change', (e) => this.toggleBudgetFields(e.target.checked));
+
             // Prevent modal close on content click
             document.querySelectorAll('.modal-content').forEach(content => {
                 content.addEventListener('click', (e) => e.stopPropagation());
