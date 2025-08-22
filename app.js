@@ -815,6 +815,30 @@ class SmartExpenseTracker {
             this.safeAddEventListener('taskCategory', 'change', (e) => this.filterTasks(e.target.value, 'category'));
             this.safeAddEventListener('hasBudget', 'change', (e) => this.toggleBudgetFields(e.target.checked));
 
+            // Nutrition planner events
+            this.safeAddEventListener('addInventoryBtn', 'click', () => this.showInventoryModal());
+            this.safeAddEventListener('addRecipeBtn', 'click', () => this.showRecipeModal());
+            this.safeAddEventListener('addShoppingItemBtn', 'click', () => this.showShoppingModal());
+            this.safeAddEventListener('generateMealPlanBtn', 'click', () => this.generateWeeklyMealPlan());
+            this.safeAddEventListener('setNutritionGoalsBtn', 'click', () => this.showNutritionGoalsModal());
+            this.safeAddEventListener('exportShoppingListBtn', 'click', () => this.exportShoppingList());
+
+            // Nutrition tab switching
+            document.querySelectorAll('.nutrition-tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tabName = e.target.closest('.nutrition-tab-btn').dataset.nutritionTab;
+                    this.switchNutritionTab(tabName);
+                });
+            });
+
+            // Nutrition filters
+            this.safeAddEventListener('inventoryCategory', 'change', () => this.filterInventory());
+            this.safeAddEventListener('lowStockFilter', 'click', () => this.toggleLowStockFilter());
+            this.safeAddEventListener('expiringFilter', 'click', () => this.toggleExpiringFilter());
+            this.safeAddEventListener('recipeDiet', 'change', () => this.filterRecipes());
+            this.safeAddEventListener('recipeCategory', 'change', () => this.filterRecipes());
+            this.safeAddEventListener('availableOnlyFilter', 'click', () => this.toggleAvailableRecipesFilter());
+
             // Prevent modal close on content click
             document.querySelectorAll('.modal-content').forEach(content => {
                 content.addEventListener('click', (e) => e.stopPropagation());
