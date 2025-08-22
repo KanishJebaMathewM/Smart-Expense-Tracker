@@ -3988,7 +3988,7 @@ class SmartExpenseTracker {
                         <div class="modal-body">
                             <div class="task-budget-summary">
                                 <div class="budget-info">
-                                    <span>Budget: ₹${task.budget}</span>
+                                    <span>Budget: ��${task.budget}</span>
                                     <span>Spent: ₹${task.status === 'completed' ? task.budget : (task.actualExpense || 0)}</span>
                                     <span class="${task.status === 'completed' ? 'completed' : (task.actualExpense <= task.budget ? 'within-budget' : 'over-budget')}">
                                         ${task.status === 'completed' ? 'Completed - Full Budget Spent' : (task.actualExpense <= task.budget ? 'Within Budget' : 'Over Budget')}
@@ -6750,7 +6750,58 @@ class SmartExpenseTracker {
     }
 
     renderNutritionCharts(weeklyData, todayNutrition) {
-        console.log('Nutrition charts rendering - to be implemented');
+        try {
+            // Create a simple nutrition progress visualization
+            const insightsContainer = document.getElementById('nutritionInsights');
+            if (!insightsContainer) return;
+
+            const chartsHtml = `
+                <div class="nutrition-charts">
+                    <div class="weekly-overview">
+                        <h4>Weekly Nutrition Overview</h4>
+                        <div class="week-bars">
+                            ${weeklyData.map(day => `
+                                <div class="day-bar">
+                                    <div class="day-label">${day.dayName}</div>
+                                    <div class="calorie-bar">
+                                        <div class="bar-fill" style="height: ${Math.min((day.nutrition.calories / 2500) * 100, 100)}%"></div>
+                                    </div>
+                                    <div class="day-calories">${Math.round(day.nutrition.calories)}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="nutrition-breakdown">
+                        <h4>Today's Macronutrients</h4>
+                        <div class="macro-circles">
+                            <div class="macro-circle">
+                                <div class="circle-progress protein-circle" style="--progress: ${Math.min((todayNutrition.protein / this.userPreferences.proteinTarget) * 100, 100)}%"></div>
+                                <div class="macro-label">Protein<br>${Math.round(todayNutrition.protein)}g</div>
+                            </div>
+                            <div class="macro-circle">
+                                <div class="circle-progress carbs-circle" style="--progress: ${Math.min((todayNutrition.carbs / this.userPreferences.carbTarget) * 100, 100)}%"></div>
+                                <div class="macro-label">Carbs<br>${Math.round(todayNutrition.carbs)}g</div>
+                            </div>
+                            <div class="macro-circle">
+                                <div class="circle-progress fat-circle" style="--progress: ${Math.min((todayNutrition.fat / this.userPreferences.fatTarget) * 100, 100)}%"></div>
+                                <div class="macro-label">Fat<br>${Math.round(todayNutrition.fat)}g</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Insert or update charts
+            let chartsElement = insightsContainer.querySelector('.nutrition-charts');
+            if (chartsElement) {
+                chartsElement.outerHTML = chartsHtml;
+            } else {
+                insightsContainer.insertAdjacentHTML('afterbegin', chartsHtml);
+            }
+        } catch (error) {
+            console.error('Error rendering nutrition charts:', error);
+        }
     }
 
     // ==============================================
