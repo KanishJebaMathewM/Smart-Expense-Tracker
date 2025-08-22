@@ -422,18 +422,28 @@
 
     <!-- Auto-logout functionality -->
     <script>
-        // Auto-logout functionality when window is closed or user leaves
-        window.addEventListener('beforeunload', () => {
-            // Clear session data on window close
-            localStorage.removeItem('app_session_token');
-            localStorage.removeItem('current_user_id');
+        // Auto-logout functionality when window is actually closed (not on navigation)
+        let isInternalNavigation = false;
+
+        window.addEventListener('beforeunload', (e) => {
+            // Only clear session on actual tab/window close, not on page refresh or navigation
+            if (e.returnValue === undefined && !isInternalNavigation) {
+                localStorage.removeItem('app_session_token');
+                localStorage.removeItem('current_user_id');
+            }
         });
 
-        // Also handle when user navigates away from the page
-        window.addEventListener('pagehide', () => {
-            // Clear session data on page hide
-            localStorage.removeItem('app_session_token');
-            localStorage.removeItem('current_user_id');
+        // Track when user clicks logout to allow clean navigation
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    isInternalNavigation = true;
+                    localStorage.removeItem('app_session_token');
+                    localStorage.removeItem('current_user_id');
+                    window.location.href = 'auth.html';
+                });
+            }
         });
     </script>
 
