@@ -3165,6 +3165,20 @@ class SmartExpenseTracker {
         }
     }
 
+    // Refresh all task manager related displays
+    refreshTaskManagerDisplay() {
+        try {
+            this.renderTasks();
+            this.updateTaskStats();
+            this.renderCalendar(); // Update calendar with latest task completion data
+            this.updateDashboard(); // Update dashboard with latest stats
+            this.updateExpenseIntegration(); // Update task-expense integration
+            this.updateTaskExpenseSummary(); // Update task-expense summary on dashboard
+        } catch (error) {
+            console.error('Error refreshing task manager display:', error);
+        }
+    }
+
     // Update task-expense summary on dashboard
     updateTaskExpenseSummary() {
         try {
