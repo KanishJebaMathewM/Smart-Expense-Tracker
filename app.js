@@ -576,6 +576,8 @@ class SmartExpenseTracker {
     // Load profile-specific data (user-specific)
     loadProfileData() {
         try {
+            console.log('=== LOADING PROFILE DATA ===');
+
             // Always ensure data structures exist first
             this.income = this.income || {};
             this.expenses = this.expenses || {};
@@ -583,35 +585,73 @@ class SmartExpenseTracker {
 
             // If no current profile, try to load any existing data or keep empty structures
             if (!this.currentProfile) {
-                console.log('No current profile, using empty data structures');
+                console.log('⚠️ No current profile, using empty data structures');
                 return;
             }
 
+            console.log('Current profile info:', {
+                id: this.currentProfile.id,
+                name: this.currentProfile.name,
+                userEmail: this.currentUser?.email,
+                userId: this.currentUser?.userId
+            });
+
             const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id);
-            console.log(`Loading profile data with key: ${userSpecificKey}`);
+            console.log(`📁 Loading profile data with key: ${userSpecificKey}`);
 
             const profileData = localStorage.getItem(userSpecificKey);
 
             if (profileData) {
+                console.log('✅ Found existing profile data');
                 const data = JSON.parse(profileData);
+                console.log('Profile data content:', {
+                    hasIncome: !!data.income,
+                    hasExpenses: !!data.expenses,
+                    hasTasks: !!data.tasks,
+                    lastSaved: data.lastSaved,
+                    user: data.user,
+                    userEmail: data.userEmail
+                });
+
                 this.income = data.income || {};
                 this.expenses = data.expenses || {};
                 this.tasks = data.tasks || {};
-                console.log(`Profile data loaded successfully:`, {
-                    income: Object.keys(this.income).length,
-                    expenses: Object.keys(this.expenses).length,
-                    tasks: Object.keys(this.tasks).length
+
+                console.log(`📊 Profile data loaded successfully:`, {
+                    incomeEntries: Object.keys(this.income).length,
+                    expenseEntries: Object.keys(this.expenses).length,
+                    taskEntries: Object.keys(this.tasks).length
                 });
+
+                // Show detailed expense data for debugging
+                if (Object.keys(this.expenses).length > 0) {
+                    console.log('📝 Expense data details:', {
+                        dates: Object.keys(this.expenses),
+                        totalDays: Object.keys(this.expenses).length,
+                        firstEntries: Object.keys(this.expenses).slice(0, 3).map(date => ({
+                            date,
+                            count: this.expenses[date].length
+                        }))
+                    });
+                }
             } else {
+                console.log('❌ No user-specific data found');
+
+                // Check if there are any storage keys that might match
+                const allKeys = Object.keys(localStorage);
+                const profileKeys = allKeys.filter(key => key.includes('profile_data'));
+                console.log('📋 All profile-related keys in storage:', profileKeys);
+
                 // Try to migrate from legacy storage if no user-specific data found
-                console.log('No user-specific data found, checking for legacy data migration');
+                console.log('🔄 Checking for legacy data migration...');
                 this.migrateLegacyData();
             }
 
-            console.log(`Profile data loaded successfully for user: ${this.currentUser?.name}`);
+            console.log(`✅ Profile data loading completed for user: ${this.currentUser?.name}`);
+            console.log('=== PROFILE DATA LOADING COMPLETED ===');
         } catch (error) {
             this.showError('Failed to load profile data: ' + error.message);
-            console.error('Profile data loading error:', error);
+            console.error('❌ Profile data loading error:', error);
             // Always ensure data structures exist, even on error
             this.income = this.income || {};
             this.expenses = this.expenses || {};
