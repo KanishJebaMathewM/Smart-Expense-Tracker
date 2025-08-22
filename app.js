@@ -90,6 +90,9 @@ class SmartExpenseTracker {
             // Get authenticated user data
             this.loadAuthenticatedUser();
 
+            // Display current user name
+            this.displayCurrentUser();
+
             this.hideLoadingScreen();
             this.initMainTracker();
 
