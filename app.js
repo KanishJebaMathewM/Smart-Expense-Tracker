@@ -652,7 +652,7 @@ class SmartExpenseTracker {
     // Load profile-specific data (user-specific)
     loadProfileData() {
         try {
-            console.log('=== LOADING PROFILE DATA ===');
+            console.log('%c=== LOADING PROFILE DATA ===', 'color: blue; font-size: 16px; font-weight: bold;');
 
             // Always ensure data structures exist first
             this.income = this.income || {};
@@ -792,7 +792,7 @@ class SmartExpenseTracker {
             return true;
         } catch (error) {
             this.showError('Failed to save profile data: ' + error.message);
-            console.error('��� Profile data saving error:', error);
+            console.error('❌ Profile data saving error:', error);
             return false;
         }
     }
