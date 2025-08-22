@@ -4183,3 +4183,288 @@ body {
         max-width: 60px;
     }
 }
+/* Export Modal Styles */
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+    margin: var(--spacing-6) 0;
+}
+
+.export-option {
+    position: relative;
+}
+
+.export-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.export-option label {
+    display: block;
+    padding: var(--spacing-5);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--bg-secondary);
+    position: relative;
+}
+
+.export-option label:hover {
+    border-color: var(--primary-300);
+    background: var(--bg-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.export-option input[type="radio"]:checked + label {
+    border-color: var(--primary-500);
+    background: var(--primary-50);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.export-option-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    margin-bottom: var(--spacing-3);
+}
+
+.export-option-header strong {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.export-option-subtitle {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--primary-600);
+}
+
+.export-option-description {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.export-option input[type="radio"]:checked + label::after {
+    content: '✓';
+    position: absolute;
+    top: var(--spacing-3);
+    right: var(--spacing-3);
+    width: 24px;
+    height: 24px;
+    background: var(--primary-500);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Task Detail Styles for Reports */
+.report-task-details {
+    margin-top: var(--spacing-8);
+    padding-top: var(--spacing-8);
+    border-top: 2px solid var(--border-color);
+}
+
+.task-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-6);
+    margin-top: var(--spacing-6);
+}
+
+.task-detail-section h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.task-detail-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
+    transition: var(--transition);
+}
+
+.task-detail-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.task-detail-item.completed {
+    border-left: 4px solid var(--success-500);
+    background: var(--success-50);
+}
+
+.task-detail-item.pending {
+    border-left: 4px solid var(--warning-500);
+    background: var(--warning-50);
+}
+
+.task-detail-item.in-progress {
+    border-left: 4px solid var(--primary-500);
+    background: var(--primary-50);
+}
+
+.task-detail-item.overdue {
+    border-left: 4px solid var(--error-500);
+    background: var(--error-50);
+}
+
+.task-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-2);
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+}
+
+.task-detail-header strong {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+    flex: 1;
+    min-width: 0;
+}
+
+.task-priority {
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.task-priority.low {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+.task-priority.medium {
+    background: var(--warning-100);
+    color: var(--warning-700);
+}
+
+.task-priority.high {
+    background: var(--error-100);
+    color: var(--error-700);
+}
+
+.task-priority.urgent {
+    background: var(--error-200);
+    color: var(--error-800);
+    animation: pulse 2s infinite;
+}
+
+.overdue-badge {
+    padding: var(--spacing-1) var(--spacing-2);
+    background: var(--error-500);
+    color: white;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+}
+
+.task-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.task-detail-meta span {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+
+.task-detail-desc {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0;
+    padding-top: var(--spacing-2);
+    border-top: 1px solid var(--border-color);
+}
+
+.no-tasks {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: var(--spacing-6);
+    background: var(--bg-accent);
+    border-radius: var(--border-radius-lg);
+    border: 1px dashed var(--border-color);
+}
+
+.task-status-badge {
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    margin-left: var(--spacing-2);
+}
+
+.task-status-badge.completed {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Responsive adjustments for export modal */
+@media (max-width: 768px) {
+    .export-option label {
+        padding: var(--spacing-4);
+    }
+    
+    .export-option-header strong {
+        font-size: var(--font-size-base);
+    }
+    
+    .export-option-description {
+        font-size: var(--font-size-xs);
+    }
+    
+    .task-detail-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-4);
+    }
+    
+    .task-detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .task-detail-meta {
+        flex-direction: column;
+        gap: var(--spacing-1);
+    }
+}
