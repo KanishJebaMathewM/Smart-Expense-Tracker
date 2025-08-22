@@ -220,8 +220,11 @@ class SmartExpenseTracker {
 
     // Get user-specific storage key
     getUserSpecificKey(baseKey) {
-        const userId = this.currentUser?.userId || this.currentUser?.email || 'default';
-        return `${baseKey}_${userId.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        // Always use email as the primary identifier for consistency
+        // This ensures the same key is generated regardless of session
+        const userIdentifier = this.currentUser?.email || this.currentUser?.userId || 'default';
+        const cleanIdentifier = userIdentifier.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+        return `${baseKey}_${cleanIdentifier}`;
     }
 
     // Logout (redirect to auth)
@@ -282,6 +285,73 @@ class SmartExpenseTracker {
         } catch (error) {
             this.showError('Failed to initialize main tracker: ' + error.message);
             console.error('Main tracker initialization error:', error);
+        }
+    }
+
+    // Migrate legacy data to user-specific storage
+    migrateLegacyData() {
+        try {
+            // Check for legacy storage keys
+            const legacyKeys = ['income_data', 'expenses_data', 'tasks_data'];
+            let hasLegacyData = false;
+
+            legacyKeys.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    hasLegacyData = true;
+                }
+            });
+
+            if (!hasLegacyData) {
+                console.log('No legacy data found for migration');
+                return;
+            }
+
+            console.log('Migrating legacy data to user-specific storage...');
+
+            // Migrate income data
+            const legacyIncome = localStorage.getItem('income_data');
+            if (legacyIncome && Object.keys(this.income).length === 0) {
+                try {
+                    this.income = JSON.parse(legacyIncome);
+                    console.log('Migrated legacy income data');
+                } catch (e) {
+                    console.error('Failed to migrate income data:', e);
+                }
+            }
+
+            // Migrate expenses data
+            const legacyExpenses = localStorage.getItem('expenses_data');
+            if (legacyExpenses && Object.keys(this.expenses).length === 0) {
+                try {
+                    this.expenses = JSON.parse(legacyExpenses);
+                    console.log('Migrated legacy expenses data');
+                } catch (e) {
+                    console.error('Failed to migrate expenses data:', e);
+                }
+            }
+
+            // Migrate tasks data
+            const legacyTasks = localStorage.getItem('tasks_data');
+            if (legacyTasks && Object.keys(this.tasks).length === 0) {
+                try {
+                    this.tasks = JSON.parse(legacyTasks);
+                    console.log('Migrated legacy tasks data');
+                } catch (e) {
+                    console.error('Failed to migrate tasks data:', e);
+                }
+            }
+
+            // Save migrated data with new user-specific keys
+            if (hasLegacyData) {
+                this.saveProfileData();
+                console.log('Legacy data migration completed successfully');
+
+                // Optionally remove legacy keys after successful migration
+                // legacyKeys.forEach(key => localStorage.removeItem(key));
+            }
+
+        } catch (error) {
+            console.error('Error during legacy data migration:', error);
         }
     }
 
@@ -407,13 +477,15 @@ class SmartExpenseTracker {
             this.expenses = this.expenses || {};
             this.tasks = this.tasks || {};
 
-            // If no current profile, keep empty structures but don't return early
+            // If no current profile, try to load any existing data or keep empty structures
             if (!this.currentProfile) {
                 console.log('No current profile, using empty data structures');
                 return;
             }
 
             const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id);
+            console.log(`Loading profile data with key: ${userSpecificKey}`);
+
             const profileData = localStorage.getItem(userSpecificKey);
 
             if (profileData) {
@@ -421,10 +493,15 @@ class SmartExpenseTracker {
                 this.income = data.income || {};
                 this.expenses = data.expenses || {};
                 this.tasks = data.tasks || {};
+                console.log(`Profile data loaded successfully:`, {
+                    income: Object.keys(this.income).length,
+                    expenses: Object.keys(this.expenses).length,
+                    tasks: Object.keys(this.tasks).length
+                });
             } else {
-                this.income = {};
-                this.expenses = {};
-                this.tasks = {};
+                // Try to migrate from legacy storage if no user-specific data found
+                console.log('No user-specific data found, checking for legacy data migration');
+                this.migrateLegacyData();
             }
 
             console.log(`Profile data loaded successfully for user: ${this.currentUser?.name}`);
@@ -432,9 +509,9 @@ class SmartExpenseTracker {
             this.showError('Failed to load profile data: ' + error.message);
             console.error('Profile data loading error:', error);
             // Always ensure data structures exist, even on error
-            this.income = {};
-            this.expenses = {};
-            this.tasks = {};
+            this.income = this.income || {};
+            this.expenses = this.expenses || {};
+            this.tasks = this.tasks || {};
         }
     }
 
@@ -449,10 +526,12 @@ class SmartExpenseTracker {
                 expenses: this.expenses || {},
                 tasks: this.tasks || {},
                 lastSaved: new Date().toISOString(),
-                user: this.currentUser?.name || 'Unknown'
+                user: this.currentUser?.name || 'Unknown',
+                userEmail: this.currentUser?.email || 'Unknown'
             };
 
             localStorage.setItem(userSpecificKey, JSON.stringify(profileData));
+            console.log(`Profile data saved with key: ${userSpecificKey}`);
             return true;
         } catch (error) {
             this.showError('Failed to save profile data: ' + error.message);
