@@ -1778,6 +1778,18 @@ class SmartExpenseTracker {
         return icons[type] || icons.info;
     }
 
+    // Display current user name in the header
+    displayCurrentUser() {
+        try {
+            const familyMemberName = document.getElementById('familyMemberName');
+            if (familyMemberName && this.currentUser) {
+                familyMemberName.textContent = this.currentUser.name || 'Unknown User';
+            }
+        } catch (error) {
+            console.error('Error displaying current user:', error);
+        }
+    }
+
     // Profile functionality methods
     showProfile() {
         try {
