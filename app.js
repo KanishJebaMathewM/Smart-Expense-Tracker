@@ -925,8 +925,12 @@ class SmartExpenseTracker {
                     </div>
                     <div class="expense-amount">₹${parseFloat(expense.amount).toFixed(2)}</div>
                     <div class="expense-actions">
-                        <button class="edit-btn" onclick="tracker.editExpense('${expense.id}')" title="Edit">✏️</button>
-                        <button class="delete-btn" onclick="tracker.deleteExpense('${expense.id}')" title="Delete">🗑️</button>
+                        <button class="edit-btn" onclick="tracker.editExpense('${expense.id}')" title="Edit">
+                            <div class="icon-bg icon-edit xsmall"></div>
+                        </button>
+                        <button class="delete-btn" onclick="tracker.deleteExpense('${expense.id}')" title="Delete">
+                            <div class="icon-bg icon-delete xsmall"></div>
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -1021,7 +1025,7 @@ class SmartExpenseTracker {
                         </div>
 
                         <div class="report-card">
-                            <h4>💡 Insights & Tips</h4>
+                            <h4><div class="icon-bg icon-insights xsmall" style="display: inline-block; margin-right: 8px;"></div>Insights & Tips</h4>
                             ${this.generateInsights(income, totalSpent, balance, categoryTotals)}
                         </div>
                     </div>
@@ -1040,26 +1044,26 @@ class SmartExpenseTracker {
         const insights = [];
 
         if (balance < 0) {
-            insights.push('<p>⚠️ You\'re spending more than your income. Consider reducing expenses.</p>');
+            insights.push('<p><span class="warning-icon">⚠</span> You\'re spending more than your income. Consider reducing expenses.</p>');
         } else if (balance / income < 0.1) {
-            insights.push('<p>⚠️ Low savings rate. Try to save at least 10% of your income.</p>');
+            insights.push('<p><span class="warning-icon">⚠</span> Low savings rate. Try to save at least 10% of your income.</p>');
         } else if (balance / income > 0.3) {
-            insights.push('<p>✅ Great savings rate! You\'re saving over 30% of your income.</p>');
+            insights.push('<p><span class="success-icon">✓</span> Great savings rate! You\'re saving over 30% of your income.</p>');
         }
 
         const topCategory = Object.keys(categoryTotals).reduce((a, b) =>
             categoryTotals[a] > categoryTotals[b] ? a : b, '');
 
         if (topCategory && categoryTotals[topCategory] / totalSpent > 0.4) {
-            insights.push(`<p>💡 ${topCategory} takes up ${((categoryTotals[topCategory] / totalSpent) * 100).toFixed(1)}% of your spending. Consider if this aligns with your priorities.</p>`);
+            insights.push(`<p><span class="info-icon">i</span> ${topCategory} takes up ${((categoryTotals[topCategory] / totalSpent) * 100).toFixed(1)}% of your spending. Consider if this aligns with your priorities.</p>`);
         }
 
         if (totalSpent > income * 0.8) {
-            insights.push('<p>💡 You\'re spending over 80% of your income. Consider creating a budget to track expenses better.</p>');
+            insights.push('<p><span class="info-icon">i</span> You\'re spending over 80% of your income. Consider creating a budget to track expenses better.</p>');
         }
 
         if (insights.length === 0) {
-            insights.push('<p>✅ Your spending patterns look healthy! Keep up the good work.</p>');
+            insights.push('<p><span class="success-icon">✓</span> Your spending patterns look healthy! Keep up the good work.</p>');
         }
 
         return insights.join('');
