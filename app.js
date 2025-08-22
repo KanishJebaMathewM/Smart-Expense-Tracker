@@ -2620,6 +2620,7 @@ class SmartExpenseTracker {
     // Update expense integration
     updateExpenseIntegration() {
         try {
+            this.calculateTaskExpenses(); // Update actual expenses for tasks
             const tasksWithBudget = Object.values(this.tasks).filter(task => task.budget && task.budget > 0);
             const tasksWithBudgetElement = document.getElementById('tasksWithBudget');
             const spendingGoalsElement = document.getElementById('spendingGoals');
@@ -2628,12 +2629,28 @@ class SmartExpenseTracker {
                 if (tasksWithBudget.length === 0) {
                     tasksWithBudgetElement.innerHTML = '<p class="placeholder-text">No budget-related tasks yet</p>';
                 } else {
-                    tasksWithBudgetElement.innerHTML = tasksWithBudget.map(task => `
-                        <div class="integration-item">
-                            <div class="integration-title">${this.escapeHtml(task.title)}</div>
-                            <div class="integration-budget">Budget: ₹${task.budget} | Spent: ₹${task.actualExpense || 0}</div>
-                        </div>
-                    `).join('');
+                    tasksWithBudgetElement.innerHTML = tasksWithBudget.map(task => {
+                        const budgetStatus = task.actualExpense > task.budget ? 'over-budget' : 'within-budget';
+                        const percentage = ((task.actualExpense / task.budget) * 100).toFixed(1);
+
+                        return `
+                            <div class="integration-item ${budgetStatus}">
+                                <div class="integration-title">${this.escapeHtml(task.title)}</div>
+                                <div class="integration-budget">
+                                    Budget: ₹${task.budget} | Spent: ₹${task.actualExpense || 0} (${percentage}%)
+                                </div>
+                                <div class="integration-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${Math.min(percentage, 100)}%"></div>
+                                    </div>
+                                </div>
+                                <div class="integration-actions">
+                                    <button class="btn-small" onclick="tracker.viewTaskExpenses('${task.id}')">View Expenses</button>
+                                    <button class="btn-small" onclick="tracker.addExpenseForTask('${task.id}')">Add Expense</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
                 }
             }
 
@@ -2642,13 +2659,24 @@ class SmartExpenseTracker {
                 const totalSpent = tasksWithBudget.reduce((sum, task) => sum + (task.actualExpense || 0), 0);
 
                 if (totalBudget > 0) {
+                    const totalPercentage = ((totalSpent / totalBudget) * 100).toFixed(1);
+                    const statusClass = totalSpent > totalBudget ? 'over-budget' : 'within-budget';
+
                     spendingGoalsElement.innerHTML = `
-                        <div class="integration-item">
+                        <div class="integration-item ${statusClass}">
                             <div class="integration-title">Total Task Budget</div>
-                            <div class="integration-budget">₹${totalBudget} planned | ₹${totalSpent} spent</div>
+                            <div class="integration-budget">₹${totalBudget} planned | ₹${totalSpent} spent (${totalPercentage}%)</div>
                             <div class="integration-progress">
                                 <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${Math.min((totalSpent / totalBudget) * 100, 100)}%"></div>
+                                    <div class="progress-fill" style="width: ${Math.min(totalPercentage, 100)}%"></div>
+                                </div>
+                            </div>
+                            <div class="budget-summary">
+                                <div class="summary-item">
+                                    <span>Remaining Budget:</span>
+                                    <span class="${totalBudget - totalSpent >= 0 ? 'positive' : 'negative'}">
+                                        ₹${Math.abs(totalBudget - totalSpent)}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -2660,6 +2688,189 @@ class SmartExpenseTracker {
 
         } catch (error) {
             console.error('Error updating expense integration:', error);
+        }
+    }
+
+    // Calculate actual expenses for tasks based on expense category matching
+    calculateTaskExpenses() {
+        try {
+            const tasksWithBudget = Object.values(this.tasks).filter(task => task.budget && task.budget > 0);
+
+            tasksWithBudget.forEach(task => {
+                let actualExpense = 0;
+
+                // Find expenses that match the task's expense category
+                Object.values(this.expenses).forEach(dailyExpenses => {
+                    if (Array.isArray(dailyExpenses)) {
+                        dailyExpenses.forEach(expense => {
+                            if (expense.category === task.expenseCategory) {
+                                // Add a task identifier to link expenses to tasks if not already present
+                                if (!expense.linkedTaskId && expense.name.toLowerCase().includes(task.title.toLowerCase())) {
+                                    expense.linkedTaskId = task.id;
+                                }
+
+                                if (expense.linkedTaskId === task.id) {
+                                    actualExpense += parseFloat(expense.amount) || 0;
+                                }
+                            }
+                        });
+                    }
+                });
+
+                task.actualExpense = actualExpense;
+            });
+
+            // Save updated tasks
+            this.setTasks(this.tasks);
+        } catch (error) {
+            console.error('Error calculating task expenses:', error);
+        }
+    }
+
+    // View expenses for a specific task
+    viewTaskExpenses(taskId) {
+        try {
+            const task = this.tasks[taskId];
+            if (!task) return;
+
+            const taskExpenses = [];
+            Object.entries(this.expenses).forEach(([dateKey, dailyExpenses]) => {
+                if (Array.isArray(dailyExpenses)) {
+                    dailyExpenses.forEach(expense => {
+                        if (expense.linkedTaskId === taskId ||
+                            (expense.category === task.expenseCategory &&
+                             expense.name.toLowerCase().includes(task.title.toLowerCase()))) {
+                            taskExpenses.push({
+                                ...expense,
+                                date: dateKey
+                            });
+                        }
+                    });
+                }
+            });
+
+            this.showTaskExpensesModal(task, taskExpenses);
+        } catch (error) {
+            console.error('Error viewing task expenses:', error);
+        }
+    }
+
+    // Show task expenses modal
+    showTaskExpensesModal(task, expenses) {
+        try {
+            const modalHtml = `
+                <div id="taskExpensesModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Expenses for: ${this.escapeHtml(task.title)}</h3>
+                            <button class="close-btn" onclick="tracker.hideTaskExpensesModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="task-budget-summary">
+                                <div class="budget-info">
+                                    <span>Budget: ₹${task.budget}</span>
+                                    <span>Spent: ₹${task.actualExpense || 0}</span>
+                                    <span class="${task.actualExpense <= task.budget ? 'within-budget' : 'over-budget'}">
+                                        ${task.actualExpense <= task.budget ? 'Within Budget' : 'Over Budget'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="task-expenses-list">
+                                ${expenses.length === 0 ?
+                                    '<p class="placeholder-text">No expenses linked to this task yet</p>' :
+                                    expenses.map(expense => `
+                                        <div class="expense-item">
+                                            <div class="expense-info">
+                                                <div class="expense-name">${this.escapeHtml(expense.name)}</div>
+                                                <div class="expense-meta">
+                                                    ${new Date(expense.date).toLocaleDateString()} • ${expense.category}
+                                                </div>
+                                            </div>
+                                            <div class="expense-amount">₹${parseFloat(expense.amount).toFixed(2)}</div>
+                                        </div>
+                                    `).join('')
+                                }
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" onclick="tracker.addExpenseForTask('${task.id}')">Add Expense</button>
+                            <button class="btn btn-secondary" onclick="tracker.hideTaskExpensesModal()">Close</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="taskExpensesOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        } catch (error) {
+            console.error('Error showing task expenses modal:', error);
+        }
+    }
+
+    // Hide task expenses modal
+    hideTaskExpensesModal() {
+        try {
+            const modal = document.getElementById('taskExpensesModal');
+            const overlay = document.getElementById('taskExpensesOverlay');
+
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding task expenses modal:', error);
+        }
+    }
+
+    // Add expense for a specific task
+    addExpenseForTask(taskId) {
+        try {
+            const task = this.tasks[taskId];
+            if (!task) return;
+
+            // Hide task expenses modal if open
+            this.hideTaskExpensesModal();
+
+            // Show expense modal with pre-filled data
+            this.showExpenseModal(new Date());
+
+            // Pre-fill the expense form with task data
+            setTimeout(() => {
+                const nameInput = document.getElementById('expenseName');
+                const categorySelect = document.getElementById('expenseCategory');
+
+                if (nameInput && !nameInput.value) {
+                    nameInput.value = `${task.title} - `;
+                    nameInput.focus();
+                    nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length);
+                }
+
+                if (categorySelect && task.expenseCategory) {
+                    categorySelect.value = task.expenseCategory;
+                }
+
+                // Store the task ID for linking
+                window.currentTaskForExpense = taskId;
+            }, 100);
+        } catch (error) {
+            console.error('Error adding expense for task:', error);
+        }
+    }
+
+    // Get task statistics for dashboard integration
+    getTaskStats() {
+        try {
+            const tasks = Object.values(this.tasks);
+            return {
+                total: tasks.length,
+                completed: tasks.filter(t => t.status === 'completed').length,
+                pending: tasks.filter(t => t.status === 'pending').length,
+                inProgress: tasks.filter(t => t.status === 'in-progress').length,
+                overdue: tasks.filter(t => this.isTaskOverdue(t)).length,
+                withBudget: tasks.filter(t => t.budget && t.budget > 0).length
+            };
+        } catch (error) {
+            console.error('Error getting task stats:', error);
+            return { total: 0, completed: 0, pending: 0, inProgress: 0, overdue: 0, withBudget: 0 };
         }
     }
 }
