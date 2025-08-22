@@ -282,9 +282,16 @@ class SmartExpenseTracker {
     }
 
     // Logout (redirect to auth)
-    logout() {
+    async logout() {
         try {
-            if (confirm('Are you sure you want to logout? Your data will be preserved and available when you log back in.')) {
+            const shouldLogout = await confirmAsync('Are you sure you want to logout? Your data will be preserved and available when you log back in.', {
+                title: 'Confirm Logout',
+                confirmText: 'Logout',
+                cancelText: 'Stay Logged In',
+                confirmClass: 'btn-danger'
+            });
+
+            if (shouldLogout) {
                 console.log('🔓 Starting logout process...');
 
                 // Check current state before saving
