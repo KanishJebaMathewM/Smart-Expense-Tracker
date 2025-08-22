@@ -3809,6 +3809,18 @@ class SmartExpenseTracker {
                     ` : ''}
 
                     <div class="task-actions-menu" onclick="event.stopPropagation()">
+                        ${task.shoppingItems && task.status !== 'completed' ? `
+                            <button class="task-action-btn nutrition-action" onclick="tracker.completeShoppingTask('${task.id}')">
+                                <div class="icon-bg icon-shopping-list xsmall"></div>
+                                Complete Shopping
+                            </button>
+                        ` : ''}
+                        ${task.recipeId && task.status !== 'completed' ? `
+                            <button class="task-action-btn nutrition-action" onclick="tracker.completeCookingTask('${task.id}')">
+                                <div class="icon-bg icon-recipes xsmall"></div>
+                                Complete Cooking
+                            </button>
+                        ` : ''}
                         ${otherStatuses.map(status => `
                             <button class="task-action-btn" onclick="tracker.toggleTaskStatus('${task.id}', '${status}')">
                                 <div class="icon-bg icon-task-${status === 'in-progress' ? 'progress' : status} xsmall"></div>
