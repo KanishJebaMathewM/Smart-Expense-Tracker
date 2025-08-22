@@ -2846,9 +2846,9 @@ class SmartExpenseTracker {
                             <div class="task-budget-summary">
                                 <div class="budget-info">
                                     <span>Budget: ₹${task.budget}</span>
-                                    <span>Spent: ₹${task.actualExpense || 0}</span>
-                                    <span class="${task.actualExpense <= task.budget ? 'within-budget' : 'over-budget'}">
-                                        ${task.actualExpense <= task.budget ? 'Within Budget' : 'Over Budget'}
+                                    <span>Spent: ₹${task.status === 'completed' ? task.budget : (task.actualExpense || 0)}</span>
+                                    <span class="${task.status === 'completed' ? 'completed' : (task.actualExpense <= task.budget ? 'within-budget' : 'over-budget')}">
+                                        ${task.status === 'completed' ? 'Completed - Full Budget Spent' : (task.actualExpense <= task.budget ? 'Within Budget' : 'Over Budget')}
                                     </span>
                                 </div>
                             </div>
