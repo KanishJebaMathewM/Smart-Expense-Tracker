@@ -136,13 +136,11 @@
     position: relative;
 }
 .icon-money::before {
-    content: '$';
+    content: '💵';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: white;
-    font-weight: bold;
     font-size: 0.8em;
 }
 
@@ -282,7 +280,7 @@
     position: relative;
 }
 .icon-income::before {
-    content: '📈';
+    content: '💰';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -295,7 +293,7 @@
     position: relative;
 }
 .icon-expense::before {
-    content: '📤';
+    content: '💸';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -308,12 +306,12 @@
     position: relative;
 }
 .icon-savings::before {
-    content: '🏛️';
+    content: '🐷';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 0.6em;
+    font-size: 0.7em;
 }
 
 .icon-balance {
@@ -334,7 +332,7 @@
     position: relative;
 }
 .icon-logout::before {
-    content: '🚪';
+    content: '👋';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -360,7 +358,7 @@
     position: relative;
 }
 .icon-app-logo::before {
-    content: '💰';
+    content: '📊';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -373,7 +371,7 @@
     position: relative;
 }
 .icon-welcome::before {
-    content: '⭐';
+    content: '🎉';
     position: absolute;
     top: 50%;
     left: 50%;
