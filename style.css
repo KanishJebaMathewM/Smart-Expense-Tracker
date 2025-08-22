@@ -173,7 +173,10 @@
 .icon-bg.xsmall {
     width: 16px;
     height: 16px;
-    
+}
+
+/* Additional CSS Variables (these should be moved to :root but keeping here for now to avoid conflicts) */
+:root {
     /* Shadows */
     --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -181,13 +184,13 @@
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    
+
     /* Transitions and Animations */
     --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    
+
     /* Spacing System */
     --spacing-1: 4px;
     --spacing-2: 8px;
@@ -200,7 +203,7 @@
     --spacing-12: 48px;
     --spacing-16: 64px;
     --spacing-20: 80px;
-    
+
     /* Typography */
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
@@ -210,16 +213,170 @@
     --font-size-2xl: 1.5rem;
     --font-size-3xl: 1.875rem;
     --font-size-4xl: 2.25rem;
-    
+
     --line-height-tight: 1.25;
     --line-height-normal: 1.5;
     --line-height-relaxed: 1.75;
-    
+
     --font-weight-light: 300;
     --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
+}
+
+/* Profile Modal Styles */
+.profile-modal-content {
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.profile-section {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-picture-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-picture-container {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+}
+
+.profile-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-picture-overlay {
+    text-align: center;
+}
+
+.upload-btn {
+    background: var(--primary-600);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 auto;
+    transition: background-color 0.2s;
+}
+
+.upload-btn:hover {
+    background: var(--primary-700);
+}
+
+.profile-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.profile-stats-section {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.profile-stats-section h4 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-400);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-danger {
+    background: var(--error-600);
+    color: white;
+    border: 1px solid var(--error-700);
+}
+
+.btn-danger:hover {
+    background: var(--error-700);
+    border-color: var(--error-800);
+}
+
+/* Family member clickable styling */
+.family-member-info:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+    transition: background-color 0.2s ease;
+}
+
+/* Mobile responsive for profile modal */
+@media (max-width: 768px) {
+    .profile-modal-content {
+        max-width: 95vw;
+        margin: 1rem;
+    }
+
+    .profile-section {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .profile-picture {
+        width: 100px;
+        height: 100px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* Enhanced Base Styles */
