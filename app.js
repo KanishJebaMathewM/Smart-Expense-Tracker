@@ -4714,7 +4714,7 @@ class SmartExpenseTracker {
     }
 
     // Add to shopping list
-    addToShoppingList(foodId, quantity, unit, estimatedCost = 0) {
+    addToShoppingList(foodId, quantity, unit) {
         try {
             const foodData = this.foodDatabase[foodId];
             if (!foodData) {
@@ -4730,9 +4730,9 @@ class SmartExpenseTracker {
                 quantity: quantity,
                 unit: unit || foodData.unit,
                 category: foodData.category,
-                estimatedCost: estimatedCost,
                 purchased: false,
-                addedDate: new Date().toISOString()
+                addedDate: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             };
 
             this.hasUnsavedChanges = true;
