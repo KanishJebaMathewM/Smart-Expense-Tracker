@@ -680,20 +680,34 @@
         // Check authentication status before loading main app
         (function checkAuthentication() {
             try {
+                console.log('=== AUTHENTICATION CHECK STARTED ===');
+
                 // Check if user is authenticated (check session and current user)
                 const sessionData = localStorage.getItem('app_session_token');
                 const currentUserId = localStorage.getItem('current_user_id');
                 const allUsers = localStorage.getItem('all_family_users');
 
+                console.log('Auth check data:', {
+                    hasSession: !!sessionData,
+                    currentUserId: currentUserId,
+                    hasAllUsers: !!allUsers
+                });
+
                 // If no session or no current user, redirect to auth
                 if (!sessionData || !currentUserId) {
-                    console.log('No session or current user found, redirecting to auth');
+                    console.log('❌ No session or current user found, redirecting to auth');
                     window.location.href = 'auth.html';
                     return;
                 }
 
                 // Parse session data
                 const session = JSON.parse(sessionData);
+                console.log('Session data:', {
+                    userId: session.userId,
+                    userEmail: session.userEmail,
+                    userName: session.userName,
+                    expires: session.expiresAt
+                });
 
                 // Check if session is expired
                 const expiryTime = new Date(session.expiresAt);
@@ -701,11 +715,18 @@
 
                 if (currentTime >= expiryTime) {
                     // Session expired - redirect to auth
-                    console.log('Session expired, redirecting to auth');
+                    console.log('❌ Session expired, redirecting to auth');
                     localStorage.removeItem('app_session_token');
                     localStorage.removeItem('current_user_id');
                     window.location.href = 'auth.html';
                     return;
+                }
+
+                // Verify the session userId matches the current user ID
+                if (session.userId && session.userId !== currentUserId) {
+                    console.log('⚠️ Session userId mismatch, updating current user ID');
+                    localStorage.setItem('current_user_id', session.userId);
+                    currentUserId = session.userId;
                 }
 
                 // Get current user data
@@ -713,24 +734,37 @@
                 if (allUsers) {
                     const users = JSON.parse(allUsers);
                     currentUser = users[currentUserId];
+                    console.log('Found user in family system:', {
+                        userId: currentUserId,
+                        found: !!currentUser,
+                        userName: currentUser?.name,
+                        userEmail: currentUser?.email
+                    });
                 }
 
                 // Fallback to legacy user data
                 if (!currentUser) {
+                    console.log('⚠️ User not found in family system, checking legacy data');
                     const userData = localStorage.getItem('user_account_data');
                     if (userData) {
                         currentUser = JSON.parse(userData);
+                        console.log('Found legacy user data:', {
+                            userName: currentUser?.name,
+                            userEmail: currentUser?.email
+                        });
                     }
                 }
 
                 if (!currentUser) {
-                    console.log('No valid user data found, redirecting to auth');
+                    console.log('❌ No valid user data found, redirecting to auth');
                     window.location.href = 'auth.html';
                     return;
                 }
 
                 // Valid session - load main app
+                console.log('✅ Authentication successful!');
                 console.log(`Authenticated user: ${currentUser.name} (${currentUser.email})`);
+                console.log('=== AUTHENTICATION CHECK COMPLETED ===');
 
                 // Update loading text and show profile picture
                 const loadingText = document.querySelector('.loading-text');
@@ -743,8 +777,15 @@
                     loadingText.textContent = `Welcome back, ${currentUser.name}!`;
                 }
 
+                // Generate user-specific storage key for profile data (same logic as main app)
+                const userIdentifier = currentUser.email || currentUserId;
+                const cleanIdentifier = userIdentifier.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+                const profileDataKey = `profile_data_profile_default_${cleanIdentifier}`;
+
+                console.log('Looking for profile data with key:', profileDataKey);
+
                 // Show profile picture if available
-                const profileData = JSON.parse(localStorage.getItem(`profile_data_${currentUserId}`) || '{}');
+                const profileData = JSON.parse(localStorage.getItem(profileDataKey) || '{}');
                 if (profileData.profilePicture && loadingProfileArea && loadingProfileImage) {
                     // Hide the generic welcome icon
                     if (loadingIcon) loadingIcon.style.display = 'none';
@@ -763,7 +804,7 @@
                 }
 
             } catch (error) {
-                console.error('Authentication check failed:', error);
+                console.error('❌ Authentication check failed:', error);
                 // On error, redirect to auth for safety
                 window.location.href = 'auth.html';
             }
