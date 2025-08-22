@@ -87,6 +87,14 @@ class SmartExpenseTracker {
         // Initialize data structures to prevent undefined errors
         this.income = {};
         this.expenses = {};
+        this.tasks = {};
+
+        // Task management properties
+        this.editingTaskId = null;
+        this.taskFilters = {
+            status: 'all',
+            category: 'all'
+        };
 
         this.init();
     }
