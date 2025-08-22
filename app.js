@@ -1059,7 +1059,7 @@ class SmartExpenseTracker {
             // Verify the save worked
             const verification = localStorage.getItem(userSpecificKey);
             if (verification) {
-                console.log('✅ Save verification successful');
+                console.log('��� Save verification successful');
             } else {
                 console.error('❌ Save verification failed - data not found after save');
                 return false;
@@ -6581,6 +6581,382 @@ class SmartExpenseTracker {
 
     renderNutritionCharts(weeklyData, todayNutrition) {
         console.log('Nutrition charts rendering - to be implemented');
+    }
+
+    // ==============================================
+    // EXPENSE INTEGRATION METHODS
+    // ==============================================
+
+    // Purchase shopping list items and add to expenses
+    async purchaseShoppingItems() {
+        try {
+            const items = Object.values(this.shoppingList).filter(item => !item.purchased);
+
+            if (items.length === 0) {
+                this.showInfo('No pending items in shopping list to purchase');
+                return;
+            }
+
+            const totalCost = items.reduce((sum, item) => sum + item.estimatedCost, 0);
+
+            const shouldPurchase = await confirmAsync(
+                `Purchase ${items.length} items for approximately ₹${totalCost.toFixed(2)}?`,
+                {
+                    title: 'Purchase Groceries',
+                    confirmText: 'Purchase & Track',
+                    cancelText: 'Cancel',
+                    confirmClass: 'btn-primary'
+                }
+            );
+
+            if (shouldPurchase) {
+                const today = new Date();
+                let totalActualCost = 0;
+
+                // Group items by category for combined expense entries
+                const categoryGroups = {};
+                items.forEach(item => {
+                    if (!categoryGroups[item.category]) {
+                        categoryGroups[item.category] = {
+                            items: [],
+                            totalCost: 0
+                        };
+                    }
+                    categoryGroups[item.category].items.push(item);
+                    categoryGroups[item.category].totalCost += item.estimatedCost;
+                });
+
+                // Create expense entries for each category
+                for (const [category, group] of Object.entries(categoryGroups)) {
+                    const expenseName = `Groceries - ${category} (${group.items.length} items)`;
+                    const expense = {
+                        name: expenseName,
+                        category: 'Food',
+                        amount: group.totalCost,
+                        nutritionRelated: true,
+                        groceryItems: group.items.map(item => ({
+                            name: item.name,
+                            quantity: item.quantity,
+                            unit: item.unit,
+                            cost: item.estimatedCost
+                        }))
+                    };
+
+                    if (this.addExpenseForDate(today, expense)) {
+                        totalActualCost += group.totalCost;
+
+                        // Mark items as purchased and add to inventory
+                        group.items.forEach(item => {
+                            this.shoppingList[item.id].purchased = true;
+                            this.shoppingList[item.id].purchaseDate = today.toISOString();
+                            this.shoppingList[item.id].actualCost = item.estimatedCost;
+
+                            // Add to inventory
+                            this.addToInventory(item.foodId, item.quantity, item.unit);
+                        });
+                    }
+                }
+
+                this.hasUnsavedChanges = true;
+                this.debouncedSave();
+
+                // Update all displays
+                this.renderShoppingList();
+                this.renderInventory();
+                this.updateNutritionOverview();
+                this.updateDashboard();
+
+                this.showSuccess(
+                    `Groceries purchased for ₹${totalActualCost.toFixed(2)}! ` +
+                    `Items added to inventory and expenses tracked.`
+                );
+            }
+        } catch (error) {
+            this.showError('Failed to purchase groceries: ' + error.message);
+            console.error('Error purchasing shopping items:', error);
+        }
+    }
+
+    // Add individual grocery item to expenses
+    async addGroceryExpense(foodId, quantity, unit, actualCost) {
+        try {
+            const foodData = this.foodDatabase[foodId];
+            if (!foodData) {
+                this.showError('Food item not found');
+                return false;
+            }
+
+            const today = new Date();
+            const expense = {
+                name: `${foodData.name} (${quantity} ${unit})`,
+                category: 'Food',
+                amount: actualCost,
+                nutritionRelated: true,
+                foodId: foodId,
+                quantity: quantity,
+                unit: unit
+            };
+
+            if (this.addExpenseForDate(today, expense)) {
+                // Also add to inventory
+                this.addToInventory(foodId, quantity, unit);
+
+                this.updateDashboard();
+                this.updateNutritionOverview();
+
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.error('Error adding grocery expense:', error);
+            return false;
+        }
+    }
+
+    // Show grocery purchase modal
+    showGroceryPurchaseModal() {
+        try {
+            const modalHtml = `
+                <div id="groceryPurchaseModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Add Grocery Purchase</h3>
+                            <button class="close-btn" onclick="tracker.hideGroceryPurchaseModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="groceryFoodSelect">Food Item</label>
+                                <select id="groceryFoodSelect" required>
+                                    <option value="">Select food item...</option>
+                                    ${Object.entries(this.foodDatabase).map(([id, food]) =>
+                                        `<option value="${id}">${food.name}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="groceryQuantity">Quantity Purchased</label>
+                                <input type="number" id="groceryQuantity" placeholder="Enter quantity" min="0" step="0.1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="groceryUnit">Unit</label>
+                                <input type="text" id="groceryUnit" placeholder="e.g., cups, pieces, grams" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="groceryCost">Actual Cost (₹)</label>
+                                <input type="number" id="groceryCost" placeholder="0.00" min="0" step="0.01" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="addToInventory" checked>
+                                    <span class="checkmark"></span>
+                                    Add to kitchen inventory
+                                </label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="saveGroceryPurchase" class="btn btn-primary">Add Purchase</button>
+                            <button class="btn btn-secondary" onclick="tracker.hideGroceryPurchaseModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="groceryPurchaseOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Bind events
+            document.getElementById('saveGroceryPurchase').addEventListener('click', () => {
+                this.saveGroceryPurchase();
+            });
+
+            // Auto-fill unit when food is selected
+            document.getElementById('groceryFoodSelect').addEventListener('change', (e) => {
+                const foodId = e.target.value;
+                if (foodId && this.foodDatabase[foodId]) {
+                    document.getElementById('groceryUnit').value = this.foodDatabase[foodId].unit;
+
+                    // Estimate cost based on quantity
+                    const quantity = parseFloat(document.getElementById('groceryQuantity').value) || 1;
+                    const estimatedCost = this.estimateIngredientCost(foodId, quantity);
+                    document.getElementById('groceryCost').value = estimatedCost.toFixed(2);
+                }
+            });
+
+            // Update cost when quantity changes
+            document.getElementById('groceryQuantity').addEventListener('input', (e) => {
+                const foodId = document.getElementById('groceryFoodSelect').value;
+                const quantity = parseFloat(e.target.value) || 0;
+                if (foodId && quantity > 0) {
+                    const estimatedCost = this.estimateIngredientCost(foodId, quantity);
+                    document.getElementById('groceryCost').value = estimatedCost.toFixed(2);
+                }
+            });
+
+        } catch (error) {
+            console.error('Error showing grocery purchase modal:', error);
+        }
+    }
+
+    // Hide grocery purchase modal
+    hideGroceryPurchaseModal() {
+        try {
+            const modal = document.getElementById('groceryPurchaseModal');
+            const overlay = document.getElementById('groceryPurchaseOverlay');
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding grocery purchase modal:', error);
+        }
+    }
+
+    // Save grocery purchase
+    saveGroceryPurchase() {
+        try {
+            const foodId = document.getElementById('groceryFoodSelect').value;
+            const quantity = parseFloat(document.getElementById('groceryQuantity').value);
+            const unit = document.getElementById('groceryUnit').value;
+            const cost = parseFloat(document.getElementById('groceryCost').value);
+            const addToInventory = document.getElementById('addToInventory').checked;
+
+            if (!foodId || !quantity || quantity <= 0 || !cost || cost <= 0) {
+                this.showError('Please fill all required fields with valid values');
+                return;
+            }
+
+            if (this.addGroceryExpense(foodId, quantity, unit, cost)) {
+                if (!addToInventory) {
+                    // Remove from inventory if user doesn't want to add it
+                    delete this.inventory[foodId];
+                }
+
+                this.hideGroceryPurchaseModal();
+                this.showSuccess('Grocery purchase added to expenses and inventory!');
+            }
+        } catch (error) {
+            this.showError('Failed to save grocery purchase: ' + error.message);
+            console.error('Error saving grocery purchase:', error);
+        }
+    }
+
+    // Get nutrition-related expenses for a date range
+    getNutritionExpenses(startDate, endDate) {
+        try {
+            const nutritionExpenses = [];
+
+            // Iterate through all expense dates
+            Object.entries(this.expenses).forEach(([dateKey, dailyExpenses]) => {
+                const expenseDate = new Date(dateKey);
+
+                if (expenseDate >= startDate && expenseDate <= endDate) {
+                    dailyExpenses.forEach(expense => {
+                        if (expense.nutritionRelated || expense.category === 'Food') {
+                            nutritionExpenses.push({
+                                ...expense,
+                                date: dateKey
+                            });
+                        }
+                    });
+                }
+            });
+
+            return nutritionExpenses;
+        } catch (error) {
+            console.error('Error getting nutrition expenses:', error);
+            return [];
+        }
+    }
+
+    // Get monthly nutrition expense summary
+    getMonthlyNutritionSummary(month = this.currentMonth, year = this.currentYear) {
+        try {
+            const startDate = new Date(year, month, 1);
+            const endDate = new Date(year, month + 1, 0);
+
+            const nutritionExpenses = this.getNutritionExpenses(startDate, endDate);
+            const totalNutritionExpenses = nutritionExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const totalMonthlyExpenses = this.getTotalMonthlyExpenses(month, year);
+
+            return {
+                nutritionExpenses: totalNutritionExpenses,
+                totalExpenses: totalMonthlyExpenses,
+                nutritionPercentage: totalMonthlyExpenses > 0 ? (totalNutritionExpenses / totalMonthlyExpenses) * 100 : 0,
+                expenseCount: nutritionExpenses.length,
+                avgExpenseAmount: nutritionExpenses.length > 0 ? totalNutritionExpenses / nutritionExpenses.length : 0
+            };
+        } catch (error) {
+            console.error('Error getting monthly nutrition summary:', error);
+            return {
+                nutritionExpenses: 0,
+                totalExpenses: 0,
+                nutritionPercentage: 0,
+                expenseCount: 0,
+                avgExpenseAmount: 0
+            };
+        }
+    }
+
+    // Update expense tracker to show nutrition integration
+    updateExpenseIntegration() {
+        try {
+            // This method enhances the existing task-expense integration
+            // to also show nutrition-related expenses
+
+            const existingContainer = document.getElementById('taskExpenseSummary');
+            if (!existingContainer) return;
+
+            // Get nutrition expense summary
+            const nutritionSummary = this.getMonthlyNutritionSummary();
+
+            // Add nutrition integration card to the existing summary
+            const nutritionIntegrationHtml = `
+                <div class="summary-card nutrition-integration">
+                    <div class="summary-header">
+                        <div class="icon-bg icon-nutrition small"></div>
+                        <h4>Nutrition Expenses</h4>
+                    </div>
+                    <div class="summary-content">
+                        <div class="summary-stat">
+                            <span class="stat-value">₹${nutritionSummary.nutritionExpenses.toFixed(0)}</span>
+                            <span class="stat-label">Food Expenses</span>
+                        </div>
+                        <div class="summary-details">
+                            <span>Food % of Total: ${nutritionSummary.nutritionPercentage.toFixed(1)}%</span>
+                            <span>Grocery Entries: ${nutritionSummary.expenseCount}</span>
+                            <span>Avg Purchase: ₹${nutritionSummary.avgExpenseAmount.toFixed(0)}</span>
+                        </div>
+                    </div>
+                    <div class="integration-actions">
+                        <button class="btn btn-small" onclick="tracker.showGroceryPurchaseModal()">
+                            <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 4px;"></div>
+                            Add Grocery
+                        </button>
+                        <button class="btn btn-small" onclick="tracker.purchaseShoppingItems()">
+                            <div class="icon-bg icon-shopping-list xsmall" style="display: inline-block; margin-right: 4px;"></div>
+                            Buy Shopping List
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Check if nutrition integration already exists
+            const existingNutritionCard = existingContainer.querySelector('.nutrition-integration');
+            if (existingNutritionCard) {
+                existingNutritionCard.outerHTML = nutritionIntegrationHtml;
+            } else {
+                // Add to existing summary grid
+                const summaryGrid = existingContainer.querySelector('.summary-grid');
+                if (summaryGrid) {
+                    summaryGrid.insertAdjacentHTML('beforeend', nutritionIntegrationHtml);
+                }
+            }
+        } catch (error) {
+            console.error('Error updating expense integration:', error);
+        }
     }
 }
 
