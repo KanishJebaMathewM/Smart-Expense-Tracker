@@ -1157,34 +1157,76 @@ class SmartExpenseTracker {
         try {
             const dateElement = document.createElement('div');
             dateElement.className = 'calendar-date';
-            
+
             if (isOtherMonth) {
                 dateElement.classList.add('other-month');
             }
-            
+
             // Check if this is today
             const today = new Date();
             if (date.toDateString() === today.toDateString()) {
                 dateElement.classList.add('today');
             }
-            
+
             // Check if there are expenses for this date
             const totalExpenses = this.getTotalExpensesForDate(date);
             if (totalExpenses > 0) {
                 dateElement.classList.add('has-expenses');
             }
-            
-            dateElement.innerHTML = `
-                <div class="date-number">${date.getDate()}</div>
-                ${totalExpenses > 0 ? `<div class="date-amount">₹${totalExpenses.toFixed(0)}</div>` : ''}
-            `;
-            
+
+            // Check for completed tasks on this date
+            const completedTasks = this.getCompletedTasksForDate(date);
+            const budgetTasksCompleted = completedTasks.filter(task => task.budget && task.budget > 0);
+
+            if (completedTasks.length > 0) {
+                dateElement.classList.add('has-completed-tasks');
+            }
+
+            if (budgetTasksCompleted.length > 0) {
+                dateElement.classList.add('has-budget-tasks');
+            }
+
+            // Build date content
+            let dateContent = `<div class="date-number">${date.getDate()}</div>`;
+
+            // Add expense amount if present
+            if (totalExpenses > 0) {
+                dateContent += `<div class="date-amount">₹${totalExpenses.toFixed(0)}</div>`;
+            }
+
+            // Add task completion indicators
+            if (completedTasks.length > 0) {
+                dateContent += `<div class="date-tasks">
+                    <span class="task-indicator" title="${completedTasks.length} task(s) completed">
+                        <div class="icon-bg icon-task-completed xsmall"></div>
+                        ${completedTasks.length}
+                    </span>
+                </div>`;
+            }
+
+            // Add budget task indicator if present
+            if (budgetTasksCompleted.length > 0) {
+                const totalBudget = budgetTasksCompleted.reduce((sum, task) => sum + (task.budget || 0), 0);
+                dateContent += `<div class="date-budget-tasks" title="₹${totalBudget} budget tasks completed">
+                    <span class="budget-indicator">
+                        <div class="icon-bg icon-integration xsmall"></div>
+                        ₹${totalBudget.toFixed(0)}
+                    </span>
+                </div>`;
+            }
+
+            dateElement.innerHTML = dateContent;
+
             dateElement.addEventListener('click', () => {
                 if (!isOtherMonth) {
-                    this.showExpenseModal(date);
+                    if (completedTasks.length > 0) {
+                        this.showDateDetailsModal(date, totalExpenses, completedTasks);
+                    } else {
+                        this.showExpenseModal(date);
+                    }
                 }
             });
-            
+
             return dateElement;
         } catch (error) {
             console.error('Error creating date element:', error);
