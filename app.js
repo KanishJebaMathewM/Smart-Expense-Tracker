@@ -449,6 +449,11 @@ class SmartExpenseTracker {
     // Income and expense management methods
     getIncome(month = this.currentMonth, year = this.currentYear) {
         try {
+            // Ensure income object exists
+            if (!this.income) {
+                this.income = {};
+            }
+
             const key = `${year}-${String(month + 1).padStart(2, '0')}`;
             return parseFloat(this.income[key]) || 0;
         } catch (error) {
