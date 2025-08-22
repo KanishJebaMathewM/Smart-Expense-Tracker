@@ -2507,11 +2507,7 @@ class SmartExpenseTracker {
                 }
 
                 if (this.setTasks(this.tasks)) {
-                    this.renderTasks();
-                    this.updateTaskStats();
-                    this.renderCalendar(); // Update calendar to show completed tasks
-                    this.updateDashboard(); // Update dashboard with latest data
-                    this.updateExpenseIntegration(); // Update expense integration
+                    this.refreshTaskManagerDisplay();
 
                     if (newStatus === 'completed' && task.budget) {
                         this.showSuccess(`Task completed! Calendar and expenses updated.`);
