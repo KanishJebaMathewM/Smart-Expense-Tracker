@@ -1011,7 +1011,7 @@ class SmartExpenseTracker {
                 }
             }
 
-            console.log('��� Saving profile data...');
+            console.log('💾 Saving profile data...');
 
             const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id);
             const profileData = {
@@ -1069,7 +1069,7 @@ class SmartExpenseTracker {
             return true;
         } catch (error) {
             this.showError('Failed to save profile data: ' + error.message);
-            console.error('�� Profile data saving error:', error);
+            console.error('❌ Profile data saving error:', error);
             return false;
         }
     }
@@ -6979,6 +6979,130 @@ class SmartExpenseTracker {
         } catch (error) {
             this.showError('Failed to create grocery shopping task: ' + error.message);
             console.error('Error creating grocery shopping task:', error);
+        }
+    }
+
+    // Complete shopping task and mark items as purchased
+    async completeShoppingTask(taskId) {
+        try {
+            const task = this.tasks[taskId];
+            if (!task || !task.shoppingItems) {
+                this.showError('Shopping task not found or has no items');
+                return;
+            }
+
+            const shouldComplete = await confirmAsync(
+                `Mark shopping task as completed? This will also mark ${task.shoppingItems.length} items as purchased in your shopping list.`,
+                {
+                    title: 'Complete Shopping Task',
+                    confirmText: 'Complete & Mark Purchased',
+                    cancelText: 'Cancel',
+                    confirmClass: 'btn-primary'
+                }
+            );
+
+            if (shouldComplete) {
+                // Mark corresponding shopping list items as purchased
+                let itemsMarked = 0;
+                Object.values(this.shoppingList).forEach(shoppingItem => {
+                    const matchingTaskItem = task.shoppingItems.find(taskItem =>
+                        taskItem.name === shoppingItem.name &&
+                        taskItem.category === shoppingItem.category
+                    );
+
+                    if (matchingTaskItem && !shoppingItem.purchased) {
+                        shoppingItem.purchased = true;
+                        shoppingItem.purchaseDate = new Date().toISOString();
+
+                        // Add to inventory
+                        this.addToInventory(shoppingItem.foodId, shoppingItem.quantity, shoppingItem.unit);
+                        itemsMarked++;
+                    }
+                });
+
+                // Mark task as completed
+                task.status = 'completed';
+                task.completedDate = new Date().toISOString();
+
+                this.hasUnsavedChanges = true;
+                this.debouncedSave();
+
+                // Update all relevant displays
+                this.renderShoppingList();
+                this.renderInventory();
+                this.updateNutritionOverview();
+                this.renderTasks();
+                this.updateTaskStats();
+
+                this.showSuccess(`Shopping task completed! ${itemsMarked} items marked as purchased and added to inventory.`);
+            }
+        } catch (error) {
+            this.showError('Failed to complete shopping task: ' + error.message);
+            console.error('Error completing shopping task:', error);
+        }
+    }
+
+    // Complete cooking task and log meal
+    async completeCookingTask(taskId) {
+        try {
+            const task = this.tasks[taskId];
+            if (!task || !task.recipeId) {
+                this.showError('Cooking task not found or has no recipe');
+                return;
+            }
+
+            const recipe = this.recipes[task.recipeId];
+            if (!recipe) {
+                this.showError('Recipe not found');
+                return;
+            }
+
+            // Check if we can make the recipe
+            const availableRecipes = this.getAvailableRecipes();
+            const recipeData = availableRecipes.find(r => r.recipe.id === task.recipeId);
+
+            if (!recipeData || !recipeData.canMake) {
+                this.showInfo('Cannot complete cooking task - missing ingredients. Purchase ingredients first.');
+                return;
+            }
+
+            const shouldComplete = await confirmAsync(
+                `Mark cooking task as completed? This will use ingredients from your inventory and log the meal for today.`,
+                {
+                    title: 'Complete Cooking Task',
+                    confirmText: 'Complete & Log Meal',
+                    cancelText: 'Cancel',
+                    confirmClass: 'btn-primary'
+                }
+            );
+
+            if (shouldComplete) {
+                // Use ingredients from inventory
+                this.useIngredientsFromInventory(recipe);
+
+                // Log the meal
+                const today = new Date();
+                this.logMeal(today, task.recipeId, 1, 'main');
+
+                // Mark task as completed
+                task.status = 'completed';
+                task.completedDate = new Date().toISOString();
+
+                this.hasUnsavedChanges = true;
+                this.debouncedSave();
+
+                // Update all relevant displays
+                this.renderInventory();
+                this.updateNutritionOverview();
+                this.renderNutritionInsights();
+                this.renderTasks();
+                this.updateTaskStats();
+
+                this.showSuccess(`Cooking task completed! ${recipe.name} cooked and meal logged for today.`);
+            }
+        } catch (error) {
+            this.showError('Failed to complete cooking task: ' + error.message);
+            console.error('Error completing cooking task:', error);
         }
     }
 
