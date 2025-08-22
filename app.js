@@ -17,6 +17,37 @@ class SmartExpenseTracker {
             CURRENT_PROFILE: 'current_profile_id',
             PROFILE_DATA: 'profile_data_'
         };
+
+        // Icon helper functions
+        this.getCategoryIcon = (category, size = '') => {
+            const iconMap = {
+                'Food': 'icon-food',
+                'Transportation': 'icon-transportation',
+                'Entertainment': 'icon-entertainment',
+                'Shopping': 'icon-shopping',
+                'Bills': 'icon-bills',
+                'Health': 'icon-health',
+                'Education': 'icon-education',
+                'Other': 'icon-bills'
+            };
+            const iconClass = iconMap[category] || 'icon-money';
+            const sizeClass = size ? ` ${size}` : '';
+            return `<div class="icon-bg ${iconClass}${sizeClass}"></div>`;
+        };
+
+        this.getUIIcon = (type, size = '') => {
+            const iconMap = {
+                'user': 'icon-user',
+                'money': 'icon-money',
+                'analytics': 'icon-analytics',
+                'reports': 'icon-bills',
+                'trending-up': 'icon-analytics',
+                'trending-down': 'icon-money'
+            };
+            const iconClass = iconMap[type] || 'icon-money';
+            const sizeClass = size ? ` ${size}` : '';
+            return `<div class="icon-bg ${iconClass}${sizeClass}"></div>`;
+        };
         
         // Category colors for charts
         this.categoryColors = {
