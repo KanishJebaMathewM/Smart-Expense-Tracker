@@ -1273,6 +1273,7 @@ class SmartExpenseTracker {
             
             this.updateMonthComparison();
             this.updateAllTimeTotals();
+            this.updateTaskExpenseSummary();
             
             console.log('Dashboard updated successfully');
         } catch (error) {
