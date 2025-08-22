@@ -52,7 +52,7 @@ class SmartExpenseTracker {
         // Category colors for charts
         this.categoryColors = {
             'Food': '#EF4444',
-            'Transportation': '#F97316', 
+            'Transportation': '#F97316',
             'Entertainment': '#8B5CF6',
             'Shopping': '#EC4899',
             'Bills': '#3B82F6',
@@ -60,7 +60,21 @@ class SmartExpenseTracker {
             'Education': '#F59E0B',
             'Other': '#64748B'
         };
-        
+
+        // Profile data structure
+        this.profileData = {
+            name: '',
+            email: '',
+            dateOfBirth: '',
+            bio: '',
+            phone: '',
+            profilePicture: null,
+            memberSince: '',
+            lastLogin: '',
+            totalExpenses: 0,
+            expenseCount: 0
+        };
+
         this.init();
     }
     
