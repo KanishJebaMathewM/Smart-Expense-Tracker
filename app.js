@@ -5133,10 +5133,6 @@ class SmartExpenseTracker {
                                 <input type="text" id="shoppingUnit" placeholder="e.g., cups, pieces, grams" required>
                             </div>
 
-                            <div class="form-group">
-                                <label for="estimatedCost">Estimated Cost (₹)</label>
-                                <input type="number" id="estimatedCost" placeholder="0" min="0" step="0.01">
-                            </div>
                         </div>
                         <div class="modal-footer">
                             <button id="saveShoppingItem" class="btn btn-primary">Add to List</button>
