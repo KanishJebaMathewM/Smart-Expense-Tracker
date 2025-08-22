@@ -1456,6 +1456,35 @@ body {
     transform: scale(0.95);
 }
 
+/* Insight text icons */
+.warning-icon, .success-icon, .info-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 18px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.warning-icon {
+    background: var(--warning-500);
+    color: white;
+}
+
+.success-icon {
+    background: var(--success-500);
+    color: white;
+}
+
+.info-icon {
+    background: var(--primary-500);
+    color: white;
+}
+
 .calendar {
     width: 100%;
 }
