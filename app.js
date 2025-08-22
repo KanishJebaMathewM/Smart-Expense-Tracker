@@ -231,13 +231,16 @@ class SmartExpenseTracker {
                 // Save current profile data before logout
                 this.saveProfileData();
 
-                // Clear session data
+                // Only clear session data, keep user data intact
                 localStorage.removeItem('app_session_token');
                 localStorage.removeItem('current_user_id');
 
-                this.showSuccess('Logged out successfully');
+                // Note: We do NOT clear user data like expenses, tasks, income, etc.
+                // This preserves all the user's data for when they log back in
 
-                // Redirect to auth page immediately
+                this.showSuccess('Logged out successfully. Your data is preserved.');
+
+                // Redirect to auth page
                 setTimeout(() => {
                     window.location.href = 'auth.html';
                 }, 1000);
@@ -2359,8 +2362,8 @@ class SmartExpenseTracker {
 
             if (modal && overlay) {
                 this.loadProfileData();
-                modal.style.display = 'block';
-                overlay.style.display = 'block';
+                modal.classList.add('active');
+                overlay.classList.add('active');
 
                 // Bind profile events
                 this.bindProfileEvents();
@@ -2376,8 +2379,8 @@ class SmartExpenseTracker {
             const overlay = document.getElementById('overlay');
 
             if (modal && overlay) {
-                modal.style.display = 'none';
-                overlay.style.display = 'none';
+                modal.classList.remove('active');
+                overlay.classList.remove('active');
             }
         } catch (error) {
             console.error('Error hiding profile:', error);
@@ -2417,7 +2420,6 @@ class SmartExpenseTracker {
             document.getElementById('profileName').value = this.profileData.name;
             document.getElementById('profileEmail').value = this.profileData.email;
             document.getElementById('profileDOB').value = this.profileData.dateOfBirth;
-            document.getElementById('profileBio').value = this.profileData.bio;
             document.getElementById('profilePhone').value = this.profileData.phone;
 
             // Populate stats
@@ -2515,7 +2517,6 @@ class SmartExpenseTracker {
             // Get form data
             const name = document.getElementById('profileName').value.trim();
             const dob = document.getElementById('profileDOB').value;
-            const bio = document.getElementById('profileBio').value.trim();
             const phone = document.getElementById('profilePhone').value.trim();
 
             // Validate required fields
@@ -2527,7 +2528,6 @@ class SmartExpenseTracker {
             // Update profile data
             this.profileData.name = name;
             this.profileData.dateOfBirth = dob;
-            this.profileData.bio = bio;
             this.profileData.phone = phone;
 
             // Save to localStorage
