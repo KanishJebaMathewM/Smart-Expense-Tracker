@@ -246,6 +246,120 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Task Manager Section -->
+            <section id="tasksSection" class="app-section">
+                <div class="section-header">
+                    <h2><div class="icon-bg icon-tasks small" style="display: inline-block; margin-right: 8px;"></div>Task Manager</h2>
+                    <p class="section-description">Organize and track your daily tasks and goals</p>
+                </div>
+
+                <!-- Task Stats -->
+                <div class="task-stats">
+                    <div class="task-stat-card">
+                        <div class="stat-icon"><div class="icon-bg icon-task-total large"></div></div>
+                        <div class="stat-content">
+                            <h3>Total Tasks</h3>
+                            <span id="totalTasks" class="stat-number">0</span>
+                        </div>
+                    </div>
+                    <div class="task-stat-card">
+                        <div class="stat-icon"><div class="icon-bg icon-task-completed large"></div></div>
+                        <div class="stat-content">
+                            <h3>Completed</h3>
+                            <span id="completedTasks" class="stat-number">0</span>
+                        </div>
+                    </div>
+                    <div class="task-stat-card">
+                        <div class="stat-icon"><div class="icon-bg icon-task-pending large"></div></div>
+                        <div class="stat-content">
+                            <h3>Pending</h3>
+                            <span id="pendingTasks" class="stat-number">0</span>
+                        </div>
+                    </div>
+                    <div class="task-stat-card">
+                        <div class="stat-icon"><div class="icon-bg icon-task-progress large"></div></div>
+                        <div class="stat-content">
+                            <h3>Progress</h3>
+                            <span id="taskProgress" class="stat-number">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task Actions -->
+                <div class="task-actions">
+                    <button id="addTaskBtn" class="btn btn-primary">
+                        <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>Add Task
+                    </button>
+                    <div class="task-filters">
+                        <select id="taskFilter" class="filter-select">
+                            <option value="all">All Tasks</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="today">Due Today</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                        <select id="taskCategory" class="filter-select">
+                            <option value="all">All Categories</option>
+                            <option value="work">Work</option>
+                            <option value="personal">Personal</option>
+                            <option value="finance">Finance</option>
+                            <option value="health">Health</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tasks Container -->
+                <div class="tasks-container">
+                    <div class="tasks-grid">
+                        <!-- Task columns will be dynamically populated -->
+                        <div class="task-column" data-status="pending">
+                            <div class="column-header">
+                                <h3><div class="icon-bg icon-task-pending small" style="display: inline-block; margin-right: 6px;"></div>Pending</h3>
+                                <span class="task-count" id="pendingCount">0</span>
+                            </div>
+                            <div class="task-list" id="pendingTasksList"></div>
+                        </div>
+
+                        <div class="task-column" data-status="in-progress">
+                            <div class="column-header">
+                                <h3><div class="icon-bg icon-task-progress small" style="display: inline-block; margin-right: 6px;"></div>In Progress</h3>
+                                <span class="task-count" id="inProgressCount">0</span>
+                            </div>
+                            <div class="task-list" id="inProgressTasksList"></div>
+                        </div>
+
+                        <div class="task-column" data-status="completed">
+                            <div class="column-header">
+                                <h3><div class="icon-bg icon-task-completed small" style="display: inline-block; margin-right: 6px;"></div>Completed</h3>
+                                <span class="task-count" id="completedCount">0</span>
+                            </div>
+                            <div class="task-list" id="completedTasksList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expense Integration Section -->
+                <div class="expense-integration-section">
+                    <h3><div class="icon-bg icon-integration small" style="display: inline-block; margin-right: 8px;"></div>Task-Expense Integration</h3>
+                    <div class="integration-cards">
+                        <div class="integration-card">
+                            <h4>Tasks with Budget</h4>
+                            <div id="tasksWithBudget" class="integration-content">
+                                <p class="placeholder-text">No budget-related tasks yet</p>
+                            </div>
+                        </div>
+                        <div class="integration-card">
+                            <h4>Spending Goals</h4>
+                            <div id="spendingGoals" class="integration-content">
+                                <p class="placeholder-text">No spending goals set</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <!-- All-Time Totals Section -->
