@@ -890,6 +890,14 @@ class SmartExpenseTracker {
                 this.expenses = data.expenses || {};
                 this.tasks = data.tasks || {};
 
+                // Load nutrition planner data
+                this.inventory = data.inventory || {};
+                this.mealPlans = data.mealPlans || {};
+                this.recipes = data.recipes || {};
+                this.shoppingList = data.shoppingList || {};
+                this.nutritionLog = data.nutritionLog || {};
+                this.userPreferences = { ...this.userPreferences, ...(data.userPreferences || {}) };
+
                 console.log(`📊 Profile data loaded successfully:`, {
                     incomeEntries: Object.keys(this.income).length,
                     expenseEntries: Object.keys(this.expenses).length,
@@ -985,6 +993,15 @@ class SmartExpenseTracker {
                 income: this.income || {},
                 expenses: this.expenses || {},
                 tasks: this.tasks || {},
+
+                // Nutrition planner data
+                inventory: this.inventory || {},
+                mealPlans: this.mealPlans || {},
+                recipes: this.recipes || {},
+                shoppingList: this.shoppingList || {},
+                nutritionLog: this.nutritionLog || {},
+                userPreferences: this.userPreferences || {},
+
                 lastSaved: new Date().toISOString(),
                 user: this.currentUser?.name || 'Unknown',
                 userEmail: this.currentUser?.email || 'Unknown'
