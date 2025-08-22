@@ -861,7 +861,8 @@ class SmartExpenseTracker {
             }
             const key = `${year}-${String(month + 1).padStart(2, '0')}`;
             this.income[key] = amount;
-            this.saveProfileData();
+            const saveSuccess = this.saveProfileData();
+            console.log(`%c💰 INCOME SAVED: ₹${amount} for ${key} (Save success: ${saveSuccess})`, 'color: blue; font-size: 14px; font-weight: bold;');
             return true;
         } catch (error) {
             this.showError('Failed to save income: ' + error.message);
