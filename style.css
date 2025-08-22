@@ -149,7 +149,7 @@
     position: relative;
 }
 .icon-home::before {
-    content: '🏠';
+    content: '����';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -1949,6 +1949,152 @@ body {
     font-style: italic;
     text-align: center;
     padding: var(--spacing-4);
+}
+
+/* Integration enhancements */
+.integration-item {
+    background: rgba(71, 85, 105, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
+    transition: var(--transition);
+}
+
+.integration-item:hover {
+    border-color: var(--border-accent);
+    background: rgba(71, 85, 105, 0.8);
+}
+
+.integration-item.over-budget {
+    border-left: 4px solid var(--error-500);
+}
+
+.integration-item.within-budget {
+    border-left: 4px solid var(--success-500);
+}
+
+.integration-title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.integration-budget {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-3);
+}
+
+.integration-progress {
+    margin-bottom: var(--spacing-3);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-accent);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success-500), var(--warning-500), var(--error-500));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.integration-actions {
+    display: flex;
+    gap: var(--spacing-2);
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    background: var(--primary-600);
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-small:hover {
+    background: var(--primary-700);
+}
+
+.budget-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+}
+
+.summary-item .positive {
+    color: var(--success-400);
+    font-weight: var(--font-weight-semibold);
+}
+
+.summary-item .negative {
+    color: var(--error-400);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Task expenses modal */
+.task-budget-summary {
+    background: rgba(96, 165, 250, 0.1);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+}
+
+.budget-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.budget-info .within-budget {
+    color: var(--success-400);
+}
+
+.budget-info .over-budget {
+    color: var(--error-400);
+}
+
+.task-expenses-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.task-expenses-list .expense-item {
+    background: rgba(51, 65, 85, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-3);
+    margin-bottom: var(--spacing-2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-expenses-list .expense-meta {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-top: 2px;
 }
 
 /* Task Modal Enhancements */
