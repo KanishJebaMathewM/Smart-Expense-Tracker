@@ -699,6 +699,12 @@ class SmartExpenseTracker {
                     taskEntries: Object.keys(this.tasks).length
                 });
 
+                // Show obvious alert if data is found
+                const totalEntries = Object.keys(this.income).length + Object.keys(this.expenses).length + Object.keys(this.tasks).length;
+                if (totalEntries > 0) {
+                    console.log(`%c🎉 DATA FOUND! Found ${totalEntries} total entries (${Object.keys(this.expenses).length} expense days, ${Object.keys(this.income).length} income entries, ${Object.keys(this.tasks).length} tasks)`, 'color: green; font-size: 16px; font-weight: bold;');
+                }
+
                 // Show detailed expense data for debugging
                 if (Object.keys(this.expenses).length > 0) {
                     console.log('📝 Expense data details:', {
