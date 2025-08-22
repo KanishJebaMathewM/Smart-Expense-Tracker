@@ -285,15 +285,68 @@ class SmartExpenseTracker {
     logout() {
         try {
             if (confirm('Are you sure you want to logout? Your data will be preserved and available when you log back in.')) {
-                // Save current profile data before logout
-                console.log('Saving profile data before logout...');
-                const saveSuccess = this.saveProfileData();
+                console.log('🔓 Starting logout process...');
 
-                if (saveSuccess) {
-                    console.log('Profile data saved successfully before logout');
-                } else {
-                    console.warn('Failed to save profile data before logout');
+                // Check current state before saving
+                console.log('Current state:', {
+                    hasCurrentUser: !!this.currentUser,
+                    currentUserName: this.currentUser?.name,
+                    hasCurrentProfile: !!this.currentProfile,
+                    currentProfileId: this.currentProfile?.id,
+                    dataToSave: {
+                        income: Object.keys(this.income || {}).length,
+                        expenses: Object.keys(this.expenses || {}).length,
+                        tasks: Object.keys(this.tasks || {}).length
+                    }
+                });
+
+                // Ensure we have a profile before saving
+                if (!this.currentProfile && this.currentUser) {
+                    console.log('⚠️ No current profile found, ensuring default profile...');
+                    this.ensureDefaultProfile();
                 }
+
+                // Save current profile data before logout
+                console.log('💾 Saving profile data before logout...');
+                let saveSuccess = false;
+                let saveMessage = '';
+
+                if (this.currentProfile) {
+                    saveSuccess = this.saveProfileData();
+                    saveMessage = saveSuccess ? 'Profile data saved successfully before logout' : 'Failed to save profile data (but continuing logout)';
+                } else {
+                    // If still no profile, try to save data directly
+                    console.log('⚠️ Still no profile, attempting direct data save...');
+                    try {
+                        if (this.currentUser && (Object.keys(this.income || {}).length > 0 || Object.keys(this.expenses || {}).length > 0 || Object.keys(this.tasks || {}).length > 0)) {
+                            const userEmail = this.currentUser.email || 'unknown';
+                            const cleanIdentifier = userEmail.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+                            const directKey = `profile_data_profile_default_${cleanIdentifier}`;
+
+                            const directData = {
+                                income: this.income || {},
+                                expenses: this.expenses || {},
+                                tasks: this.tasks || {},
+                                lastSaved: new Date().toISOString(),
+                                user: this.currentUser.name || 'Unknown',
+                                userEmail: this.currentUser.email || 'Unknown'
+                            };
+
+                            localStorage.setItem(directKey, JSON.stringify(directData));
+                            console.log(`✅ Direct save successful with key: ${directKey}`);
+                            saveSuccess = true;
+                            saveMessage = 'Data saved directly before logout';
+                        } else {
+                            saveMessage = 'No data to save (new user or empty profile)';
+                            saveSuccess = true; // Not an error condition
+                        }
+                    } catch (directSaveError) {
+                        console.error('❌ Direct save failed:', directSaveError);
+                        saveMessage = 'Direct save failed, but continuing logout';
+                    }
+                }
+
+                console.log(saveSuccess ? '✅' : '⚠️', saveMessage);
 
                 // Only clear session data, keep user data intact
                 localStorage.removeItem('app_session_token');
@@ -311,13 +364,17 @@ class SmartExpenseTracker {
             }
         } catch (error) {
             this.showError('Failed to logout: ' + error.message);
-            console.error('Logout error:', error);
+            console.error('❌ Logout error:', error);
+
             // Force redirect even on error after trying to save data
             try {
-                this.saveProfileData();
+                if (this.currentProfile) {
+                    this.saveProfileData();
+                }
             } catch (saveError) {
-                console.error('Failed to save data during error logout:', saveError);
+                console.error('❌ Failed to save data during error logout:', saveError);
             }
+
             setTimeout(() => {
                 window.location.href = 'auth.html';
             }, 2000);
