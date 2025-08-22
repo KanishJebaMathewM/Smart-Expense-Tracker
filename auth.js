@@ -1059,10 +1059,10 @@ class AuthenticationSystem {
     
     getNotificationIcon(type) {
         const icons = {
-            success: '✅',
-            error: '❌', 
-            warning: '⚠️',
-            info: 'ℹ️'
+            success: '✓',
+            error: '✗',
+            warning: '!',
+            info: 'i'
         };
         return icons[type] || icons.info;
     }
