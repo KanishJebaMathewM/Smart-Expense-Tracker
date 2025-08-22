@@ -860,14 +860,18 @@ class AuthenticationSystem {
     createSession() {
         try {
             const sessionData = {
-                userId: this.userData.email,
+                userId: this.userData.userId, // Use the actual userId, not email
+                userEmail: this.userData.email, // Keep email for reference
+                userName: this.userData.name, // Keep name for reference
                 createdAt: new Date().toISOString(),
                 expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
             };
-            
+
             localStorage.setItem(this.STORAGE_KEYS.APP_SESSION, JSON.stringify(sessionData));
             localStorage.setItem(this.STORAGE_KEYS.LAST_LOGIN, new Date().toISOString());
-            
+
+            console.log(`Session created for user: ${this.userData.name} (${this.userData.userId})`);
+
         } catch (error) {
             console.error('Error creating session:', error);
         }
