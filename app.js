@@ -646,7 +646,7 @@ class SmartExpenseTracker {
                 if (legacyIncome && Object.keys(this.income).length === 0) {
                     try {
                         this.income = JSON.parse(legacyIncome);
-                        console.log('✅ Migrated legacy income data');
+                        console.log('��� Migrated legacy income data');
                     } catch (e) {
                         console.error('❌ Failed to migrate income data:', e);
                     }
@@ -6085,9 +6085,40 @@ class SmartExpenseTracker {
             });
 
             if (addedCount > 0) {
+                // Create a task for cooking this recipe after shopping
+                const taskId = Date.now().toString();
+                const recipe = recipeData.recipe;
+                const ingredientNames = recipeData.missingIngredients.map(ing =>
+                    this.foodDatabase[ing.food]?.name || ing.food
+                ).join(', ');
+
+                this.tasks[taskId] = {
+                    id: taskId,
+                    title: `Cook ${recipe.name}`,
+                    description: `Shop for missing ingredients (${ingredientNames}) and cook this healthy ${recipe.cuisine || 'recipe'}. ` +
+                                `Recipe serves ${recipe.servings} and takes ${recipe.prepTime} minutes to prepare.`,
+                    priority: 'medium',
+                    category: 'health',
+                    status: 'pending',
+                    dueDate: null,
+                    createdDate: new Date().toISOString(),
+                    hasBudget: false,
+                    recipeId: recipeId,
+                    nutritionRelated: true,
+                    requiredIngredients: recipeData.missingIngredients.map(ing => ({
+                        food: ing.food,
+                        name: this.foodDatabase[ing.food]?.name || ing.food,
+                        quantity: ing.missing,
+                        unit: this.foodDatabase[ing.food]?.unit || 'units'
+                    }))
+                };
+
+                this.hasUnsavedChanges = true;
+                this.debouncedSave();
+
                 this.renderShoppingList();
                 this.updateNutritionOverview();
-                this.showSuccess(`Added ${addedCount} missing ingredients to shopping list`);
+                this.showSuccess(`Added ${addedCount} missing ingredients to shopping list and created a cooking task!`);
             } else {
                 this.showError('Failed to add ingredients to shopping list');
             }
