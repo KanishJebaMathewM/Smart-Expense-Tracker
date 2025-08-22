@@ -6511,21 +6511,164 @@ class SmartExpenseTracker {
         }
     }
 
-    // Placeholder methods for less critical features
+    // Select meal slot for planning
     selectMealSlot(weekKey, mealKey) {
-        console.log('Meal slot selection - to be implemented:', weekKey, mealKey);
+        try {
+            const availableRecipes = this.getAvailableRecipes().filter(r => r.canMake);
+
+            if (availableRecipes.length === 0) {
+                this.showInfo('No recipes available that can be made with current inventory. Add ingredients or recipes first.');
+                return;
+            }
+
+            // Create a simple recipe selection modal
+            const modalHtml = `
+                <div id="mealSelectionModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Select Recipe for ${mealKey}</h3>
+                            <button class="close-btn" onclick="tracker.hideMealSelectionModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="recipe-selection-list">
+                                ${availableRecipes.map(r => `
+                                    <div class="recipe-option" onclick="tracker.assignMealToSlot('${weekKey}', '${mealKey}', '${r.recipe.id}')">
+                                        <div class="recipe-name">${r.recipe.name}</div>
+                                        <div class="recipe-stats">${Math.round(r.nutrition.calories)} kcal | ${Math.round(r.nutrition.protein)}g protein</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="tracker.hideMealSelectionModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="mealSelectionOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        } catch (error) {
+            console.error('Error selecting meal slot:', error);
+        }
     }
 
-    removePlannedMeal(weekKey, mealKey) {
-        console.log('Remove planned meal - to be implemented:', weekKey, mealKey);
+    // Hide meal selection modal
+    hideMealSelectionModal() {
+        try {
+            const modal = document.getElementById('mealSelectionModal');
+            const overlay = document.getElementById('mealSelectionOverlay');
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding meal selection modal:', error);
+        }
     }
 
+    // Assign meal to slot
+    assignMealToSlot(weekKey, mealKey, recipeId) {
+        try {
+            const recipe = this.recipes[recipeId];
+            if (!recipe) {
+                this.showError('Recipe not found');
+                return;
+            }
+
+            if (!this.mealPlans[weekKey]) {
+                this.mealPlans[weekKey] = {};
+            }
+
+            const nutrition = this.calculateRecipeNutrition(recipe);
+            this.mealPlans[weekKey][mealKey] = {
+                recipeId: recipeId,
+                recipeName: recipe.name,
+                calories: nutrition.calories,
+                protein: nutrition.protein,
+                carbs: nutrition.carbs,
+                fat: nutrition.fat,
+                assignedAt: new Date().toISOString()
+            };
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            this.hideMealSelectionModal();
+            this.renderMealPlan();
+            this.showSuccess(`${recipe.name} assigned to ${mealKey}!`);
+
+        } catch (error) {
+            this.showError('Failed to assign meal: ' + error.message);
+            console.error('Error assigning meal to slot:', error);
+        }
+    }
+
+    // Remove planned meal
+    async removePlannedMeal(weekKey, mealKey) {
+        try {
+            if (!this.mealPlans[weekKey] || !this.mealPlans[weekKey][mealKey]) {
+                return;
+            }
+
+            const meal = this.mealPlans[weekKey][mealKey];
+            const shouldRemove = await confirmAsync(`Remove ${meal.recipeName} from ${mealKey}?`, {
+                title: 'Remove Planned Meal',
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-danger'
+            });
+
+            if (shouldRemove) {
+                delete this.mealPlans[weekKey][mealKey];
+
+                // Clean up empty week
+                if (Object.keys(this.mealPlans[weekKey]).length === 0) {
+                    delete this.mealPlans[weekKey];
+                }
+
+                this.hasUnsavedChanges = true;
+                this.debouncedSave();
+
+                this.renderMealPlan();
+                this.showSuccess('Planned meal removed');
+            }
+        } catch (error) {
+            this.showError('Failed to remove planned meal: ' + error.message);
+            console.error('Error removing planned meal:', error);
+        }
+    }
+
+    // Navigate to previous week
     previousWeek() {
-        console.log('Previous week navigation - to be implemented');
+        try {
+            if (!this.currentMealPlanWeek) {
+                this.currentMealPlanWeek = this.getCurrentWeekKey();
+            }
+
+            const currentDate = new Date(this.currentMealPlanWeek);
+            currentDate.setDate(currentDate.getDate() - 7);
+            this.currentMealPlanWeek = currentDate.toISOString().split('T')[0];
+
+            this.renderMealPlan();
+        } catch (error) {
+            console.error('Error navigating to previous week:', error);
+        }
     }
 
+    // Navigate to next week
     nextWeek() {
-        console.log('Next week navigation - to be implemented');
+        try {
+            if (!this.currentMealPlanWeek) {
+                this.currentMealPlanWeek = this.getCurrentWeekKey();
+            }
+
+            const currentDate = new Date(this.currentMealPlanWeek);
+            currentDate.setDate(currentDate.getDate() + 7);
+            this.currentMealPlanWeek = currentDate.toISOString().split('T')[0];
+
+            this.renderMealPlan();
+        } catch (error) {
+            console.error('Error navigating to next week:', error);
+        }
     }
 
     editShoppingItem(itemId) {
