@@ -548,7 +548,7 @@ class SmartExpenseTracker {
                 if (legacyExpenses && Object.keys(this.expenses).length === 0) {
                     try {
                         this.expenses = JSON.parse(legacyExpenses);
-                        console.log('✅ Migrated legacy expenses data');
+                        console.log('�� Migrated legacy expenses data');
                     } catch (e) {
                         console.error('❌ Failed to migrate expenses data:', e);
                     }
@@ -1394,11 +1394,18 @@ class SmartExpenseTracker {
         }
     }
     
-    deleteExpense(expenseId) {
+    async deleteExpense(expenseId) {
         try {
             if (!this.selectedDate) return;
-            
-            if (confirm('Are you sure you want to delete this expense?')) {
+
+            const shouldDelete = await confirmAsync('Are you sure you want to delete this expense?', {
+                title: 'Delete Expense',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-danger'
+            });
+
+            if (shouldDelete) {
                 if (this.deleteExpenseForDate(this.selectedDate, expenseId)) {
                     this.renderExpensesList(this.selectedDate);
                     this.updateDashboard();
