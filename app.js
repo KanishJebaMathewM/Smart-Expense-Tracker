@@ -450,7 +450,7 @@ class SmartExpenseTracker {
                     }
                 }
 
-                console.log(saveSuccess ? '✅' : '⚠️', saveMessage);
+                console.log(saveSuccess ? '✅' : '��️', saveMessage);
 
                 // Only clear session data, keep user data intact
                 localStorage.removeItem('app_session_token');
@@ -6655,134 +6655,6 @@ class SmartExpenseTracker {
         }
     }
 
-    // Show grocery purchase modal
-    showGroceryPurchaseModal() {
-        try {
-            const modalHtml = `
-                <div id="groceryPurchaseModal" class="modal active">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Add Grocery Purchase</h3>
-                            <button class="close-btn" onclick="tracker.hideGroceryPurchaseModal()">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="groceryFoodSelect">Food Item</label>
-                                <select id="groceryFoodSelect" required>
-                                    <option value="">Select food item...</option>
-                                    ${Object.entries(this.foodDatabase).map(([id, food]) =>
-                                        `<option value="${id}">${food.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="groceryQuantity">Quantity Purchased</label>
-                                <input type="number" id="groceryQuantity" placeholder="Enter quantity" min="0" step="0.1" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="groceryUnit">Unit</label>
-                                <input type="text" id="groceryUnit" placeholder="e.g., cups, pieces, grams" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="groceryCost">Actual Cost (₹)</label>
-                                <input type="number" id="groceryCost" placeholder="0.00" min="0" step="0.01" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="addToInventory" checked>
-                                    <span class="checkmark"></span>
-                                    Add to kitchen inventory
-                                </label>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="saveGroceryPurchase" class="btn btn-primary">Add Purchase</button>
-                            <button class="btn btn-secondary" onclick="tracker.hideGroceryPurchaseModal()">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="groceryPurchaseOverlay" class="overlay active"></div>
-            `;
-
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-            // Bind events
-            document.getElementById('saveGroceryPurchase').addEventListener('click', () => {
-                this.saveGroceryPurchase();
-            });
-
-            // Auto-fill unit when food is selected
-            document.getElementById('groceryFoodSelect').addEventListener('change', (e) => {
-                const foodId = e.target.value;
-                if (foodId && this.foodDatabase[foodId]) {
-                    document.getElementById('groceryUnit').value = this.foodDatabase[foodId].unit;
-
-                    // Estimate cost based on quantity
-                    const quantity = parseFloat(document.getElementById('groceryQuantity').value) || 1;
-                    const estimatedCost = this.estimateIngredientCost(foodId, quantity);
-                    document.getElementById('groceryCost').value = estimatedCost.toFixed(2);
-                }
-            });
-
-            // Update cost when quantity changes
-            document.getElementById('groceryQuantity').addEventListener('input', (e) => {
-                const foodId = document.getElementById('groceryFoodSelect').value;
-                const quantity = parseFloat(e.target.value) || 0;
-                if (foodId && quantity > 0) {
-                    const estimatedCost = this.estimateIngredientCost(foodId, quantity);
-                    document.getElementById('groceryCost').value = estimatedCost.toFixed(2);
-                }
-            });
-
-        } catch (error) {
-            console.error('Error showing grocery purchase modal:', error);
-        }
-    }
-
-    // Hide grocery purchase modal
-    hideGroceryPurchaseModal() {
-        try {
-            const modal = document.getElementById('groceryPurchaseModal');
-            const overlay = document.getElementById('groceryPurchaseOverlay');
-            if (modal) modal.remove();
-            if (overlay) overlay.remove();
-        } catch (error) {
-            console.error('Error hiding grocery purchase modal:', error);
-        }
-    }
-
-    // Save grocery purchase
-    saveGroceryPurchase() {
-        try {
-            const foodId = document.getElementById('groceryFoodSelect').value;
-            const quantity = parseFloat(document.getElementById('groceryQuantity').value);
-            const unit = document.getElementById('groceryUnit').value;
-            const cost = parseFloat(document.getElementById('groceryCost').value);
-            const addToInventory = document.getElementById('addToInventory').checked;
-
-            if (!foodId || !quantity || quantity <= 0 || !cost || cost <= 0) {
-                this.showError('Please fill all required fields with valid values');
-                return;
-            }
-
-            if (this.addGroceryExpense(foodId, quantity, unit, cost)) {
-                if (!addToInventory) {
-                    // Remove from inventory if user doesn't want to add it
-                    delete this.inventory[foodId];
-                }
-
-                this.hideGroceryPurchaseModal();
-                this.showSuccess('Grocery purchase added to expenses and inventory!');
-            }
-        } catch (error) {
-            this.showError('Failed to save grocery purchase: ' + error.message);
-            console.error('Error saving grocery purchase:', error);
-        }
-    }
 
     // Get nutrition-related expenses for a date range
     getNutritionExpenses(startDate, endDate) {
