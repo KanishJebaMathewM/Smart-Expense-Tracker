@@ -496,10 +496,34 @@
                 // Valid session - load main app
                 console.log(`Authenticated user: ${currentUser.name} (${currentUser.email})`);
 
-                // Update loading text to show user
+                // Update loading text and show profile picture
                 const loadingText = document.querySelector('.loading-text');
+                const loadingIcon = document.getElementById('loadingIcon');
+                const loadingProfileArea = document.getElementById('loadingProfileArea');
+                const loadingProfileImage = document.getElementById('loadingProfileImage');
+                const loadingDefaultIcon = document.getElementById('loadingDefaultIcon');
+
                 if (loadingText) {
                     loadingText.textContent = `Welcome back, ${currentUser.name}!`;
+                }
+
+                // Show profile picture if available
+                const profileData = JSON.parse(localStorage.getItem(`profile_data_${currentUserId}`) || '{}');
+                if (profileData.profilePicture && loadingProfileArea && loadingProfileImage) {
+                    // Hide the generic welcome icon
+                    if (loadingIcon) loadingIcon.style.display = 'none';
+
+                    // Show profile area
+                    loadingProfileArea.style.display = 'block';
+                    loadingProfileImage.src = profileData.profilePicture;
+                    loadingProfileImage.style.display = 'block';
+                    if (loadingDefaultIcon) loadingDefaultIcon.style.display = 'none';
+                } else if (loadingProfileArea) {
+                    // Show profile area with default icon
+                    if (loadingIcon) loadingIcon.style.display = 'none';
+                    loadingProfileArea.style.display = 'block';
+                    if (loadingProfileImage) loadingProfileImage.style.display = 'none';
+                    if (loadingDefaultIcon) loadingDefaultIcon.style.display = 'flex';
                 }
 
             } catch (error) {
