@@ -616,6 +616,20 @@ body {
     }
 }
 
+/* Profile image styling in family member display */
+.family-member-icon .profile-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.family-member-icon .profile-img.small {
+    width: 32px;
+    height: 32px;
+}
+
 /* Simple Logout Button */
 .logout-section {
     display: flex;
