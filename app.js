@@ -1011,7 +1011,7 @@ class SmartExpenseTracker {
                 }
             }
 
-            console.log('💾 Saving profile data...');
+            console.log('��� Saving profile data...');
 
             const userSpecificKey = this.getUserSpecificKey(this.STORAGE_KEYS.PROFILE_DATA + this.currentProfile.id);
             const profileData = {
@@ -1069,7 +1069,7 @@ class SmartExpenseTracker {
             return true;
         } catch (error) {
             this.showError('Failed to save profile data: ' + error.message);
-            console.error('❌ Profile data saving error:', error);
+            console.error('�� Profile data saving error:', error);
             return false;
         }
     }
@@ -3787,11 +3787,26 @@ class SmartExpenseTracker {
                     ${task.description ? `<p class="task-description">${this.escapeHtml(task.description)}</p>` : ''}
 
                     <div class="task-meta">
-                        <span class="task-category">${task.category}</span>
+                        <span class="task-category ${task.nutritionRelated ? 'nutrition-related' : ''}">${task.category}</span>
                         <span class="task-due ${isOverdue ? 'overdue' : isDueToday ? 'today' : ''}">${dueDateText}</span>
+                        ${task.nutritionRelated ? '<span class="nutrition-badge">🥗 Nutrition</span>' : ''}
                     </div>
 
                     ${task.budget ? `<div class="task-budget-indicator">Budget: ₹${task.budget}</div>` : ''}
+
+                    ${task.recipeId ? `
+                        <div class="task-recipe-info">
+                            <div class="icon-bg icon-recipes xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Recipe: ${task.title.includes('Cook ') ? task.title.replace('Cook ', '') : 'Recipe planned'}
+                        </div>
+                    ` : ''}
+
+                    ${task.shoppingItems && task.shoppingItems.length > 0 ? `
+                        <div class="task-shopping-info">
+                            <div class="icon-bg icon-shopping-list xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            ${task.shoppingItems.length} items to purchase
+                        </div>
+                    ` : ''}
 
                     <div class="task-actions-menu" onclick="event.stopPropagation()">
                         ${otherStatuses.map(status => `
