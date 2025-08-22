@@ -126,26 +126,71 @@ class SmartExpenseTracker {
     // Load authenticated user data
     loadAuthenticatedUser() {
         try {
+            console.log('=== LOADING AUTHENTICATED USER DATA ===');
+
             // First try to get user from family users (new system)
             const allUsers = this.getAllFamilyUsers();
             const currentUserId = localStorage.getItem('current_user_id');
+            const sessionData = localStorage.getItem('app_session_token');
+
+            console.log('User loading data:', {
+                currentUserId: currentUserId,
+                hasAllUsers: !!allUsers,
+                allUsersCount: allUsers ? Object.keys(allUsers).length : 0,
+                hasSession: !!sessionData
+            });
+
+            // Log all available user IDs for debugging
+            if (allUsers && Object.keys(allUsers).length > 0) {
+                console.log('Available user IDs:', Object.keys(allUsers));
+                console.log('Looking for user ID:', currentUserId);
+            }
 
             if (currentUserId && allUsers[currentUserId]) {
                 this.currentUser = allUsers[currentUserId];
-                console.log(`Logged in as: ${this.currentUser.name} (${this.currentUser.email}) - Family System`);
+                console.log(`✅ Logged in as: ${this.currentUser.name} (${this.currentUser.email}) - Family System`);
+                console.log('User data loaded:', {
+                    userId: this.currentUser.userId,
+                    name: this.currentUser.name,
+                    email: this.currentUser.email
+                });
                 return;
             }
+
+            // If session has user info but no match found, log details
+            if (sessionData) {
+                const session = JSON.parse(sessionData);
+                console.log('Session user info:', {
+                    sessionUserId: session.userId,
+                    sessionUserEmail: session.userEmail,
+                    sessionUserName: session.userName
+                });
+
+                // Try to find user by session userId if different from currentUserId
+                if (session.userId && session.userId !== currentUserId && allUsers[session.userId]) {
+                    console.log('⚠️ Found user using session userId instead of current user ID');
+                    this.currentUser = allUsers[session.userId];
+                    // Update current user ID to match session
+                    localStorage.setItem('current_user_id', session.userId);
+                    console.log(`✅ Logged in as: ${this.currentUser.name} (${this.currentUser.email}) - Family System (Fixed)`);
+                    return;
+                }
+            }
+
+            console.log('⚠️ User not found in family system, trying legacy system...');
 
             // Fallback to legacy system
             const userData = localStorage.getItem('user_account_data');
             if (userData) {
                 this.currentUser = JSON.parse(userData);
-                console.log(`Logged in as: ${this.currentUser.name} (${this.currentUser.email}) - Legacy System`);
+                console.log(`✅ Logged in as: ${this.currentUser.name} (${this.currentUser.email}) - Legacy System`);
             } else {
-                throw new Error('No authenticated user found');
+                throw new Error('No authenticated user found in any system');
             }
+
+            console.log('=== USER DATA LOADING COMPLETED ===');
         } catch (error) {
-            console.error('Failed to load user data:', error);
+            console.error('❌ Failed to load user data:', error);
             // Redirect to auth if no valid user data
             window.location.href = 'auth.html';
         }
