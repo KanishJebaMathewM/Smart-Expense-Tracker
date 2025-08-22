@@ -1077,24 +1077,25 @@ document.addEventListener('DOMContentLoaded', () => {
 // Make auth system globally available
 window.authSystem = authSystem;
 
-// Auto-logout functionality when window is closed or user leaves
-window.addEventListener('beforeunload', () => {
-    // Clear session data on window close
-    localStorage.removeItem('app_session_token');
-    localStorage.removeItem('current_user_id');
-});
+// Auto-logout functionality when window is closed (only on tab close, not navigation)
+let isNavigating = false;
 
-// Also handle when user navigates away from the page
-window.addEventListener('pagehide', () => {
-    // Clear session data on page hide
-    localStorage.removeItem('app_session_token');
-    localStorage.removeItem('current_user_id');
-});
-
-// Handle visibility change (when tab becomes hidden)
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-        // Optional: Could implement auto-logout after a certain time of inactivity
-        // For now, we'll keep the session but this is where you could add timeout logic
+// Mark when we're navigating to prevent auto-logout
+window.addEventListener('beforeunload', (e) => {
+    // Only logout if user is actually closing the tab/window
+    // Check if this is a page refresh or navigation vs actual tab close
+    if (e.returnValue === undefined && !isNavigating) {
+        // This is likely a tab close, not navigation
+        localStorage.removeItem('app_session_token');
+        localStorage.removeItem('current_user_id');
     }
 });
+
+// Track internal navigation to prevent false auto-logout
+const originalProceedToApp = AuthenticationSystem.prototype.proceedToApp;
+if (originalProceedToApp) {
+    AuthenticationSystem.prototype.proceedToApp = function() {
+        isNavigating = true;
+        return originalProceedToApp.call(this);
+    };
+}
