@@ -3080,7 +3080,8 @@ body {
     border-color: var(--primary-400) !important;
 }
 
-.form-group input::placeholder {
+.form-group input::placeholder,
+.form-group textarea::placeholder {
     color: #64748B !important;
     opacity: 0.7;
     font-weight: var(--font-weight-normal);
