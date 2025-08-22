@@ -383,67 +383,143 @@ class SmartExpenseTracker {
     // Migrate legacy data to user-specific storage
     migrateLegacyData() {
         try {
-            // Check for legacy storage keys
-            const legacyKeys = ['income_data', 'expenses_data', 'tasks_data'];
-            let hasLegacyData = false;
+            console.log('🔄 Starting legacy data migration...');
 
+            // Check for legacy storage keys and any other potential data sources
+            const allKeys = Object.keys(localStorage);
+            const legacyKeys = ['income_data', 'expenses_data', 'tasks_data'];
+            const potentialDataKeys = allKeys.filter(key =>
+                key.includes('income') || key.includes('expense') || key.includes('task') ||
+                key.includes('profile_data')
+            );
+
+            console.log('🔍 Searching for data:', {
+                legacyKeys: legacyKeys,
+                potentialKeys: potentialDataKeys,
+                allStorageKeys: allKeys.length
+            });
+
+            let hasLegacyData = false;
+            let migrationLog = [];
+
+            // Check standard legacy keys
             legacyKeys.forEach(key => {
-                if (localStorage.getItem(key)) {
+                const data = localStorage.getItem(key);
+                if (data) {
                     hasLegacyData = true;
+                    console.log(`📋 Found legacy data in: ${key}`);
+                    try {
+                        const parsed = JSON.parse(data);
+                        migrationLog.push({
+                            key: key,
+                            type: 'legacy',
+                            entries: Array.isArray(parsed) ? parsed.length : Object.keys(parsed).length
+                        });
+                    } catch (e) {
+                        console.warn(`⚠️ Could not parse legacy data in ${key}:`, e);
+                    }
                 }
             });
 
+            // Check for any existing profile data that might belong to this user
+            const profileDataKeys = potentialDataKeys.filter(key => key.startsWith('profile_data_'));
+            if (profileDataKeys.length > 0) {
+                console.log('🔍 Found existing profile data keys:', profileDataKeys);
+
+                // Try to find data that might belong to current user
+                profileDataKeys.forEach(key => {
+                    try {
+                        const data = localStorage.getItem(key);
+                        if (data) {
+                            const parsed = JSON.parse(data);
+                            if (parsed.userEmail === this.currentUser?.email ||
+                                parsed.user === this.currentUser?.name) {
+                                console.log(`🎯 Found matching profile data: ${key}`);
+
+                                if (parsed.income && Object.keys(this.income).length === 0) {
+                                    this.income = parsed.income;
+                                    migrationLog.push({key: key, type: 'profile-income', entries: Object.keys(parsed.income).length});
+                                }
+                                if (parsed.expenses && Object.keys(this.expenses).length === 0) {
+                                    this.expenses = parsed.expenses;
+                                    migrationLog.push({key: key, type: 'profile-expenses', entries: Object.keys(parsed.expenses).length});
+                                }
+                                if (parsed.tasks && Object.keys(this.tasks).length === 0) {
+                                    this.tasks = parsed.tasks;
+                                    migrationLog.push({key: key, type: 'profile-tasks', entries: Object.keys(parsed.tasks).length});
+                                }
+                                hasLegacyData = true;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn(`⚠️ Could not parse profile data in ${key}:`, e);
+                    }
+                });
+            }
+
             if (!hasLegacyData) {
-                console.log('No legacy data found for migration');
+                console.log('❌ No legacy data found for migration');
                 return;
             }
 
-            console.log('Migrating legacy data to user-specific storage...');
+            console.log('📊 Migration summary:', migrationLog);
 
-            // Migrate income data
-            const legacyIncome = localStorage.getItem('income_data');
-            if (legacyIncome && Object.keys(this.income).length === 0) {
-                try {
-                    this.income = JSON.parse(legacyIncome);
-                    console.log('Migrated legacy income data');
-                } catch (e) {
-                    console.error('Failed to migrate income data:', e);
+            // Migrate standard legacy data if no profile data was found
+            if (migrationLog.filter(m => m.type.startsWith('profile')).length === 0) {
+                console.log('🔄 Migrating standard legacy data...');
+
+                // Migrate income data
+                const legacyIncome = localStorage.getItem('income_data');
+                if (legacyIncome && Object.keys(this.income).length === 0) {
+                    try {
+                        this.income = JSON.parse(legacyIncome);
+                        console.log('✅ Migrated legacy income data');
+                    } catch (e) {
+                        console.error('❌ Failed to migrate income data:', e);
+                    }
                 }
-            }
 
-            // Migrate expenses data
-            const legacyExpenses = localStorage.getItem('expenses_data');
-            if (legacyExpenses && Object.keys(this.expenses).length === 0) {
-                try {
-                    this.expenses = JSON.parse(legacyExpenses);
-                    console.log('Migrated legacy expenses data');
-                } catch (e) {
-                    console.error('Failed to migrate expenses data:', e);
+                // Migrate expenses data
+                const legacyExpenses = localStorage.getItem('expenses_data');
+                if (legacyExpenses && Object.keys(this.expenses).length === 0) {
+                    try {
+                        this.expenses = JSON.parse(legacyExpenses);
+                        console.log('✅ Migrated legacy expenses data');
+                    } catch (e) {
+                        console.error('❌ Failed to migrate expenses data:', e);
+                    }
                 }
-            }
 
-            // Migrate tasks data
-            const legacyTasks = localStorage.getItem('tasks_data');
-            if (legacyTasks && Object.keys(this.tasks).length === 0) {
-                try {
-                    this.tasks = JSON.parse(legacyTasks);
-                    console.log('Migrated legacy tasks data');
-                } catch (e) {
-                    console.error('Failed to migrate tasks data:', e);
+                // Migrate tasks data
+                const legacyTasks = localStorage.getItem('tasks_data');
+                if (legacyTasks && Object.keys(this.tasks).length === 0) {
+                    try {
+                        this.tasks = JSON.parse(legacyTasks);
+                        console.log('✅ Migrated legacy tasks data');
+                    } catch (e) {
+                        console.error('❌ Failed to migrate tasks data:', e);
+                    }
                 }
             }
 
             // Save migrated data with new user-specific keys
             if (hasLegacyData) {
-                this.saveProfileData();
-                console.log('Legacy data migration completed successfully');
-
-                // Optionally remove legacy keys after successful migration
-                // legacyKeys.forEach(key => localStorage.removeItem(key));
+                console.log('💾 Saving migrated data...');
+                const saveSuccess = this.saveProfileData();
+                if (saveSuccess) {
+                    console.log('��� Legacy data migration completed successfully');
+                    console.log('📊 Final data summary:', {
+                        income: Object.keys(this.income).length,
+                        expenses: Object.keys(this.expenses).length,
+                        tasks: Object.keys(this.tasks).length
+                    });
+                } else {
+                    console.error('❌ Failed to save migrated data');
+                }
             }
 
         } catch (error) {
-            console.error('Error during legacy data migration:', error);
+            console.error('❌ Error during legacy data migration:', error);
         }
     }
 
