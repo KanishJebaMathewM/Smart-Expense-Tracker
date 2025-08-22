@@ -5527,25 +5527,366 @@ class SmartExpenseTracker {
         }
     }
 
-    // Placeholder methods for remaining functionality
+    // Render meal plan
     renderMealPlan() {
-        console.log('Meal plan rendering - to be implemented');
+        try {
+            const mealPlanGrid = document.getElementById('mealPlanGrid');
+            if (!mealPlanGrid) return;
+
+            // Generate 7-day meal plan grid
+            const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const mealTypes = ['breakfast', 'lunch', 'dinner'];
+
+            // Get current week's meal plan or create empty one
+            const currentWeek = this.getCurrentWeekKey();
+            const weekPlan = this.mealPlans[currentWeek] || {};
+
+            let gridHtml = `
+                <div class="meal-plan-header">
+                    <div class="week-navigation">
+                        <button class="btn btn-secondary" onclick="tracker.previousWeek()">
+                            <div class="icon-bg icon-prev xsmall"></div> Previous Week
+                        </button>
+                        <h4>Week of ${this.formatWeekDate(currentWeek)}</h4>
+                        <button class="btn btn-secondary" onclick="tracker.nextWeek()">
+                            Next Week <div class="icon-bg icon-next xsmall"></div>
+                        </button>
+                    </div>
+                </div>
+                <div class="meal-grid">
+                    <div class="meal-grid-header">
+                        <div class="day-header">Day</div>
+                        <div class="meal-header">Breakfast</div>
+                        <div class="meal-header">Lunch</div>
+                        <div class="meal-header">Dinner</div>
+                    </div>
+            `;
+
+            daysOfWeek.forEach(day => {
+                gridHtml += `<div class="meal-row">`;
+                gridHtml += `<div class="day-cell">${day}</div>`;
+
+                mealTypes.forEach(mealType => {
+                    const mealKey = `${day.toLowerCase()}_${mealType}`;
+                    const plannedMeal = weekPlan[mealKey];
+
+                    gridHtml += `
+                        <div class="meal-cell" onclick="tracker.selectMealSlot('${currentWeek}', '${mealKey}')">
+                            ${plannedMeal ? `
+                                <div class="planned-meal">
+                                    <div class="meal-name">${this.escapeHtml(plannedMeal.recipeName)}</div>
+                                    <div class="meal-calories">${Math.round(plannedMeal.calories)} kcal</div>
+                                    <button class="remove-meal" onclick="event.stopPropagation(); tracker.removePlannedMeal('${currentWeek}', '${mealKey}')">&times;</button>
+                                </div>
+                            ` : `
+                                <div class="empty-meal">
+                                    <div class="icon-bg icon-add small"></div>
+                                    <span>Add meal</span>
+                                </div>
+                            `}
+                        </div>
+                    `;
+                });
+
+                gridHtml += `</div>`;
+            });
+
+            gridHtml += `</div>`;
+
+            // Add meal plan summary
+            const weekSummary = this.calculateWeekNutrition(weekPlan);
+            gridHtml += `
+                <div class="meal-plan-summary">
+                    <h4>Weekly Summary</h4>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span>Avg Daily Calories:</span>
+                            <span>${Math.round(weekSummary.avgCalories)} kcal</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Avg Daily Protein:</span>
+                            <span>${Math.round(weekSummary.avgProtein)}g</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Planned Meals:</span>
+                            <span>${Object.keys(weekPlan).length}/21</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Est. Weekly Cost:</span>
+                            <span>₹${Math.round(weekSummary.estimatedCost)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            mealPlanGrid.innerHTML = gridHtml;
+        } catch (error) {
+            console.error('Error rendering meal plan:', error);
+        }
     }
 
+    // Render shopping list
     renderShoppingList() {
-        console.log('Shopping list rendering - to be implemented');
+        try {
+            const shoppingList = document.getElementById('shoppingList');
+            if (!shoppingList) return;
+
+            const items = Object.values(this.shoppingList);
+
+            if (items.length === 0) {
+                shoppingList.innerHTML = `
+                    <div class="shopping-placeholder">
+                        <div class="icon-bg icon-shopping-list xlarge"></div>
+                        <h4>Your shopping list is empty</h4>
+                        <p>Add items manually or from missing recipe ingredients</p>
+                        <button class="btn btn-primary" onclick="tracker.showShoppingModal()">
+                            <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Add First Item
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group items by category
+            const groupedItems = {};
+            items.forEach(item => {
+                if (!groupedItems[item.category]) {
+                    groupedItems[item.category] = [];
+                }
+                groupedItems[item.category].push(item);
+            });
+
+            let listHtml = '';
+            Object.entries(groupedItems).forEach(([category, categoryItems]) => {
+                listHtml += `
+                    <div class="shopping-category">
+                        <h4 class="category-header">${category.charAt(0).toUpperCase() + category.slice(1)}</h4>
+                        <div class="category-items">
+                            ${categoryItems.map(item => `
+                                <div class="shopping-item ${item.purchased ? 'purchased' : ''}">
+                                    <div class="item-checkbox">
+                                        <input type="checkbox" ${item.purchased ? 'checked' : ''}
+                                               onchange="tracker.toggleShoppingItem('${item.id}')">
+                                    </div>
+                                    <div class="item-details">
+                                        <div class="item-name">${this.escapeHtml(item.name)}</div>
+                                        <div class="item-quantity">${item.quantity} ${item.unit}</div>
+                                    </div>
+                                    <div class="item-cost">₹${item.estimatedCost.toFixed(2)}</div>
+                                    <div class="item-actions">
+                                        <button class="btn-small" onclick="tracker.editShoppingItem('${item.id}')">Edit</button>
+                                        <button class="btn-small btn-danger" onclick="tracker.removeShoppingItem('${item.id}')">Remove</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            shoppingList.innerHTML = listHtml;
+
+            // Update shopping summary
+            this.updateShoppingSummary(items);
+        } catch (error) {
+            console.error('Error rendering shopping list:', error);
+        }
     }
 
+    // Render nutrition insights
     renderNutritionInsights() {
-        console.log('Nutrition insights rendering - to be implemented');
+        try {
+            const insightsContainer = document.getElementById('nutritionInsights');
+            if (!insightsContainer) return;
+
+            // Get today's nutrition data
+            const today = new Date();
+            const todayLog = this.getNutritionLogForDate(today);
+            const weeklyData = this.getWeeklyNutritionData();
+
+            // Update progress bars
+            this.updateNutritionProgress(todayLog.totalNutrition);
+
+            // Generate insights and recommendations
+            const insights = this.generateNutritionInsights(todayLog, weeklyData);
+
+            insightsContainer.innerHTML = `
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <h4>Today's Analysis</h4>
+                        <div class="insight-content">
+                            ${insights.today.map(insight => `
+                                <div class="insight-item ${insight.type}">
+                                    <div class="insight-icon">${this.getInsightIcon(insight.type)}</div>
+                                    <div class="insight-text">${insight.message}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <h4>Weekly Trends</h4>
+                        <div class="insight-content">
+                            ${insights.weekly.map(insight => `
+                                <div class="insight-item ${insight.type}">
+                                    <div class="insight-icon">${this.getInsightIcon(insight.type)}</div>
+                                    <div class="insight-text">${insight.message}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <h4>Recommendations</h4>
+                        <div class="insight-content">
+                            ${insights.recommendations.map(insight => `
+                                <div class="insight-item ${insight.type}">
+                                    <div class="insight-icon">${this.getInsightIcon(insight.type)}</div>
+                                    <div class="insight-text">${insight.message}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nutrition-charts">
+                    <div class="chart-container">
+                        <h4>Weekly Calorie Trend</h4>
+                        <canvas id="weeklyCalorieChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Macronutrient Distribution</h4>
+                        <canvas id="macroDistributionChart" width="300" height="300"></canvas>
+                    </div>
+                </div>
+            `;
+
+            // Render charts
+            this.renderNutritionCharts(weeklyData, todayLog.totalNutrition);
+        } catch (error) {
+            console.error('Error rendering nutrition insights:', error);
+        }
     }
 
+    // Generate weekly meal plan
     generateWeeklyMealPlan() {
-        console.log('Weekly meal plan generation - to be implemented');
+        try {
+            const availableRecipes = this.getAvailableRecipes().filter(r => r.canMake);
+
+            if (availableRecipes.length === 0) {
+                this.showError('No recipes available with current inventory. Please add more ingredients.');
+                return;
+            }
+
+            const currentWeek = this.getCurrentWeekKey();
+            const weekPlan = {};
+
+            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const mealTypes = ['breakfast', 'lunch', 'dinner'];
+
+            // Filter recipes by meal category
+            const breakfastRecipes = availableRecipes.filter(r => r.recipe.category === 'breakfast');
+            const mainRecipes = availableRecipes.filter(r => r.recipe.category === 'main');
+            const snackRecipes = availableRecipes.filter(r => r.recipe.category === 'snack');
+
+            // Generate plan for each day
+            daysOfWeek.forEach(day => {
+                mealTypes.forEach(mealType => {
+                    let recipePool = [];
+
+                    switch(mealType) {
+                        case 'breakfast':
+                            recipePool = breakfastRecipes.length > 0 ? breakfastRecipes : availableRecipes;
+                            break;
+                        case 'lunch':
+                        case 'dinner':
+                            recipePool = mainRecipes.length > 0 ? mainRecipes : availableRecipes;
+                            break;
+                    }
+
+                    if (recipePool.length > 0) {
+                        const randomRecipe = recipePool[Math.floor(Math.random() * recipePool.length)];
+                        const nutrition = this.calculateRecipeNutrition(randomRecipe.recipe);
+
+                        weekPlan[`${day}_${mealType}`] = {
+                            recipeId: randomRecipe.recipe.id,
+                            recipeName: randomRecipe.recipe.name,
+                            servings: 1,
+                            calories: nutrition.calories,
+                            protein: nutrition.protein,
+                            carbs: nutrition.carbs,
+                            fat: nutrition.fat
+                        };
+                    }
+                });
+            });
+
+            // Save meal plan
+            this.mealPlans[currentWeek] = weekPlan;
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            // Re-render meal plan
+            this.renderMealPlan();
+
+            this.showSuccess('Weekly meal plan generated successfully!');
+        } catch (error) {
+            this.showError('Failed to generate meal plan: ' + error.message);
+            console.error('Error generating weekly meal plan:', error);
+        }
     }
 
+    // Export shopping list
     exportShoppingList() {
-        console.log('Shopping list export - to be implemented');
+        try {
+            const items = Object.values(this.shoppingList);
+
+            if (items.length === 0) {
+                this.showError('Shopping list is empty. Add some items first.');
+                return;
+            }
+
+            // Generate CSV content
+            const csvHeaders = ['Item Name', 'Quantity', 'Unit', 'Category', 'Estimated Cost', 'Status'];
+            const csvRows = [csvHeaders.join(',')];
+
+            items.forEach(item => {
+                const row = [
+                    `"${item.name}"`,
+                    item.quantity,
+                    `"${item.unit}"`,
+                    `"${item.category}"`,
+                    item.estimatedCost,
+                    item.purchased ? 'Purchased' : 'Pending'
+                ];
+                csvRows.push(row.join(','));
+            });
+
+            // Add summary
+            csvRows.push('');
+            csvRows.push('Summary');
+            csvRows.push(`Total Items,${items.length}`);
+            csvRows.push(`Total Cost,₹${items.reduce((sum, item) => sum + item.estimatedCost, 0).toFixed(2)}`);
+            csvRows.push(`Purchased,${items.filter(item => item.purchased).length}`);
+            csvRows.push(`Pending,${items.filter(item => !item.purchased).length}`);
+
+            const csvContent = csvRows.join('\n');
+
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `shopping-list-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            this.showSuccess('Shopping list exported successfully!');
+        } catch (error) {
+            this.showError('Failed to export shopping list: ' + error.message);
+            console.error('Error exporting shopping list:', error);
+        }
     }
 
     filterInventory() {
