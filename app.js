@@ -75,6 +75,10 @@ class SmartExpenseTracker {
             expenseCount: 0
         };
 
+        // Initialize data structures to prevent undefined errors
+        this.income = {};
+        this.expenses = {};
+
         this.init();
     }
     
