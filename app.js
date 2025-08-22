@@ -98,6 +98,19 @@ class SmartExpenseTracker {
 
         this.init();
     }
+
+    // Utility function for debouncing
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
     
     // Logout button is now directly in HTML
     
@@ -1279,7 +1292,8 @@ class SmartExpenseTracker {
             const amount = parseFloat(amountInput.value);
             if (amount && amount > 0) {
                 if (this.setIncome(amount)) {
-                    this.saveProfileData(); // Save immediately after income change
+                    this.hasUnsavedChanges = true;
+                    this.debouncedSave(); // Use debounced save
                     this.updateDashboard();
                     this.hideIncomeModal();
                     this.showSuccess('Income saved successfully!');
@@ -1318,7 +1332,8 @@ class SmartExpenseTracker {
                 }
 
                 if (this.addExpenseForDate(this.selectedDate, expense)) {
-                    this.saveProfileData(); // Save immediately after expense addition
+                this.hasUnsavedChanges = true;
+                this.debouncedSave(); // Use debounced save
                     this.clearExpenseForm();
                     this.renderExpensesList(this.selectedDate);
                     this.updateDashboard();
@@ -1398,6 +1413,8 @@ class SmartExpenseTracker {
                         };
                         
                         if (this.setExpenses(this.expenses)) {
+                            this.hasUnsavedChanges = true;
+                            this.debouncedSave(); // Use debounced save
                             this.clearExpenseForm();
                             this.renderExpensesList(this.selectedDate);
                             this.updateDashboard();
@@ -1859,7 +1876,7 @@ class SmartExpenseTracker {
                         <div class="report-card">
                             <h4>${this.getUIIcon('trending-up', 'small')} Spending Analysis</h4>
                             <p><strong>Top Category:</strong> ${topCategory}</p>
-                            <p><strong>Category Amount:</strong> ₹${(categoryTotals[topCategory] || 0).toLocaleString()}</p>
+                            <p><strong>Category Amount:</strong> ���${(categoryTotals[topCategory] || 0).toLocaleString()}</p>
                             <p><strong>Avg Daily Spending:</strong> ₹${avgDailySpending.toFixed(0)}</p>
                             <p><strong>Days with Expenses:</strong> ${Object.keys(dailyTotals).length}</p>
                         </div>
