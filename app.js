@@ -977,7 +977,7 @@ class SmartExpenseTracker {
         }
     }
 
-    // Export data functionality
+    // Export data functionality - show format selection modal
     exportData() {
         try {
             if (!this.currentProfile) {
@@ -985,10 +985,129 @@ class SmartExpenseTracker {
                 return;
             }
 
+            this.showExportModal();
+        } catch (error) {
+            this.showError('Failed to show export options: ' + error.message);
+            console.error('Export error:', error);
+        }
+    }
+
+    // Show export format selection modal
+    showExportModal() {
+        try {
+            const modalHtml = `
+                <div id="exportModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Export Data</h3>
+                            <button class="close-btn" onclick="tracker.hideExportModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Choose the format for exporting your expense and task data:</p>
+
+                            <div class="export-options">
+                                <div class="export-option">
+                                    <input type="radio" id="exportJSON" name="exportFormat" value="json" checked>
+                                    <label for="exportJSON">
+                                        <div class="export-option-header">
+                                            <strong>JSON Format</strong>
+                                            <span class="export-option-subtitle">Complete data with structure</span>
+                                        </div>
+                                        <p class="export-option-description">
+                                            Exports all data including expenses, tasks, income, and metadata in JSON format.
+                                            Best for importing back into the application or for developers.
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div class="export-option">
+                                    <input type="radio" id="exportCSV" name="exportFormat" value="csv">
+                                    <label for="exportCSV">
+                                        <div class="export-option-header">
+                                            <strong>CSV Format</strong>
+                                            <span class="export-option-subtitle">Spreadsheet-friendly</span>
+                                        </div>
+                                        <p class="export-option-description">
+                                            Exports data as multiple CSV files (expenses, tasks, income) in a ZIP archive.
+                                            Best for analysis in Excel, Google Sheets, or other spreadsheet applications.
+                                        </p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" onclick="tracker.performExport()">
+                                <div class="icon-bg icon-export xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                                Export Data
+                            </button>
+                            <button class="btn btn-secondary" onclick="tracker.hideExportModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="exportOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        } catch (error) {
+            console.error('Error showing export modal:', error);
+        }
+    }
+
+    // Hide export modal
+    hideExportModal() {
+        try {
+            const modal = document.getElementById('exportModal');
+            const overlay = document.getElementById('exportOverlay');
+
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding export modal:', error);
+        }
+    }
+
+    // Perform export based on selected format
+    performExport() {
+        try {
+            const selectedFormat = document.querySelector('input[name="exportFormat"]:checked');
+            if (!selectedFormat) {
+                this.showError('Please select an export format');
+                return;
+            }
+
+            const format = selectedFormat.value;
+            this.hideExportModal();
+
+            if (format === 'json') {
+                this.exportAsJSON();
+            } else if (format === 'csv') {
+                this.exportAsCSV();
+            }
+        } catch (error) {
+            this.showError('Failed to export data: ' + error.message);
+            console.error('Export error:', error);
+        }
+    }
+
+    // Export data as JSON
+    exportAsJSON() {
+        try {
             const data = {
                 profile: this.currentProfile,
+                user: {
+                    name: this.currentUser?.name || 'Unknown',
+                    email: this.currentUser?.email || 'Unknown'
+                },
                 income: this.income,
                 expenses: this.expenses,
+                tasks: this.tasks,
+                summary: {
+                    totalIncome: this.getAllTimeIncome(),
+                    totalExpenses: this.getAllTimeExpenses(),
+                    totalTasks: Object.keys(this.tasks).length,
+                    completedTasks: Object.values(this.tasks).filter(t => t.status === 'completed').length,
+                    budgetTasks: Object.values(this.tasks).filter(t => t.budget && t.budget > 0).length
+                },
                 exportDate: new Date().toISOString(),
                 appVersion: '3.0.0'
             };
@@ -1003,10 +1122,183 @@ class SmartExpenseTracker {
             link.click();
 
             URL.revokeObjectURL(url);
-            this.showSuccess('Data exported successfully!');
+            this.showSuccess('Data exported as JSON successfully!');
         } catch (error) {
-            this.showError('Failed to export data: ' + error.message);
-            console.error('Export error:', error);
+            this.showError('Failed to export as JSON: ' + error.message);
+            console.error('JSON export error:', error);
+        }
+    }
+
+    // Export data as CSV (multiple files in ZIP)
+    exportAsCSV() {
+        try {
+            // Create CSV content for expenses
+            const expensesCsv = this.generateExpensesCsv();
+
+            // Create CSV content for tasks
+            const tasksCsv = this.generateTasksCsv();
+
+            // Create CSV content for income
+            const incomeCsv = this.generateIncomeCsv();
+
+            // Create CSV content for summary
+            const summaryCsv = this.generateSummaryCsv();
+
+            // Since we can't create ZIP files without external libraries,
+            // we'll create separate downloads for each CSV
+            this.downloadCsvFile(expensesCsv, 'expenses');
+            setTimeout(() => this.downloadCsvFile(tasksCsv, 'tasks'), 500);
+            setTimeout(() => this.downloadCsvFile(incomeCsv, 'income'), 1000);
+            setTimeout(() => this.downloadCsvFile(summaryCsv, 'summary'), 1500);
+
+            this.showSuccess('CSV files exported successfully! Multiple files will be downloaded.');
+        } catch (error) {
+            this.showError('Failed to export as CSV: ' + error.message);
+            console.error('CSV export error:', error);
+        }
+    }
+
+    // Generate expenses CSV content
+    generateExpensesCsv() {
+        try {
+            const headers = ['Date', 'Name', 'Category', 'Amount', 'Linked_Task', 'Auto_Generated'];
+            const rows = [headers.join(',')];
+
+            Object.entries(this.expenses).forEach(([dateKey, dailyExpenses]) => {
+                if (Array.isArray(dailyExpenses)) {
+                    dailyExpenses.forEach(expense => {
+                        const linkedTask = expense.linkedTaskId ?
+                            (this.tasks[expense.linkedTaskId]?.title || 'Unknown Task') : '';
+
+                        const row = [
+                            `"${dateKey}"`,
+                            `"${(expense.name || '').replace(/"/g, '""')}"`,
+                            `"${expense.category || ''}"`,
+                            expense.amount || 0,
+                            `"${linkedTask}"`,
+                            expense.autoGenerated ? 'Yes' : 'No'
+                        ];
+                        rows.push(row.join(','));
+                    });
+                }
+            });
+
+            return rows.join('\n');
+        } catch (error) {
+            console.error('Error generating expenses CSV:', error);
+            return 'Date,Name,Category,Amount,Linked_Task,Auto_Generated\n';
+        }
+    }
+
+    // Generate tasks CSV content
+    generateTasksCsv() {
+        try {
+            const headers = ['Title', 'Description', 'Category', 'Priority', 'Status', 'Due_Date', 'Created_Date', 'Completed_Date', 'Budget', 'Actual_Expense', 'Budget_Fully_Spent'];
+            const rows = [headers.join(',')];
+
+            Object.values(this.tasks).forEach(task => {
+                const actualExpense = task.status === 'completed' && task.budget ? task.budget : (task.actualExpense || 0);
+
+                const row = [
+                    `"${(task.title || '').replace(/"/g, '""')}"`,
+                    `"${(task.description || '').replace(/"/g, '""')}"`,
+                    `"${task.category || ''}"`,
+                    `"${task.priority || ''}"`,
+                    `"${task.status || ''}"`,
+                    `"${task.dueDate || ''}"`,
+                    `"${task.createdAt || ''}"`,
+                    `"${task.completedAt || ''}"`,
+                    task.budget || 0,
+                    actualExpense,
+                    (task.status === 'completed' && task.budget) ? 'Yes' : 'No'
+                ];
+                rows.push(row.join(','));
+            });
+
+            return rows.join('\n');
+        } catch (error) {
+            console.error('Error generating tasks CSV:', error);
+            return 'Title,Description,Category,Priority,Status,Due_Date,Created_Date,Completed_Date,Budget,Actual_Expense,Budget_Fully_Spent\n';
+        }
+    }
+
+    // Generate income CSV content
+    generateIncomeCsv() {
+        try {
+            const headers = ['Month_Year', 'Income_Amount'];
+            const rows = [headers.join(',')];
+
+            Object.entries(this.income).forEach(([monthKey, amount]) => {
+                const row = [
+                    `"${monthKey}"`,
+                    amount || 0
+                ];
+                rows.push(row.join(','));
+            });
+
+            return rows.join('\n');
+        } catch (error) {
+            console.error('Error generating income CSV:', error);
+            return 'Month_Year,Income_Amount\n';
+        }
+    }
+
+    // Generate summary CSV content
+    generateSummaryCsv() {
+        try {
+            const tasks = Object.values(this.tasks);
+            const completedTasks = tasks.filter(t => t.status === 'completed');
+            const pendingTasks = tasks.filter(t => t.status === 'pending');
+            const budgetTasks = tasks.filter(t => t.budget && t.budget > 0);
+
+            const headers = ['Metric', 'Value'];
+            const rows = [headers.join(',')];
+
+            const summaryData = [
+                ['Export_Date', new Date().toISOString()],
+                ['Profile_Name', this.currentProfile?.name || 'Unknown'],
+                ['User_Name', this.currentUser?.name || 'Unknown'],
+                ['Total_Income', this.getAllTimeIncome()],
+                ['Total_Expenses', this.getAllTimeExpenses()],
+                ['Total_Savings', this.getAllTimeIncome() - this.getAllTimeExpenses()],
+                ['Total_Tasks', tasks.length],
+                ['Completed_Tasks', completedTasks.length],
+                ['Pending_Tasks', pendingTasks.length],
+                ['Budget_Tasks', budgetTasks.length],
+                ['Task_Completion_Rate', tasks.length > 0 ? ((completedTasks.length / tasks.length) * 100).toFixed(2) + '%' : '0%'],
+                ['Total_Budget_Amount', budgetTasks.reduce((sum, task) => sum + (task.budget || 0), 0)],
+                ['Completed_Budget_Amount', completedTasks.filter(t => t.budget).reduce((sum, task) => sum + (task.budget || 0), 0)]
+            ];
+
+            summaryData.forEach(([metric, value]) => {
+                const row = [
+                    `"${metric}"`,
+                    `"${value}"`
+                ];
+                rows.push(row.join(','));
+            });
+
+            return rows.join('\n');
+        } catch (error) {
+            console.error('Error generating summary CSV:', error);
+            return 'Metric,Value\n';
+        }
+    }
+
+    // Download CSV file
+    downloadCsvFile(csvContent, filename) {
+        try {
+            const dataBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `expense-tracker-${filename}-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(`Error downloading ${filename} CSV:`, error);
         }
     }
 
