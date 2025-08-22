@@ -2149,6 +2149,519 @@ class SmartExpenseTracker {
             return 0;
         }
     }
+
+    // ==============================================
+    // TASK MANAGER METHODS
+    // ==============================================
+
+    // Initialize task manager
+    initTaskManager() {
+        try {
+            this.renderTasks();
+            this.updateTaskStats();
+            this.updateExpenseIntegration();
+            console.log('Task manager initialized successfully');
+        } catch (error) {
+            this.showError('Failed to initialize task manager: ' + error.message);
+            console.error('Task manager initialization error:', error);
+        }
+    }
+
+    // Get tasks
+    getTasks() {
+        return this.tasks || {};
+    }
+
+    // Set tasks
+    setTasks(tasks) {
+        try {
+            this.tasks = tasks;
+            this.saveProfileData();
+            return true;
+        } catch (error) {
+            this.showError('Failed to save tasks: ' + error.message);
+            console.error('Error setting tasks:', error);
+            return false;
+        }
+    }
+
+    // Task modal management
+    showTaskModal(taskId = null) {
+        try {
+            this.editingTaskId = taskId;
+            const modal = document.getElementById('taskModal');
+            const overlay = document.getElementById('overlay');
+            const title = document.getElementById('taskModalTitle');
+
+            if (modal && overlay && title) {
+                if (taskId) {
+                    title.textContent = 'Edit Task';
+                    this.loadTaskForEditing(taskId);
+                } else {
+                    title.textContent = 'Add New Task';
+                    this.clearTaskForm();
+                }
+
+                modal.classList.add('active');
+                overlay.classList.add('active');
+
+                const titleInput = document.getElementById('taskTitle');
+                if (titleInput) titleInput.focus();
+            }
+        } catch (error) {
+            this.showError('Failed to show task modal: ' + error.message);
+            console.error('Error showing task modal:', error);
+        }
+    }
+
+    hideTaskModal() {
+        try {
+            const modal = document.getElementById('taskModal');
+            const overlay = document.getElementById('overlay');
+
+            if (modal && overlay) {
+                modal.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+
+            this.editingTaskId = null;
+            this.clearTaskForm();
+        } catch (error) {
+            console.error('Error hiding task modal:', error);
+        }
+    }
+
+    // Clear task form
+    clearTaskForm() {
+        try {
+            const fields = ['taskTitle', 'taskDescription', 'taskDueDate', 'taskBudget'];
+            fields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element) element.value = '';
+            });
+
+            const selects = [
+                { id: 'taskPriority', value: 'medium' },
+                { id: 'taskCategorySelect', value: 'work' },
+                { id: 'taskStatus', value: 'pending' },
+                { id: 'expenseCategory', value: 'Food' }
+            ];
+
+            selects.forEach(select => {
+                const element = document.getElementById(select.id);
+                if (element) element.value = select.value;
+            });
+
+            const hasBudget = document.getElementById('hasBudget');
+            if (hasBudget) {
+                hasBudget.checked = false;
+                this.toggleBudgetFields(false);
+            }
+
+            const saveBtn = document.getElementById('saveTask');
+            const updateBtn = document.getElementById('updateTask');
+            if (saveBtn) saveBtn.style.display = 'block';
+            if (updateBtn) updateBtn.style.display = 'none';
+        } catch (error) {
+            console.error('Error clearing task form:', error);
+        }
+    }
+
+    // Load task for editing
+    loadTaskForEditing(taskId) {
+        try {
+            const task = this.tasks[taskId];
+            if (!task) return;
+
+            document.getElementById('taskTitle').value = task.title || '';
+            document.getElementById('taskDescription').value = task.description || '';
+            document.getElementById('taskPriority').value = task.priority || 'medium';
+            document.getElementById('taskCategorySelect').value = task.category || 'work';
+            document.getElementById('taskStatus').value = task.status || 'pending';
+            document.getElementById('taskDueDate').value = task.dueDate || '';
+
+            const hasBudget = task.budget && task.budget > 0;
+            document.getElementById('hasBudget').checked = hasBudget;
+            this.toggleBudgetFields(hasBudget);
+
+            if (hasBudget) {
+                document.getElementById('taskBudget').value = task.budget || '';
+                document.getElementById('expenseCategory').value = task.expenseCategory || 'Food';
+            }
+
+            const saveBtn = document.getElementById('saveTask');
+            const updateBtn = document.getElementById('updateTask');
+            if (saveBtn) saveBtn.style.display = 'none';
+            if (updateBtn) updateBtn.style.display = 'block';
+        } catch (error) {
+            console.error('Error loading task for editing:', error);
+        }
+    }
+
+    // Toggle budget fields
+    toggleBudgetFields(show) {
+        try {
+            const budgetFields = document.getElementById('budgetFields');
+            if (budgetFields) {
+                budgetFields.style.display = show ? 'block' : 'none';
+            }
+        } catch (error) {
+            console.error('Error toggling budget fields:', error);
+        }
+    }
+
+    // Save task
+    saveTask() {
+        try {
+            const taskData = this.getTaskFormData();
+            if (!taskData) return;
+
+            const taskId = Date.now().toString();
+            taskData.id = taskId;
+            taskData.createdAt = new Date().toISOString();
+            taskData.updatedAt = new Date().toISOString();
+
+            this.tasks[taskId] = taskData;
+
+            if (this.setTasks(this.tasks)) {
+                this.hideTaskModal();
+                this.renderTasks();
+                this.updateTaskStats();
+                this.updateExpenseIntegration();
+                this.showSuccess('Task added successfully!');
+            }
+        } catch (error) {
+            this.showError('Failed to save task: ' + error.message);
+            console.error('Error saving task:', error);
+        }
+    }
+
+    // Update task
+    updateTask() {
+        try {
+            if (!this.editingTaskId) return;
+
+            const taskData = this.getTaskFormData();
+            if (!taskData) return;
+
+            const existingTask = this.tasks[this.editingTaskId];
+            if (existingTask) {
+                this.tasks[this.editingTaskId] = {
+                    ...existingTask,
+                    ...taskData,
+                    updatedAt: new Date().toISOString()
+                };
+
+                if (this.setTasks(this.tasks)) {
+                    this.hideTaskModal();
+                    this.renderTasks();
+                    this.updateTaskStats();
+                    this.updateExpenseIntegration();
+                    this.showSuccess('Task updated successfully!');
+                }
+            }
+        } catch (error) {
+            this.showError('Failed to update task: ' + error.message);
+            console.error('Error updating task:', error);
+        }
+    }
+
+    // Get task form data
+    getTaskFormData() {
+        try {
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const priority = document.getElementById('taskPriority').value;
+            const category = document.getElementById('taskCategorySelect').value;
+            const status = document.getElementById('taskStatus').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const hasBudget = document.getElementById('hasBudget').checked;
+
+            if (!title) {
+                this.showError('Task title is required');
+                return null;
+            }
+
+            const taskData = {
+                title,
+                description,
+                priority,
+                category,
+                status,
+                dueDate
+            };
+
+            if (hasBudget) {
+                const budget = parseFloat(document.getElementById('taskBudget').value);
+                const expenseCategory = document.getElementById('expenseCategory').value;
+
+                if (budget && budget > 0) {
+                    taskData.budget = budget;
+                    taskData.expenseCategory = expenseCategory;
+                    taskData.actualExpense = 0; // Track actual expenses
+                }
+            }
+
+            return taskData;
+        } catch (error) {
+            console.error('Error getting task form data:', error);
+            return null;
+        }
+    }
+
+    // Delete task
+    deleteTask(taskId) {
+        try {
+            if (confirm('Are you sure you want to delete this task?')) {
+                delete this.tasks[taskId];
+
+                if (this.setTasks(this.tasks)) {
+                    this.renderTasks();
+                    this.updateTaskStats();
+                    this.updateExpenseIntegration();
+                    this.showSuccess('Task deleted successfully!');
+                }
+            }
+        } catch (error) {
+            this.showError('Failed to delete task: ' + error.message);
+            console.error('Error deleting task:', error);
+        }
+    }
+
+    // Toggle task status
+    toggleTaskStatus(taskId, newStatus) {
+        try {
+            if (this.tasks[taskId]) {
+                this.tasks[taskId].status = newStatus;
+                this.tasks[taskId].updatedAt = new Date().toISOString();
+
+                if (newStatus === 'completed') {
+                    this.tasks[taskId].completedAt = new Date().toISOString();
+                }
+
+                if (this.setTasks(this.tasks)) {
+                    this.renderTasks();
+                    this.updateTaskStats();
+                    this.showSuccess('Task status updated!');
+                }
+            }
+        } catch (error) {
+            this.showError('Failed to update task status: ' + error.message);
+            console.error('Error toggling task status:', error);
+        }
+    }
+
+    // Filter tasks
+    filterTasks(value, type) {
+        try {
+            this.taskFilters[type] = value;
+            this.renderTasks();
+        } catch (error) {
+            console.error('Error filtering tasks:', error);
+        }
+    }
+
+    // Get filtered tasks
+    getFilteredTasks() {
+        try {
+            const tasks = Object.values(this.tasks);
+
+            return tasks.filter(task => {
+                const statusMatch = this.taskFilters.status === 'all' ||
+                    this.taskFilters.status === task.status ||
+                    (this.taskFilters.status === 'today' && this.isTaskDueToday(task)) ||
+                    (this.taskFilters.status === 'overdue' && this.isTaskOverdue(task));
+
+                const categoryMatch = this.taskFilters.category === 'all' ||
+                    this.taskFilters.category === task.category;
+
+                return statusMatch && categoryMatch;
+            });
+        } catch (error) {
+            console.error('Error getting filtered tasks:', error);
+            return [];
+        }
+    }
+
+    // Check if task is due today
+    isTaskDueToday(task) {
+        if (!task.dueDate) return false;
+        const today = new Date().toDateString();
+        const dueDate = new Date(task.dueDate).toDateString();
+        return today === dueDate;
+    }
+
+    // Check if task is overdue
+    isTaskOverdue(task) {
+        if (!task.dueDate || task.status === 'completed') return false;
+        const today = new Date();
+        const dueDate = new Date(task.dueDate);
+        return dueDate < today;
+    }
+
+    // Render tasks
+    renderTasks() {
+        try {
+            const pendingList = document.getElementById('pendingTasksList');
+            const inProgressList = document.getElementById('inProgressTasksList');
+            const completedList = document.getElementById('completedTasksList');
+
+            if (!pendingList || !inProgressList || !completedList) return;
+
+            // Clear lists
+            pendingList.innerHTML = '';
+            inProgressList.innerHTML = '';
+            completedList.innerHTML = '';
+
+            // Get filtered tasks
+            const filteredTasks = this.getFilteredTasks();
+
+            // Group tasks by status
+            const tasksByStatus = {
+                pending: filteredTasks.filter(task => task.status === 'pending'),
+                'in-progress': filteredTasks.filter(task => task.status === 'in-progress'),
+                completed: filteredTasks.filter(task => task.status === 'completed')
+            };
+
+            // Render each status group
+            Object.keys(tasksByStatus).forEach(status => {
+                const tasks = tasksByStatus[status];
+                const listElement = document.getElementById(`${status === 'in-progress' ? 'inProgress' : status}TasksList`);
+
+                if (tasks.length === 0) {
+                    listElement.innerHTML = '<p class="placeholder-text">No tasks</p>';
+                } else {
+                    listElement.innerHTML = tasks.map(task => this.renderTaskItem(task)).join('');
+                }
+
+                // Update count
+                const countElement = document.getElementById(`${status === 'in-progress' ? 'inProgress' : status}Count`);
+                if (countElement) {
+                    countElement.textContent = tasks.length;
+                }
+            });
+
+        } catch (error) {
+            this.showError('Failed to render tasks: ' + error.message);
+            console.error('Error rendering tasks:', error);
+        }
+    }
+
+    // Render task item
+    renderTaskItem(task) {
+        try {
+            const isOverdue = this.isTaskOverdue(task);
+            const isDueToday = this.isTaskDueToday(task);
+
+            const dueDateText = task.dueDate ?
+                new Date(task.dueDate).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
+                }) : 'No due date';
+
+            const statusOptions = ['pending', 'in-progress', 'completed'];
+            const otherStatuses = statusOptions.filter(s => s !== task.status);
+
+            return `
+                <div class="task-item priority-${task.priority}" onclick="tracker.showTaskModal('${task.id}')">
+                    <div class="task-header">
+                        <h4 class="task-title">${this.escapeHtml(task.title)}</h4>
+                        <span class="task-priority ${task.priority}">${task.priority}</span>
+                    </div>
+
+                    ${task.description ? `<p class="task-description">${this.escapeHtml(task.description)}</p>` : ''}
+
+                    <div class="task-meta">
+                        <span class="task-category">${task.category}</span>
+                        <span class="task-due ${isOverdue ? 'overdue' : isDueToday ? 'today' : ''}">${dueDateText}</span>
+                    </div>
+
+                    ${task.budget ? `<div class="task-budget-indicator">Budget: ₹${task.budget}</div>` : ''}
+
+                    <div class="task-actions-menu" onclick="event.stopPropagation()">
+                        ${otherStatuses.map(status => `
+                            <button class="task-action-btn" onclick="tracker.toggleTaskStatus('${task.id}', '${status}')">
+                                <div class="icon-bg icon-task-${status === 'in-progress' ? 'progress' : status} xsmall"></div>
+                                ${status === 'in-progress' ? 'In Progress' : status.charAt(0).toUpperCase() + status.slice(1)}
+                            </button>
+                        `).join('')}
+                        <button class="task-action-btn" onclick="tracker.deleteTask('${task.id}')">
+                            <div class="icon-bg icon-delete xsmall"></div>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error rendering task item:', error);
+            return '<div class="task-item">Error rendering task</div>';
+        }
+    }
+
+    // Update task statistics
+    updateTaskStats() {
+        try {
+            const tasks = Object.values(this.tasks);
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(task => task.status === 'completed').length;
+            const pendingTasks = tasks.filter(task => task.status === 'pending').length;
+            const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+            this.updateElement('totalTasks', totalTasks.toString());
+            this.updateElement('completedTasks', completedTasks.toString());
+            this.updateElement('pendingTasks', pendingTasks.toString());
+            this.updateElement('taskProgress', `${progressPercentage}%`);
+
+        } catch (error) {
+            console.error('Error updating task statistics:', error);
+        }
+    }
+
+    // Update expense integration
+    updateExpenseIntegration() {
+        try {
+            const tasksWithBudget = Object.values(this.tasks).filter(task => task.budget && task.budget > 0);
+            const tasksWithBudgetElement = document.getElementById('tasksWithBudget');
+            const spendingGoalsElement = document.getElementById('spendingGoals');
+
+            if (tasksWithBudgetElement) {
+                if (tasksWithBudget.length === 0) {
+                    tasksWithBudgetElement.innerHTML = '<p class="placeholder-text">No budget-related tasks yet</p>';
+                } else {
+                    tasksWithBudgetElement.innerHTML = tasksWithBudget.map(task => `
+                        <div class="integration-item">
+                            <div class="integration-title">${this.escapeHtml(task.title)}</div>
+                            <div class="integration-budget">Budget: ₹${task.budget} | Spent: ₹${task.actualExpense || 0}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            if (spendingGoalsElement) {
+                const totalBudget = tasksWithBudget.reduce((sum, task) => sum + (task.budget || 0), 0);
+                const totalSpent = tasksWithBudget.reduce((sum, task) => sum + (task.actualExpense || 0), 0);
+
+                if (totalBudget > 0) {
+                    spendingGoalsElement.innerHTML = `
+                        <div class="integration-item">
+                            <div class="integration-title">Total Task Budget</div>
+                            <div class="integration-budget">₹${totalBudget} planned | ₹${totalSpent} spent</div>
+                            <div class="integration-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${Math.min((totalSpent / totalBudget) * 100, 100)}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    spendingGoalsElement.innerHTML = '<p class="placeholder-text">No spending goals set</p>';
+                }
+            }
+
+        } catch (error) {
+            console.error('Error updating expense integration:', error);
+        }
+    }
 }
 
 // Initialize the tracker when DOM is loaded
