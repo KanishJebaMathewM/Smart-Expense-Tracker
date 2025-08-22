@@ -5668,7 +5668,6 @@ class SmartExpenseTracker {
                                         <div class="item-name">${this.escapeHtml(item.name)}</div>
                                         <div class="item-quantity">${item.quantity} ${item.unit}</div>
                                     </div>
-                                    <div class="item-cost">₹${item.estimatedCost.toFixed(2)}</div>
                                     <div class="item-actions">
                                         <button class="btn-small" onclick="tracker.editShoppingItem('${item.id}')">Edit</button>
                                         <button class="btn-small btn-danger" onclick="tracker.removeShoppingItem('${item.id}')">Remove</button>
