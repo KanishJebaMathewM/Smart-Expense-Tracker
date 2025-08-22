@@ -17,7 +17,13 @@
     <!-- Loading Screen -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-content">
-            <div class="loading-icon"><div class="icon-bg icon-welcome large"></div></div>
+            <div class="loading-profile-area" id="loadingProfileArea" style="display: none;">
+                <div class="loading-profile-picture" id="loadingProfilePicture">
+                    <div class="icon-bg icon-user large" id="loadingDefaultIcon"></div>
+                    <img id="loadingProfileImage" style="display: none;" />
+                </div>
+            </div>
+            <div class="loading-icon" id="loadingIcon"><div class="icon-bg icon-welcome large"></div></div>
             <div class="loading-text">Loading Smart Expense Tracker...</div>
             <div class="loading-progress">
                 <div class="progress-bar">
