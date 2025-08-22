@@ -920,6 +920,11 @@ class SmartExpenseTracker {
             expense.timestamp = new Date().toISOString();
             this.expenses[dateKey].push(expense);
             this.setExpenses(this.expenses);
+
+            // Immediately save profile data
+            const saveSuccess = this.saveProfileData();
+            console.log(`%c💾 EXPENSE SAVED: ${expense.name} - ₹${expense.amount} (Save success: ${saveSuccess})`, 'color: green; font-size: 14px; font-weight: bold;');
+
             return true;
         } catch (error) {
             this.showError('Failed to add expense: ' + error.message);
