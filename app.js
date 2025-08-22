@@ -3099,12 +3099,8 @@ class SmartExpenseTracker {
                                                 <div class="task-budget">
                                                     <div class="budget-info">
                                                         Budget: ₹${task.budget}
-                                                        ${task.actualExpense ? `<br>Spent: ₹${task.actualExpense}` : ''}
-                                                        ${task.budgetVariance !== undefined ?
-                                                            `<br><span class="${task.budgetVariance >= 0 ? 'positive' : 'negative'}">
-                                                                ${task.budgetVariance >= 0 ? 'Under' : 'Over'} by ₹${Math.abs(task.budgetVariance).toFixed(2)}
-                                                            </span>` : ''
-                                                        }
+                                                        <br>Spent: ₹${task.budget} (100%)
+                                                        <br><em>Full budget marked as spent upon completion</em>
                                                     </div>
                                                 </div>
                                             </div>
