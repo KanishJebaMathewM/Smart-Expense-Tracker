@@ -253,7 +253,7 @@ class SmartExpenseTracker {
                 const defaultProfile = {
                     id: 'profile_default',
                     name: this.currentUser?.name || 'My Profile',
-                    icon: '👤',
+                    icon: this.getUIIcon('user'),
                     createdAt: new Date().toISOString(),
                     lastAccessed: new Date().toISOString()
                 };
@@ -944,12 +944,12 @@ class SmartExpenseTracker {
             const savingsRate = income > 0 ? ((balance / income) * 100).toFixed(1) : 0;
 
             reportContent.innerHTML = `<div class="report-summary">
-                    <h3>📊 Monthly Report - ${monthNames[this.currentMonth]} ${this.currentYear}</h3>
+                    <h3>${this.getUIIcon('analytics', 'small')} Monthly Report - ${monthNames[this.currentMonth]} ${this.currentYear}</h3>
                     <h4>Profile: ${this.escapeHtml(this.currentProfile?.name || 'Unknown')}</h4>
 
                     <div class="report-grid">
                         <div class="report-card">
-                            <h4>💰 Financial Summary</h4>
+                            <h4>${this.getUIIcon('money', 'small')} Financial Summary</h4>
                             <p><strong>Income:</strong> ₹${income.toLocaleString()}</p>
                             <p><strong>Expenses:</strong> ₹${totalSpent.toLocaleString()}</p>
                             <p><strong>Balance:</strong> <span class="${balance >= 0 ? 'positive-balance' : 'negative-balance'}">₹${balance.toLocaleString()}</span></p>
@@ -957,7 +957,7 @@ class SmartExpenseTracker {
                         </div>
 
                         <div class="report-card">
-                            <h4>📈 Spending Analysis</h4>
+                            <h4>${this.getUIIcon('trending-up', 'small')} Spending Analysis</h4>
                             <p><strong>Top Category:</strong> ${topCategory}</p>
                             <p><strong>Category Amount:</strong> ₹${(categoryTotals[topCategory] || 0).toLocaleString()}</p>
                             <p><strong>Avg Daily Spending:</strong> ₹${avgDailySpending.toFixed(0)}</p>
@@ -965,7 +965,7 @@ class SmartExpenseTracker {
                         </div>
 
                         <div class="report-card">
-                            <h4>📋 Category Breakdown</h4>
+                            <h4>${this.getUIIcon('reports', 'small')} Category Breakdown</h4>
                             ${Object.entries(categoryTotals).map(([category, amount]) =>
                                 `<p><strong>${category}:</strong> ₹${amount.toLocaleString()}</p>`
                             ).join('')}
@@ -1262,7 +1262,7 @@ class SmartExpenseTracker {
                         <div class="comparison-item">
                             <span class="comparison-label">Performance:</span>
                             <span class="comparison-performance ${currentSavings >= prevSavings ? 'better' : 'worse'}">
-                                ${currentSavings >= prevSavings ? '📈 Better' : '📉 Needs Improvement'}
+                                ${currentSavings >= prevSavings ? this.getUIIcon('trending-up', 'xsmall') + ' Better' : this.getUIIcon('trending-down', 'xsmall') + ' Needs Improvement'}
                             </span>
                         </div>
                     </div>
