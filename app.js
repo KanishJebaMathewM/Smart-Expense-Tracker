@@ -6750,27 +6750,81 @@ class SmartExpenseTracker {
                 }
             }
 
-            // Recommendations
+            // Recommendations based on available South Indian recipes
             const availableRecipes = this.getAvailableRecipes().filter(r => r.canMake);
+            const southIndianRecipes = availableRecipes.filter(r => r.recipe.cuisine === 'south indian');
+
             if (availableRecipes.length === 0) {
                 insights.recommendations.push({
                     type: 'action',
-                    message: 'Stock up on ingredients to unlock more recipe options.'
+                    message: 'Stock up on ingredients to unlock more healthy South Indian recipe options.'
                 });
             } else {
-                const highProteinRecipes = availableRecipes.filter(r => r.nutrition.protein > 20);
+                // Protein recommendations
+                const highProteinRecipes = availableRecipes.filter(r => r.nutrition.protein > 15);
                 if (highProteinRecipes.length > 0 && today.protein < targets.proteinTarget * 0.8) {
+                    const proteinRecipe = highProteinRecipes.find(r => r.recipe.cuisine === 'south indian') || highProteinRecipes[0];
                     insights.recommendations.push({
                         type: 'success',
-                        message: `Try "${highProteinRecipes[0].recipe.name}" for a protein boost!`
+                        message: `Try "${proteinRecipe.recipe.name}" for a protein boost! It provides ${Math.round(proteinRecipe.nutrition.protein)}g protein.`
                     });
+                }
+
+                // Fiber recommendations
+                const fiberRichRecipes = availableRecipes.filter(r => r.nutrition.fiber > 5);
+                if (fiberRichRecipes.length > 0 && today.fiber < 25) {
+                    const fiberRecipe = fiberRichRecipes.find(r => r.recipe.cuisine === 'south indian') || fiberRichRecipes[0];
+                    insights.recommendations.push({
+                        type: 'info',
+                        message: `"${fiberRecipe.recipe.name}" is rich in fiber and supports digestive health.`
+                    });
+                }
+
+                // South Indian specific recommendations
+                if (southIndianRecipes.length > 0) {
+                    const healthyOptions = southIndianRecipes.filter(r =>
+                        ['idli', 'dosa', 'sambar', 'rasam', 'upma'].some(healthy =>
+                            r.recipe.name.toLowerCase().includes(healthy)
+                        )
+                    );
+
+                    if (healthyOptions.length > 0) {
+                        insights.recommendations.push({
+                            type: 'success',
+                            message: `Traditional South Indian foods like "${healthyOptions[0].recipe.name}" are nutritious and balanced meals.`
+                        });
+                    }
                 }
             }
 
-            insights.recommendations.push({
-                type: 'info',
-                message: 'Plan your meals in advance using the Meal Plan tab for better nutrition balance.'
-            });
+            // Daily meal planning recommendations
+            const today_date = new Date();
+            const todayMeals = this.getDailyMeals(today_date);
+
+            if (!todayMeals.breakfast && !todayMeals.lunch && !todayMeals.dinner) {
+                insights.recommendations.push({
+                    type: 'action',
+                    message: 'Plan your meals for today using the Daily Meals tab for better nutrition tracking.'
+                });
+            } else if (!todayMeals.breakfast) {
+                insights.recommendations.push({
+                    type: 'warning',
+                    message: 'Don\'t skip breakfast! Try healthy options like Idli, Dosa, or Upma.'
+                });
+            }
+
+            // General health tips
+            if (today.calories > 0) {
+                insights.recommendations.push({
+                    type: 'info',
+                    message: 'Maintain a balanced diet with proper hydration and regular physical activity.'
+                });
+            } else {
+                insights.recommendations.push({
+                    type: 'action',
+                    message: 'Start tracking your nutrition by planning today\'s meals or logging what you eat.'
+                });
+            }
 
         } catch (error) {
             console.error('Error generating nutrition insights:', error);
