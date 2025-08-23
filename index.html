@@ -418,7 +418,36 @@
                     </div>
                 </div>
 
-                <!-- Meal Plan Tab -->
+                <!-- Daily Meals Tab -->
+                <div id="dailyMealsTab" class="nutrition-tab-content">
+                    <div class="tab-header">
+                        <h3>Daily Meal Planner</h3>
+                        <div class="daily-meal-controls">
+                            <input type="date" id="mealPlanDate" class="date-input">
+                            <button id="openDailyMealPlannerBtn" class="btn btn-primary">
+                                <div class="icon-bg icon-edit xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                                Plan Meals
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="dailyMealOverview" class="daily-meal-overview">
+                        <!-- Daily meal overview will be populated here -->
+                    </div>
+
+                    <div class="daily-meal-quick-actions">
+                        <button class="btn btn-secondary" onclick="tracker.showDailyMealPlanner(new Date())">
+                            <div class="icon-bg icon-add xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Plan Today's Meals
+                        </button>
+                        <button class="btn btn-secondary" onclick="tracker.copyMealsFromPreviousDay()">
+                            <div class="icon-bg icon-copy xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                            Copy Yesterday's Meals
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Weekly Meal Plan Tab -->
                 <div id="mealPlanTab" class="nutrition-tab-content">
                     <div class="tab-header">
                         <h3>Weekly Meal Planner</h3>
