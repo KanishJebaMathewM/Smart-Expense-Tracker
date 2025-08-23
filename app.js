@@ -5084,6 +5084,9 @@ class SmartExpenseTracker {
                 case 'recipes':
                     this.renderRecipes();
                     break;
+                case 'daily-meals':
+                    this.renderDailyMeals();
+                    break;
                 case 'meal-plan':
                     this.renderMealPlan();
                     break;
