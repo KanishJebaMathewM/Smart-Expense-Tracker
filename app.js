@@ -718,7 +718,7 @@ class SmartExpenseTracker {
                         this.tasks = JSON.parse(legacyTasks);
                         console.log('✅ Migrated legacy tasks data');
                     } catch (e) {
-                        console.error('�� Failed to migrate tasks data:', e);
+                        console.error('��� Failed to migrate tasks data:', e);
                     }
                 }
             }
@@ -7655,6 +7655,255 @@ class SmartExpenseTracker {
         } catch (error) {
             this.showError('Failed to remove meal: ' + error.message);
             console.error('Error removing meal from day:', error);
+        }
+    }
+
+    // Render daily meals tab content
+    renderDailyMeals() {
+        try {
+            // Set today's date as default
+            const today = new Date();
+            const dateInput = document.getElementById('mealPlanDate');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = today.toISOString().split('T')[0];
+            }
+
+            // Update the overview
+            this.updateDailyMealOverview();
+        } catch (error) {
+            console.error('Error rendering daily meals:', error);
+        }
+    }
+
+    // Update daily meal overview
+    updateDailyMealOverview() {
+        try {
+            const overviewContainer = document.getElementById('dailyMealOverview');
+            if (!overviewContainer) return;
+
+            const dateInput = document.getElementById('mealPlanDate');
+            const selectedDate = dateInput ? new Date(dateInput.value) : new Date();
+
+            const dayMeals = this.getDailyMeals(selectedDate);
+            const dayNutrition = this.calculateDayNutrition(selectedDate);
+            const targets = this.userPreferences;
+
+            const dateString = selectedDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            let overviewHtml = `
+                <div class="daily-meal-header">
+                    <h4>Meals for ${dateString}</h4>
+                    <button class="btn btn-primary" onclick="tracker.showDailyMealPlanner(new Date('${selectedDate.toISOString()}'))">
+                        <div class="icon-bg icon-edit xsmall" style="display: inline-block; margin-right: 6px;"></div>
+                        Edit Meals
+                    </button>
+                </div>
+
+                <div class="daily-meals-grid">
+                    <div class="meal-card">
+                        <div class="meal-type-title">
+                            <div class="icon-bg icon-breakfast small"></div>
+                            <h5>Breakfast</h5>
+                        </div>
+                        <div class="meal-content">
+                            ${dayMeals.breakfast ? `
+                                <div class="meal-item">
+                                    <div class="meal-name">${dayMeals.breakfast.recipeName}</div>
+                                    <div class="meal-nutrition">
+                                        ${Math.round(dayMeals.breakfast.nutrition.calories)} kcal |
+                                        ${Math.round(dayMeals.breakfast.nutrition.protein)}g protein
+                                    </div>
+                                    <div class="meal-servings">Servings: ${dayMeals.breakfast.servings}</div>
+                                </div>
+                            ` : `
+                                <div class="empty-meal">
+                                    <p>No breakfast planned</p>
+                                    <button class="btn btn-small" onclick="tracker.showMealSelector('breakfast', '${selectedDate.toISOString()}')">
+                                        Add Breakfast
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="meal-card">
+                        <div class="meal-type-title">
+                            <div class="icon-bg icon-lunch small"></div>
+                            <h5>Lunch</h5>
+                        </div>
+                        <div class="meal-content">
+                            ${dayMeals.lunch ? `
+                                <div class="meal-item">
+                                    <div class="meal-name">${dayMeals.lunch.recipeName}</div>
+                                    <div class="meal-nutrition">
+                                        ${Math.round(dayMeals.lunch.nutrition.calories)} kcal |
+                                        ${Math.round(dayMeals.lunch.nutrition.protein)}g protein
+                                    </div>
+                                    <div class="meal-servings">Servings: ${dayMeals.lunch.servings}</div>
+                                </div>
+                            ` : `
+                                <div class="empty-meal">
+                                    <p>No lunch planned</p>
+                                    <button class="btn btn-small" onclick="tracker.showMealSelector('lunch', '${selectedDate.toISOString()}')">
+                                        Add Lunch
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="meal-card">
+                        <div class="meal-type-title">
+                            <div class="icon-bg icon-dinner small"></div>
+                            <h5>Dinner</h5>
+                        </div>
+                        <div class="meal-content">
+                            ${dayMeals.dinner ? `
+                                <div class="meal-item">
+                                    <div class="meal-name">${dayMeals.dinner.recipeName}</div>
+                                    <div class="meal-nutrition">
+                                        ${Math.round(dayMeals.dinner.nutrition.calories)} kcal |
+                                        ${Math.round(dayMeals.dinner.nutrition.protein)}g protein
+                                    </div>
+                                    <div class="meal-servings">Servings: ${dayMeals.dinner.servings}</div>
+                                </div>
+                            ` : `
+                                <div class="empty-meal">
+                                    <p>No dinner planned</p>
+                                    <button class="btn btn-small" onclick="tracker.showMealSelector('dinner', '${selectedDate.toISOString()}')">
+                                        Add Dinner
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+
+                    ${dayMeals.snacks.length > 0 ? `
+                        <div class="meal-card">
+                            <div class="meal-type-title">
+                                <div class="icon-bg icon-snacks small"></div>
+                                <h5>Snacks</h5>
+                            </div>
+                            <div class="meal-content">
+                                ${dayMeals.snacks.map((snack, index) => `
+                                    <div class="meal-item">
+                                        <div class="meal-name">${snack.recipeName}</div>
+                                        <div class="meal-nutrition">
+                                            ${Math.round(snack.nutrition.calories)} kcal |
+                                            ${Math.round(snack.nutrition.protein)}g protein
+                                        </div>
+                                        <div class="meal-servings">Servings: ${snack.servings}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="daily-nutrition-overview">
+                    <h4>Daily Nutrition Progress</h4>
+                    <div class="nutrition-progress-grid">
+                        <div class="nutrition-progress-item">
+                            <div class="progress-label">Calories</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill calories" style="width: ${Math.min((dayNutrition.calories / targets.calorieTarget) * 100, 100)}%"></div>
+                            </div>
+                            <div class="progress-text">${Math.round(dayNutrition.calories)} / ${targets.calorieTarget}</div>
+                        </div>
+                        <div class="nutrition-progress-item">
+                            <div class="progress-label">Protein (g)</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill protein" style="width: ${Math.min((dayNutrition.protein / targets.proteinTarget) * 100, 100)}%"></div>
+                            </div>
+                            <div class="progress-text">${Math.round(dayNutrition.protein)} / ${targets.proteinTarget}</div>
+                        </div>
+                        <div class="nutrition-progress-item">
+                            <div class="progress-label">Carbs (g)</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill carbs" style="width: ${Math.min((dayNutrition.carbs / targets.carbTarget) * 100, 100)}%"></div>
+                            </div>
+                            <div class="progress-text">${Math.round(dayNutrition.carbs)} / ${targets.carbTarget}</div>
+                        </div>
+                        <div class="nutrition-progress-item">
+                            <div class="progress-label">Fat (g)</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill fat" style="width: ${Math.min((dayNutrition.fat / targets.fatTarget) * 100, 100)}%"></div>
+                            </div>
+                            <div class="progress-text">${Math.round(dayNutrition.fat)} / ${targets.fatTarget}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            overviewContainer.innerHTML = overviewHtml;
+        } catch (error) {
+            console.error('Error updating daily meal overview:', error);
+        }
+    }
+
+    // Copy meals from previous day
+    async copyMealsFromPreviousDay() {
+        try {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+
+            const yesterdayMeals = this.getDailyMeals(yesterday);
+
+            // Check if yesterday has any meals
+            if (!yesterdayMeals.breakfast && !yesterdayMeals.lunch && !yesterdayMeals.dinner && yesterdayMeals.snacks.length === 0) {
+                this.showInfo('No meals found for yesterday to copy.');
+                return;
+            }
+
+            const shouldCopy = await confirmAsync(
+                'Copy all meals from yesterday to today? This will replace any existing meals for today.',
+                {
+                    title: 'Copy Yesterday\'s Meals',
+                    confirmText: 'Copy Meals',
+                    cancelText: 'Cancel',
+                    confirmClass: 'btn-primary'
+                }
+            );
+
+            if (shouldCopy) {
+                // Copy each meal type
+                let copiedCount = 0;
+
+                if (yesterdayMeals.breakfast) {
+                    this.setDailyMeal(today, 'breakfast', yesterdayMeals.breakfast.recipeId, yesterdayMeals.breakfast.servings);
+                    copiedCount++;
+                }
+
+                if (yesterdayMeals.lunch) {
+                    this.setDailyMeal(today, 'lunch', yesterdayMeals.lunch.recipeId, yesterdayMeals.lunch.servings);
+                    copiedCount++;
+                }
+
+                if (yesterdayMeals.dinner) {
+                    this.setDailyMeal(today, 'dinner', yesterdayMeals.dinner.recipeId, yesterdayMeals.dinner.servings);
+                    copiedCount++;
+                }
+
+                // Copy snacks
+                yesterdayMeals.snacks.forEach(snack => {
+                    this.setDailyMeal(today, 'snacks', snack.recipeId, snack.servings);
+                    copiedCount++;
+                });
+
+                // Update the overview
+                this.updateDailyMealOverview();
+
+                this.showSuccess(`Copied ${copiedCount} meals from yesterday to today!`);
+            }
+        } catch (error) {
+            this.showError('Failed to copy meals from yesterday: ' + error.message);
+            console.error('Error copying meals from previous day:', error);
         }
     }
 
