@@ -872,6 +872,14 @@ class SmartExpenseTracker {
             this.safeAddEventListener('exportShoppingListBtn', 'click', () => this.exportShoppingList());
             this.safeAddEventListener('createGroceryTaskBtn', 'click', () => this.createGroceryShoppingTask());
 
+            // Daily meal planning events
+            this.safeAddEventListener('openDailyMealPlannerBtn', 'click', () => {
+                const dateInput = document.getElementById('mealPlanDate');
+                const selectedDate = dateInput ? new Date(dateInput.value) : new Date();
+                this.showDailyMealPlanner(selectedDate);
+            });
+            this.safeAddEventListener('mealPlanDate', 'change', () => this.updateDailyMealOverview());
+
             // Nutrition tab switching
             document.querySelectorAll('.nutrition-tab-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
