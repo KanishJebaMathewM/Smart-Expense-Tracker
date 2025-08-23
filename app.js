@@ -7186,6 +7186,467 @@ class SmartExpenseTracker {
         }
     }
 
+    // ==============================================
+    // DAILY MEAL MANAGEMENT METHODS
+    // ==============================================
+
+    // Get daily meals for a specific date
+    getDailyMeals(date) {
+        try {
+            const dateKey = this.getDateKey(date);
+            return this.dailyMeals[dateKey] || {
+                breakfast: null,
+                lunch: null,
+                dinner: null,
+                snacks: []
+            };
+        } catch (error) {
+            console.error('Error getting daily meals:', error);
+            return { breakfast: null, lunch: null, dinner: null, snacks: [] };
+        }
+    }
+
+    // Set a meal for a specific date and meal type
+    setDailyMeal(date, mealType, recipeId, servings = 1) {
+        try {
+            const dateKey = this.getDateKey(date);
+
+            if (!this.dailyMeals[dateKey]) {
+                this.dailyMeals[dateKey] = {
+                    breakfast: null,
+                    lunch: null,
+                    dinner: null,
+                    snacks: []
+                };
+            }
+
+            const recipe = this.recipes[recipeId];
+            if (!recipe) {
+                this.showError('Recipe not found');
+                return false;
+            }
+
+            const nutrition = this.calculateRecipeNutrition(recipe);
+            const mealData = {
+                recipeId: recipeId,
+                recipeName: recipe.name,
+                servings: servings,
+                nutrition: {
+                    calories: nutrition.calories * servings,
+                    protein: nutrition.protein * servings,
+                    carbs: nutrition.carbs * servings,
+                    fat: nutrition.fat * servings,
+                    fiber: nutrition.fiber * servings
+                },
+                assignedAt: new Date().toISOString()
+            };
+
+            if (mealType === 'snacks') {
+                this.dailyMeals[dateKey].snacks.push(mealData);
+            } else {
+                this.dailyMeals[dateKey][mealType] = mealData;
+            }
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            return true;
+        } catch (error) {
+            console.error('Error setting daily meal:', error);
+            return false;
+        }
+    }
+
+    // Remove a meal from a specific date and meal type
+    removeDailyMeal(date, mealType, snackIndex = null) {
+        try {
+            const dateKey = this.getDateKey(date);
+
+            if (!this.dailyMeals[dateKey]) {
+                return false;
+            }
+
+            if (mealType === 'snacks' && snackIndex !== null) {
+                this.dailyMeals[dateKey].snacks.splice(snackIndex, 1);
+            } else {
+                this.dailyMeals[dateKey][mealType] = null;
+            }
+
+            // Clean up empty date entries
+            const dayMeals = this.dailyMeals[dateKey];
+            if (!dayMeals.breakfast && !dayMeals.lunch && !dayMeals.dinner && dayMeals.snacks.length === 0) {
+                delete this.dailyMeals[dateKey];
+            }
+
+            this.hasUnsavedChanges = true;
+            this.debouncedSave();
+
+            return true;
+        } catch (error) {
+            console.error('Error removing daily meal:', error);
+            return false;
+        }
+    }
+
+    // Calculate total nutrition for a day
+    calculateDayNutrition(date) {
+        try {
+            const dayMeals = this.getDailyMeals(date);
+            const totalNutrition = {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+                fiber: 0
+            };
+
+            // Add breakfast, lunch, dinner nutrition
+            ['breakfast', 'lunch', 'dinner'].forEach(mealType => {
+                const meal = dayMeals[mealType];
+                if (meal && meal.nutrition) {
+                    totalNutrition.calories += meal.nutrition.calories || 0;
+                    totalNutrition.protein += meal.nutrition.protein || 0;
+                    totalNutrition.carbs += meal.nutrition.carbs || 0;
+                    totalNutrition.fat += meal.nutrition.fat || 0;
+                    totalNutrition.fiber += meal.nutrition.fiber || 0;
+                }
+            });
+
+            // Add snacks nutrition
+            dayMeals.snacks.forEach(snack => {
+                if (snack.nutrition) {
+                    totalNutrition.calories += snack.nutrition.calories || 0;
+                    totalNutrition.protein += snack.nutrition.protein || 0;
+                    totalNutrition.carbs += snack.nutrition.carbs || 0;
+                    totalNutrition.fat += snack.nutrition.fat || 0;
+                    totalNutrition.fiber += snack.nutrition.fiber || 0;
+                }
+            });
+
+            return totalNutrition;
+        } catch (error) {
+            console.error('Error calculating day nutrition:', error);
+            return { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+        }
+    }
+
+    // Show daily meal planner modal
+    showDailyMealPlanner(date = new Date()) {
+        try {
+            const dayMeals = this.getDailyMeals(date);
+            const dateString = date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const modalHtml = `
+                <div id="dailyMealModal" class="modal active">
+                    <div class="modal-content large-modal">
+                        <div class="modal-header">
+                            <h3>Daily Meal Planner - ${dateString}</h3>
+                            <button class="close-btn" onclick="tracker.hideDailyMealPlanner()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="daily-meal-planner">
+                                ${this.renderMealTypeSection('breakfast', dayMeals.breakfast, date)}
+                                ${this.renderMealTypeSection('lunch', dayMeals.lunch, date)}
+                                ${this.renderMealTypeSection('dinner', dayMeals.dinner, date)}
+                                ${this.renderSnacksSection(dayMeals.snacks, date)}
+                            </div>
+
+                            <div class="daily-nutrition-summary">
+                                <h4>Daily Nutrition Summary</h4>
+                                <div class="nutrition-totals" id="dailyNutritionTotals">
+                                    ${this.renderDayNutritionSummary(date)}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="tracker.hideDailyMealPlanner()">Close</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="dailyMealOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        } catch (error) {
+            console.error('Error showing daily meal planner:', error);
+        }
+    }
+
+    // Hide daily meal planner modal
+    hideDailyMealPlanner() {
+        try {
+            const modal = document.getElementById('dailyMealModal');
+            const overlay = document.getElementById('dailyMealOverlay');
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding daily meal planner:', error);
+        }
+    }
+
+    // Render meal type section for the modal
+    renderMealTypeSection(mealType, meal, date) {
+        const mealTypeTitle = mealType.charAt(0).toUpperCase() + mealType.slice(1);
+
+        return `
+            <div class="meal-type-section">
+                <div class="meal-type-header">
+                    <h4>${mealTypeTitle}</h4>
+                    <button class="btn btn-small" onclick="tracker.showMealSelector('${mealType}', '${date.toISOString()}')">
+                        ${meal ? 'Change' : 'Add'} ${mealTypeTitle}
+                    </button>
+                </div>
+                <div class="meal-content">
+                    ${meal ? `
+                        <div class="assigned-meal">
+                            <div class="meal-info">
+                                <div class="meal-name">${meal.recipeName}</div>
+                                <div class="meal-nutrition">
+                                    ${Math.round(meal.nutrition.calories)} kcal |
+                                    ${Math.round(meal.nutrition.protein)}g protein |
+                                    Servings: ${meal.servings}
+                                </div>
+                            </div>
+                            <button class="btn btn-small btn-danger" onclick="tracker.removeMealFromDay('${date.toISOString()}', '${mealType}')">
+                                Remove
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="empty-meal">
+                            <p>No ${mealType} planned</p>
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
+    }
+
+    // Render snacks section for the modal
+    renderSnacksSection(snacks, date) {
+        return `
+            <div class="meal-type-section">
+                <div class="meal-type-header">
+                    <h4>Snacks</h4>
+                    <button class="btn btn-small" onclick="tracker.showMealSelector('snacks', '${date.toISOString()}')">
+                        Add Snack
+                    </button>
+                </div>
+                <div class="meal-content">
+                    ${snacks.length > 0 ? snacks.map((snack, index) => `
+                        <div class="assigned-meal">
+                            <div class="meal-info">
+                                <div class="meal-name">${snack.recipeName}</div>
+                                <div class="meal-nutrition">
+                                    ${Math.round(snack.nutrition.calories)} kcal |
+                                    ${Math.round(snack.nutrition.protein)}g protein |
+                                    Servings: ${snack.servings}
+                                </div>
+                            </div>
+                            <button class="btn btn-small btn-danger" onclick="tracker.removeMealFromDay('${date.toISOString()}', 'snacks', ${index})">
+                                Remove
+                            </button>
+                        </div>
+                    `).join('') : `
+                        <div class="empty-meal">
+                            <p>No snacks planned</p>
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
+    }
+
+    // Render day nutrition summary
+    renderDayNutritionSummary(date) {
+        const dayNutrition = this.calculateDayNutrition(date);
+        const targets = this.userPreferences;
+
+        return `
+            <div class="nutrition-summary-grid">
+                <div class="nutrition-item">
+                    <div class="nutrition-label">Calories</div>
+                    <div class="nutrition-value">${Math.round(dayNutrition.calories)} / ${targets.calorieTarget}</div>
+                    <div class="nutrition-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((dayNutrition.calories / targets.calorieTarget) * 100, 100)}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nutrition-item">
+                    <div class="nutrition-label">Protein (g)</div>
+                    <div class="nutrition-value">${Math.round(dayNutrition.protein)} / ${targets.proteinTarget}</div>
+                    <div class="nutrition-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((dayNutrition.protein / targets.proteinTarget) * 100, 100)}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nutrition-item">
+                    <div class="nutrition-label">Carbs (g)</div>
+                    <div class="nutrition-value">${Math.round(dayNutrition.carbs)} / ${targets.carbTarget}</div>
+                    <div class="nutrition-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((dayNutrition.carbs / targets.carbTarget) * 100, 100)}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nutrition-item">
+                    <div class="nutrition-label">Fat (g)</div>
+                    <div class="nutrition-value">${Math.round(dayNutrition.fat)} / ${targets.fatTarget}</div>
+                    <div class="nutrition-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((dayNutrition.fat / targets.fatTarget) * 100, 100)}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Show meal selector for a specific meal type
+    showMealSelector(mealType, dateIso) {
+        try {
+            const availableRecipes = Object.values(this.recipes);
+            const date = new Date(dateIso);
+
+            if (availableRecipes.length === 0) {
+                this.showInfo('No recipes available. Add some recipes first.');
+                return;
+            }
+
+            // Filter recipes by meal type if applicable
+            const suitableRecipes = availableRecipes.filter(recipe => {
+                if (mealType === 'breakfast') {
+                    return recipe.category === 'breakfast' || recipe.category === 'snack';
+                } else if (mealType === 'snacks') {
+                    return recipe.category === 'snack' || recipe.category === 'breakfast';
+                } else {
+                    return recipe.category === 'main' || recipe.category === 'side';
+                }
+            });
+
+            const recipesToShow = suitableRecipes.length > 0 ? suitableRecipes : availableRecipes;
+
+            const modalHtml = `
+                <div id="mealSelectorModal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Select Recipe for ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}</h3>
+                            <button class="close-btn" onclick="tracker.hideMealSelector()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="servings-input">
+                                <label for="mealServings">Number of servings:</label>
+                                <input type="number" id="mealServings" min="0.5" max="10" step="0.5" value="1">
+                            </div>
+                            <div class="recipe-selection-list">
+                                ${recipesToShow.map(recipe => {
+                                    const nutrition = this.calculateRecipeNutrition(recipe);
+                                    return `
+                                        <div class="recipe-option" onclick="tracker.selectMealForDay('${dateIso}', '${mealType}', '${recipe.id}')">
+                                            <div class="recipe-info">
+                                                <div class="recipe-name">${recipe.name}</div>
+                                                <div class="recipe-details">
+                                                    <span class="recipe-cuisine">${recipe.cuisine || 'General'}</span>
+                                                    <span class="recipe-diet">${recipe.dietType}</span>
+                                                    <span class="recipe-time">${recipe.prepTime} min</span>
+                                                </div>
+                                                <div class="recipe-nutrition">
+                                                    ${Math.round(nutrition.calories)} kcal |
+                                                    ${Math.round(nutrition.protein)}g protein |
+                                                    ${Math.round(nutrition.carbs)}g carbs
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="tracker.hideMealSelector()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="mealSelectorOverlay" class="overlay active"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        } catch (error) {
+            console.error('Error showing meal selector:', error);
+        }
+    }
+
+    // Hide meal selector modal
+    hideMealSelector() {
+        try {
+            const modal = document.getElementById('mealSelectorModal');
+            const overlay = document.getElementById('mealSelectorOverlay');
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        } catch (error) {
+            console.error('Error hiding meal selector:', error);
+        }
+    }
+
+    // Select meal for a specific day
+    selectMealForDay(dateIso, mealType, recipeId) {
+        try {
+            const date = new Date(dateIso);
+            const servingsInput = document.getElementById('mealServings');
+            const servings = servingsInput ? parseFloat(servingsInput.value) : 1;
+
+            if (this.setDailyMeal(date, mealType, recipeId, servings)) {
+                this.hideMealSelector();
+
+                // Update the daily meal planner if it's open
+                const dailyMealModal = document.getElementById('dailyMealModal');
+                if (dailyMealModal) {
+                    // Refresh the modal content
+                    this.hideDailyMealPlanner();
+                    setTimeout(() => this.showDailyMealPlanner(date), 100);
+                }
+
+                this.showSuccess(`${this.recipes[recipeId].name} added to ${mealType}!`);
+            }
+        } catch (error) {
+            this.showError('Failed to add meal: ' + error.message);
+            console.error('Error selecting meal for day:', error);
+        }
+    }
+
+    // Remove meal from day
+    async removeMealFromDay(dateIso, mealType, snackIndex = null) {
+        try {
+            const date = new Date(dateIso);
+            const mealTypeText = mealType === 'snacks' ? 'snack' : mealType;
+
+            const shouldRemove = await confirmAsync(`Remove this ${mealTypeText} from your meal plan?`, {
+                title: 'Remove Meal',
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-danger'
+            });
+
+            if (shouldRemove) {
+                if (this.removeDailyMeal(date, mealType, snackIndex)) {
+                    // Refresh the modal content
+                    this.hideDailyMealPlanner();
+                    setTimeout(() => this.showDailyMealPlanner(date), 100);
+
+                    this.showSuccess(`${mealTypeText.charAt(0).toUpperCase() + mealTypeText.slice(1)} removed from meal plan!`);
+                }
+            }
+        } catch (error) {
+            this.showError('Failed to remove meal: ' + error.message);
+            console.error('Error removing meal from day:', error);
+        }
+    }
+
     // Complete shopping task and mark items as purchased
     async completeShoppingTask(taskId) {
         try {
