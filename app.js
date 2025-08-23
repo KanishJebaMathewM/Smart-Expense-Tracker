@@ -4509,6 +4509,7 @@ class SmartExpenseTracker {
             // Ensure data structures exist
             this.inventory = this.inventory || {};
             this.mealPlans = this.mealPlans || {};
+            this.dailyMeals = this.dailyMeals || {};
             this.recipes = this.recipes || {};
             this.shoppingList = this.shoppingList || {};
             this.nutritionLog = this.nutritionLog || {};
