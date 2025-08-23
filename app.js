@@ -7374,6 +7374,17 @@ class SmartExpenseTracker {
             this.hasUnsavedChanges = true;
             this.debouncedSave();
 
+            // Update nutrition insights if in nutrition section
+            if (document.getElementById('nutritionSection')?.classList.contains('active')) {
+                this.updateNutritionOverview();
+
+                // Update insights tab if it's currently active
+                const insightsTab = document.getElementById('insightsTab');
+                if (insightsTab?.classList.contains('active')) {
+                    this.renderNutritionInsights();
+                }
+            }
+
             return true;
         } catch (error) {
             console.error('Error setting daily meal:', error);
