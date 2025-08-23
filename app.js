@@ -92,6 +92,7 @@ class SmartExpenseTracker {
         // Nutrition planner data structures
         this.inventory = {}; // Kitchen stock items
         this.mealPlans = {}; // Weekly meal plans
+        this.dailyMeals = {}; // Daily meal plans (breakfast, lunch, dinner)
         this.recipes = {}; // User saved recipes
         this.shoppingList = {}; // Shopping list items
         this.nutritionLog = {}; // Daily nutrition tracking
