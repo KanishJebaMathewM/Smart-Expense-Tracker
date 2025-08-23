@@ -116,16 +116,30 @@ class SmartExpenseTracker {
         this.editingInventoryId = null;
         this.currentMealPlan = null;
 
-        // Comprehensive food nutrition database
+        // Comprehensive food nutrition database with South Indian ingredients
         this.foodDatabase = {
             // Grains & Cereals (per 100g)
             'rice': { name: 'Rice (White, Cooked)', calories: 130, protein: 2.7, carbs: 28, fat: 0.3, fiber: 0.4, category: 'grains', unit: 'cups' },
             'brown_rice': { name: 'Brown Rice (Cooked)', calories: 112, protein: 2.6, carbs: 23, fat: 0.9, fiber: 1.8, category: 'grains', unit: 'cups' },
+            'basmati_rice': { name: 'Basmati Rice (Cooked)', calories: 121, protein: 2.5, carbs: 25, fat: 0.4, fiber: 0.6, category: 'grains', unit: 'cups' },
+            'ponni_rice': { name: 'Ponni Rice (Cooked)', calories: 125, protein: 2.8, carbs: 28, fat: 0.2, fiber: 0.3, category: 'grains', unit: 'cups' },
+            'idli_rice': { name: 'Idli Rice (Raw)', calories: 345, protein: 6.8, carbs: 78, fat: 0.7, fiber: 0.4, category: 'grains', unit: 'cups' },
             'wheat_flour': { name: 'Wheat Flour', calories: 364, protein: 10.3, carbs: 76, fat: 1.5, fiber: 2.7, category: 'grains', unit: 'cups' },
+            'semolina': { name: 'Semolina (Rava)', calories: 360, protein: 12.7, carbs: 73, fat: 1.0, fiber: 3.9, category: 'grains', unit: 'cups' },
             'oats': { name: 'Oats', calories: 389, protein: 16.9, carbs: 66.3, fat: 6.9, fiber: 10.6, category: 'grains', unit: 'cups' },
             'quinoa': { name: 'Quinoa (Cooked)', calories: 120, protein: 4.4, carbs: 22, fat: 1.9, fiber: 2.8, category: 'grains', unit: 'cups' },
 
-            // Vegetables (per 100g)
+            // South Indian Lentils & Dals (per 100g)
+            'toor_dal': { name: 'Toor Dal (Cooked)', calories: 118, protein: 8.9, carbs: 19.7, fat: 0.4, fiber: 6.1, category: 'protein', unit: 'cups' },
+            'urad_dal': { name: 'Urad Dal (Cooked)', calories: 105, protein: 8.1, carbs: 17.3, fat: 0.6, fiber: 4.9, category: 'protein', unit: 'cups' },
+            'moong_dal': { name: 'Moong Dal (Cooked)', calories: 104, protein: 7.6, carbs: 18.5, fat: 0.4, fiber: 5.1, category: 'protein', unit: 'cups' },
+            'chana_dal': { name: 'Chana Dal (Cooked)', calories: 164, protein: 8.9, carbs: 27, fat: 2.6, fiber: 7.6, category: 'protein', unit: 'cups' },
+            'masoor_dal': { name: 'Masoor Dal (Cooked)', calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 7.9, category: 'protein', unit: 'cups' },
+            'black_gram': { name: 'Black Gram (Whole Urad)', calories: 341, protein: 25, carbs: 58, fat: 1.6, fiber: 18, category: 'protein', unit: 'cups' },
+            'lentils': { name: 'Lentils (Cooked)', calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 7.9, category: 'protein', unit: 'cups' },
+            'chickpeas': { name: 'Chickpeas (Cooked)', calories: 164, protein: 8.9, carbs: 27, fat: 2.6, fiber: 7.6, category: 'protein', unit: 'cups' },
+
+            // South Indian Vegetables (per 100g)
             'tomato': { name: 'Tomato', calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2, fiber: 1.2, category: 'vegetables', unit: 'pieces' },
             'onion': { name: 'Onion', calories: 40, protein: 1.1, carbs: 9.3, fat: 0.1, fiber: 1.7, category: 'vegetables', unit: 'pieces' },
             'potato': { name: 'Potato', calories: 77, protein: 2.0, carbs: 17, fat: 0.1, fiber: 2.2, category: 'vegetables', unit: 'pieces' },
@@ -134,35 +148,68 @@ class SmartExpenseTracker {
             'broccoli': { name: 'Broccoli', calories: 34, protein: 2.8, carbs: 7, fat: 0.4, fiber: 2.6, category: 'vegetables', unit: 'cups' },
             'cauliflower': { name: 'Cauliflower', calories: 25, protein: 1.9, carbs: 5, fat: 0.3, fiber: 2.0, category: 'vegetables', unit: 'cups' },
             'bell_pepper': { name: 'Bell Pepper', calories: 31, protein: 1.0, carbs: 7, fat: 0.3, fiber: 2.5, category: 'vegetables', unit: 'pieces' },
+            'okra': { name: 'Okra (Bhindi)', calories: 33, protein: 1.9, carbs: 7.5, fat: 0.2, fiber: 3.2, category: 'vegetables', unit: 'cups' },
+            'eggplant': { name: 'Eggplant (Brinjal)', calories: 25, protein: 1.0, carbs: 6, fat: 0.2, fiber: 3.0, category: 'vegetables', unit: 'pieces' },
+            'drumstick': { name: 'Drumstick (Moringa)', calories: 37, protein: 2.1, carbs: 8.5, fat: 0.2, fiber: 3.2, category: 'vegetables', unit: 'pieces' },
+            'bottle_gourd': { name: 'Bottle Gourd (Lauki)', calories: 14, protein: 0.6, carbs: 3.4, fat: 0.0, fiber: 0.5, category: 'vegetables', unit: 'cups' },
+            'ridge_gourd': { name: 'Ridge Gourd (Turai)', calories: 20, protein: 1.2, carbs: 4.2, fat: 0.2, fiber: 1.1, category: 'vegetables', unit: 'cups' },
+            'bitter_gourd': { name: 'Bitter Gourd (Karela)', calories: 17, protein: 1.0, carbs: 3.7, fat: 0.2, fiber: 2.8, category: 'vegetables', unit: 'cups' },
+            'snake_gourd': { name: 'Snake Gourd', calories: 18, protein: 0.5, carbs: 4.4, fat: 0.1, fiber: 0.8, category: 'vegetables', unit: 'cups' },
+            'curry_leaves': { name: 'Curry Leaves', calories: 108, protein: 6.1, carbs: 18.7, fat: 1.0, fiber: 6.4, category: 'vegetables', unit: 'grams' },
+            'plantain': { name: 'Raw Plantain', calories: 122, protein: 1.3, carbs: 31.9, fat: 0.4, fiber: 2.3, category: 'vegetables', unit: 'pieces' },
 
             // Proteins (per 100g)
             'chicken': { name: 'Chicken Breast', calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, category: 'protein', unit: 'grams' },
             'fish': { name: 'Fish (General)', calories: 206, protein: 22, carbs: 0, fat: 12, fiber: 0, category: 'protein', unit: 'grams' },
+            'pomfret': { name: 'Pomfret Fish', calories: 96, protein: 18.8, carbs: 0, fat: 1.9, fiber: 0, category: 'protein', unit: 'grams' },
+            'mackerel': { name: 'Mackerel Fish', calories: 205, protein: 19, carbs: 0, fat: 14, fiber: 0, category: 'protein', unit: 'grams' },
+            'sardine': { name: 'Sardine Fish', calories: 208, protein: 25, carbs: 0, fat: 11, fiber: 0, category: 'protein', unit: 'grams' },
+            'prawns': { name: 'Prawns/Shrimp', calories: 99, protein: 18, carbs: 0.9, fat: 1.5, fiber: 0, category: 'protein', unit: 'grams' },
             'eggs': { name: 'Eggs', calories: 155, protein: 13, carbs: 1.1, fat: 11, fiber: 0, category: 'protein', unit: 'pieces' },
             'paneer': { name: 'Paneer', calories: 265, protein: 18.3, carbs: 1.2, fat: 20.8, fiber: 0, category: 'protein', unit: 'grams' },
             'tofu': { name: 'Tofu', calories: 76, protein: 8, carbs: 1.9, fat: 4.8, fiber: 0.3, category: 'protein', unit: 'grams' },
-            'lentils': { name: 'Lentils (Cooked)', calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 7.9, category: 'protein', unit: 'cups' },
-            'chickpeas': { name: 'Chickpeas (Cooked)', calories: 164, protein: 8.9, carbs: 27, fat: 2.6, fiber: 7.6, category: 'protein', unit: 'cups' },
 
             // Dairy (per 100g/ml)
             'milk': { name: 'Milk (Whole)', calories: 61, protein: 3.2, carbs: 4.8, fat: 3.3, fiber: 0, category: 'dairy', unit: 'ml' },
+            'coconut_milk': { name: 'Coconut Milk', calories: 230, protein: 2.3, carbs: 6, fat: 24, fiber: 2.2, category: 'dairy', unit: 'ml' },
             'yogurt': { name: 'Yogurt (Plain)', calories: 59, protein: 10, carbs: 3.6, fat: 0.4, fiber: 0, category: 'dairy', unit: 'grams' },
+            'buttermilk': { name: 'Buttermilk', calories: 40, protein: 3.3, carbs: 4.8, fat: 0.9, fiber: 0, category: 'dairy', unit: 'ml' },
             'cheese': { name: 'Cheese', calories: 113, protein: 7, carbs: 1, fat: 9, fiber: 0, category: 'dairy', unit: 'grams' },
 
             // Oils & Fats (per 100g)
             'oil': { name: 'Cooking Oil', calories: 884, protein: 0, carbs: 0, fat: 100, fiber: 0, category: 'fats', unit: 'ml' },
+            'coconut_oil': { name: 'Coconut Oil', calories: 862, protein: 0, carbs: 0, fat: 100, fiber: 0, category: 'fats', unit: 'ml' },
+            'sesame_oil': { name: 'Sesame Oil (Gingelly)', calories: 884, protein: 0, carbs: 0, fat: 100, fiber: 0, category: 'fats', unit: 'ml' },
+            'mustard_oil': { name: 'Mustard Oil', calories: 884, protein: 0, carbs: 0, fat: 100, fiber: 0, category: 'fats', unit: 'ml' },
             'butter': { name: 'Butter', calories: 717, protein: 0.9, carbs: 0.1, fat: 81, fiber: 0, category: 'fats', unit: 'grams' },
             'ghee': { name: 'Ghee', calories: 900, protein: 0, carbs: 0, fat: 100, fiber: 0, category: 'fats', unit: 'grams' },
 
-            // Fruits (per 100g)
+            // South Indian Fruits (per 100g)
             'apple': { name: 'Apple', calories: 52, protein: 0.3, carbs: 14, fat: 0.2, fiber: 2.4, category: 'fruits', unit: 'pieces' },
             'banana': { name: 'Banana', calories: 89, protein: 1.1, carbs: 23, fat: 0.3, fiber: 2.6, category: 'fruits', unit: 'pieces' },
             'orange': { name: 'Orange', calories: 47, protein: 0.9, carbs: 12, fat: 0.1, fiber: 2.4, category: 'fruits', unit: 'pieces' },
+            'mango': { name: 'Mango', calories: 60, protein: 0.8, carbs: 15, fat: 0.4, fiber: 1.6, category: 'fruits', unit: 'pieces' },
+            'coconut': { name: 'Coconut (Fresh)', calories: 354, protein: 3.3, carbs: 15, fat: 33, fiber: 9, category: 'fruits', unit: 'pieces' },
+            'jackfruit': { name: 'Jackfruit', calories: 95, protein: 1.7, carbs: 23, fat: 0.6, fiber: 1.5, category: 'fruits', unit: 'cups' },
+            'guava': { name: 'Guava', calories: 68, protein: 2.6, carbs: 14, fat: 1.0, fiber: 5.4, category: 'fruits', unit: 'pieces' },
+            'papaya': { name: 'Papaya', calories: 43, protein: 0.5, carbs: 11, fat: 0.3, fiber: 1.7, category: 'fruits', unit: 'cups' },
 
-            // Spices & Others (per 100g)
+            // South Indian Spices & Others (per 100g)
             'salt': { name: 'Salt', calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, category: 'spices', unit: 'grams' },
             'sugar': { name: 'Sugar', calories: 387, protein: 0, carbs: 100, fat: 0, fiber: 0, category: 'spices', unit: 'grams' },
-            'turmeric': { name: 'Turmeric', calories: 354, protein: 7.8, carbs: 65, fat: 9.9, fiber: 21, category: 'spices', unit: 'grams' }
+            'jaggery': { name: 'Jaggery (Gur)', calories: 383, protein: 0.4, carbs: 98, fat: 0.1, fiber: 0, category: 'spices', unit: 'grams' },
+            'turmeric': { name: 'Turmeric', calories: 354, protein: 7.8, carbs: 65, fat: 9.9, fiber: 21, category: 'spices', unit: 'grams' },
+            'coriander_powder': { name: 'Coriander Powder', calories: 298, protein: 12.4, carbs: 55, fat: 17.8, fiber: 42, category: 'spices', unit: 'grams' },
+            'cumin_powder': { name: 'Cumin Powder', calories: 375, protein: 18, carbs: 44, fat: 22, fiber: 11, category: 'spices', unit: 'grams' },
+            'red_chili_powder': { name: 'Red Chili Powder', calories: 282, protein: 13.5, carbs: 57, fat: 14, fiber: 35, category: 'spices', unit: 'grams' },
+            'mustard_seeds': { name: 'Mustard Seeds', calories: 508, protein: 26, carbs: 28, fat: 36, fiber: 12, category: 'spices', unit: 'grams' },
+            'fenugreek_seeds': { name: 'Fenugreek Seeds (Methi)', calories: 323, protein: 23, carbs: 58, fat: 6.4, fiber: 25, category: 'spices', unit: 'grams' },
+            'cardamom': { name: 'Cardamom', calories: 311, protein: 10.8, carbs: 68, fat: 6.7, fiber: 28, category: 'spices', unit: 'grams' },
+            'cinnamon': { name: 'Cinnamon', calories: 247, protein: 4.0, carbs: 81, fat: 1.2, fiber: 53, category: 'spices', unit: 'grams' },
+            'cloves': { name: 'Cloves', calories: 274, protein: 6.0, carbs: 65, fat: 13, fiber: 34, category: 'spices', unit: 'grams' },
+            'black_pepper': { name: 'Black Pepper', calories: 251, protein: 10.4, carbs: 64, fat: 3.3, fiber: 25, category: 'spices', unit: 'grams' },
+            'tamarind': { name: 'Tamarind', calories: 239, protein: 2.8, carbs: 63, fat: 0.6, fiber: 5.1, category: 'spices', unit: 'grams' },
+            'asafoetida': { name: 'Asafoetida (Hing)', calories: 297, protein: 4.0, carbs: 68, fat: 1.1, fiber: 7.0, category: 'spices', unit: 'grams' }
         };
 
         this.init();
