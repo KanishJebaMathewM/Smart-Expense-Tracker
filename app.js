@@ -4973,15 +4973,74 @@ class SmartExpenseTracker {
         }
     }
 
-    // Get nutrition log for a specific date
+    // Get nutrition log for a specific date (integrates with daily meals)
     getNutritionLogForDate(date) {
         try {
             const dateKey = this.getDateKey(date);
-            return this.nutritionLog[dateKey] || {
-                meals: [],
-                totalNutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+
+            // Check if there's a specific nutrition log entry
+            if (this.nutritionLog[dateKey]) {
+                return this.nutritionLog[dateKey];
+            }
+
+            // If no nutrition log, create one from daily meals
+            const dayMeals = this.getDailyMeals(date);
+            const totalNutrition = this.calculateDayNutrition(date);
+
+            // Convert daily meals to nutrition log format
+            const meals = [];
+
+            if (dayMeals.breakfast) {
+                meals.push({
+                    recipeId: dayMeals.breakfast.recipeId,
+                    recipeName: dayMeals.breakfast.recipeName,
+                    servings: dayMeals.breakfast.servings,
+                    mealType: 'breakfast',
+                    nutrition: dayMeals.breakfast.nutrition,
+                    loggedAt: dayMeals.breakfast.assignedAt
+                });
+            }
+
+            if (dayMeals.lunch) {
+                meals.push({
+                    recipeId: dayMeals.lunch.recipeId,
+                    recipeName: dayMeals.lunch.recipeName,
+                    servings: dayMeals.lunch.servings,
+                    mealType: 'lunch',
+                    nutrition: dayMeals.lunch.nutrition,
+                    loggedAt: dayMeals.lunch.assignedAt
+                });
+            }
+
+            if (dayMeals.dinner) {
+                meals.push({
+                    recipeId: dayMeals.dinner.recipeId,
+                    recipeName: dayMeals.dinner.recipeName,
+                    servings: dayMeals.dinner.servings,
+                    mealType: 'dinner',
+                    nutrition: dayMeals.dinner.nutrition,
+                    loggedAt: dayMeals.dinner.assignedAt
+                });
+            }
+
+            // Add snacks
+            dayMeals.snacks.forEach((snack, index) => {
+                meals.push({
+                    recipeId: snack.recipeId,
+                    recipeName: snack.recipeName,
+                    servings: snack.servings,
+                    mealType: `snack_${index + 1}`,
+                    nutrition: snack.nutrition,
+                    loggedAt: snack.assignedAt
+                });
+            });
+
+            return {
+                meals: meals,
+                totalNutrition: totalNutrition,
                 waterIntake: 0,
-                exerciseMinutes: 0
+                exerciseMinutes: 0,
+                fromDailyMeals: true // Flag to indicate this came from daily meals
             };
         } catch (error) {
             console.error('Error getting nutrition log for date:', error);
