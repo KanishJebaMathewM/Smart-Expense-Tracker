@@ -2955,9 +2955,9 @@ class SmartExpenseTracker {
 
             // Render current tab content
             const activeTab = document.querySelector('.nutrition-tab-btn.active');
-            const currentTab = activeTab ? activeTab.dataset.nutritionTab : 'inventory';
+            const currentTab = activeTab ? activeTab.dataset.nutritionTab : 'daily-meals';
 
-            // Switch to inventory tab by default and render content
+            // Switch to daily-meals tab by default for better user experience
             this.switchNutritionTab(currentTab);
 
             console.log('Nutrition section initialized successfully');
@@ -4483,7 +4483,7 @@ class SmartExpenseTracker {
                             </div>
                             <div class="summary-details">
                                 <span>Total Monthly: ₹${monthlyExpenses}</span>
-                                <span>Task Related: ₹${totalTaskSpent}</span>
+                                <span>Task Related: ���${totalTaskSpent}</span>
                                 <span>Other: ₹${monthlyExpenses - totalTaskSpent}</span>
                             </div>
                         </div>
