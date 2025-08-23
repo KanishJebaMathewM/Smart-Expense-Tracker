@@ -4528,80 +4528,221 @@ class SmartExpenseTracker {
         }
     }
 
-    // Initialize default recipes
+    // Initialize default South Indian healthy recipes
     initializeDefaultRecipes() {
         try {
             this.recipes = {
-                'fried_rice': {
-                    id: 'fried_rice',
-                    name: 'Vegetable Fried Rice',
+                'idli': {
+                    id: 'idli',
+                    name: 'Idli (Steamed Rice Cakes)',
                     ingredients: {
-                        'rice': { quantity: 1, unit: 'cups' },
-                        'eggs': { quantity: 2, unit: 'pieces' },
-                        'carrot': { quantity: 0.5, unit: 'pieces' },
-                        'onion': { quantity: 0.5, unit: 'pieces' },
-                        'oil': { quantity: 2, unit: 'ml' }
+                        'idli_rice': { quantity: 2, unit: 'cups' },
+                        'urad_dal': { quantity: 0.5, unit: 'cups' },
+                        'salt': { quantity: 1, unit: 'grams' }
                     },
-                    instructions: ['Cook rice', 'Scramble eggs', 'Stir-fry vegetables', 'Mix everything together'],
-                    servings: 2,
-                    prepTime: 30,
-                    difficulty: 'easy',
-                    category: 'main',
-                    cuisine: 'asian',
+                    instructions: [
+                        'Soak rice and urad dal separately for 6 hours',
+                        'Grind urad dal to smooth paste',
+                        'Grind rice to coarse paste',
+                        'Mix both batters, add salt and ferment overnight',
+                        'Steam in idli plates for 12-15 minutes'
+                    ],
+                    servings: 4,
+                    prepTime: 720, // includes soaking and fermentation time
+                    difficulty: 'medium',
+                    category: 'breakfast',
+                    cuisine: 'south indian',
                     dietType: 'veg'
                 },
-                'chicken_curry': {
-                    id: 'chicken_curry',
-                    name: 'Chicken Curry',
+                'dosa': {
+                    id: 'dosa',
+                    name: 'Plain Dosa (Crispy Crepe)',
                     ingredients: {
-                        'chicken': { quantity: 300, unit: 'grams' },
-                        'onion': { quantity: 1, unit: 'pieces' },
-                        'tomato': { quantity: 2, unit: 'pieces' },
-                        'oil': { quantity: 3, unit: 'ml' },
-                        'turmeric': { quantity: 1, unit: 'grams' }
+                        'idli_rice': { quantity: 3, unit: 'cups' },
+                        'urad_dal': { quantity: 1, unit: 'cups' },
+                        'salt': { quantity: 1, unit: 'grams' },
+                        'oil': { quantity: 2, unit: 'ml' }
                     },
-                    instructions: ['Marinate chicken', 'Cook onions', 'Add tomatoes and spices', 'Add chicken and simmer'],
-                    servings: 3,
+                    instructions: [
+                        'Soak rice and dal separately for 6 hours',
+                        'Grind to smooth batter and ferment overnight',
+                        'Heat pan, spread batter thin',
+                        'Drizzle oil, cook until golden',
+                        'Fold and serve hot'
+                    ],
+                    servings: 6,
+                    prepTime: 720,
+                    difficulty: 'medium',
+                    category: 'breakfast',
+                    cuisine: 'south indian',
+                    dietType: 'veg'
+                },
+                'sambar': {
+                    id: 'sambar',
+                    name: 'Sambar (Lentil Curry)',
+                    ingredients: {
+                        'toor_dal': { quantity: 1, unit: 'cups' },
+                        'tomato': { quantity: 2, unit: 'pieces' },
+                        'onion': { quantity: 1, unit: 'pieces' },
+                        'drumstick': { quantity: 2, unit: 'pieces' },
+                        'okra': { quantity: 0.5, unit: 'cups' },
+                        'tamarind': { quantity: 15, unit: 'grams' },
+                        'turmeric': { quantity: 0.5, unit: 'grams' },
+                        'mustard_seeds': { quantity: 1, unit: 'grams' },
+                        'curry_leaves': { quantity: 2, unit: 'grams' },
+                        'oil': { quantity: 10, unit: 'ml' }
+                    },
+                    instructions: [
+                        'Cook toor dal with turmeric until soft',
+                        'Soak tamarind and extract juice',
+                        'Heat oil, add mustard seeds and curry leaves',
+                        'Add vegetables and cook until tender',
+                        'Add tamarind juice and cooked dal',
+                        'Simmer until well combined'
+                    ],
+                    servings: 4,
                     prepTime: 45,
                     difficulty: 'medium',
                     category: 'main',
-                    cuisine: 'indian',
-                    dietType: 'non-veg'
+                    cuisine: 'south indian',
+                    dietType: 'veg'
                 },
-                'oats_breakfast': {
-                    id: 'oats_breakfast',
-                    name: 'Healthy Oats Bowl',
+                'rasam': {
+                    id: 'rasam',
+                    name: 'Tomato Rasam (Spiced Soup)',
                     ingredients: {
-                        'oats': { quantity: 0.5, unit: 'cups' },
-                        'milk': { quantity: 200, unit: 'ml' },
-                        'banana': { quantity: 1, unit: 'pieces' },
-                        'apple': { quantity: 0.5, unit: 'pieces' }
+                        'tomato': { quantity: 3, unit: 'pieces' },
+                        'tamarind': { quantity: 10, unit: 'grams' },
+                        'turmeric': { quantity: 0.5, unit: 'grams' },
+                        'black_pepper': { quantity: 1, unit: 'grams' },
+                        'cumin_powder': { quantity: 1, unit: 'grams' },
+                        'mustard_seeds': { quantity: 1, unit: 'grams' },
+                        'curry_leaves': { quantity: 2, unit: 'grams' },
+                        'ghee': { quantity: 5, unit: 'grams' },
+                        'salt': { quantity: 1, unit: 'grams' }
                     },
-                    instructions: ['Cook oats with milk', 'Add chopped fruits', 'Mix and serve'],
-                    servings: 1,
-                    prepTime: 10,
+                    instructions: [
+                        'Extract tamarind juice',
+                        'Mash tomatoes and add to tamarind water',
+                        'Add turmeric, pepper, cumin powder and salt',
+                        'Boil until flavors combine',
+                        'Temper with mustard seeds and curry leaves in ghee',
+                        'Serve hot with rice'
+                    ],
+                    servings: 3,
+                    prepTime: 25,
+                    difficulty: 'easy',
+                    category: 'main',
+                    cuisine: 'south indian',
+                    dietType: 'veg'
+                },
+                'coconut_chutney': {
+                    id: 'coconut_chutney',
+                    name: 'Coconut Chutney',
+                    ingredients: {
+                        'coconut': { quantity: 0.5, unit: 'pieces' },
+                        'urad_dal': { quantity: 1, unit: 'grams' },
+                        'mustard_seeds': { quantity: 1, unit: 'grams' },
+                        'curry_leaves': { quantity: 2, unit: 'grams' },
+                        'salt': { quantity: 1, unit: 'grams' },
+                        'oil': { quantity: 5, unit: 'ml' }
+                    },
+                    instructions: [
+                        'Grind coconut with little water to smooth paste',
+                        'Add salt and mix',
+                        'Heat oil, add mustard seeds and urad dal',
+                        'When seeds splutter, add curry leaves',
+                        'Pour tempering over chutney'
+                    ],
+                    servings: 4,
+                    prepTime: 15,
+                    difficulty: 'easy',
+                    category: 'side',
+                    cuisine: 'south indian',
+                    dietType: 'veg'
+                },
+                'curd_rice': {
+                    id: 'curd_rice',
+                    name: 'Curd Rice (Thayir Sadam)',
+                    ingredients: {
+                        'rice': { quantity: 1, unit: 'cups' },
+                        'yogurt': { quantity: 200, unit: 'grams' },
+                        'milk': { quantity: 50, unit: 'ml' },
+                        'mustard_seeds': { quantity: 1, unit: 'grams' },
+                        'curry_leaves': { quantity: 2, unit: 'grams' },
+                        'salt': { quantity: 1, unit: 'grams' },
+                        'oil': { quantity: 5, unit: 'ml' }
+                    },
+                    instructions: [
+                        'Cook rice and let it cool slightly',
+                        'Mash rice with little milk',
+                        'Mix in yogurt and salt',
+                        'Heat oil, add mustard seeds and curry leaves',
+                        'Pour tempering over curd rice',
+                        'Serve chilled'
+                    ],
+                    servings: 2,
+                    prepTime: 20,
+                    difficulty: 'easy',
+                    category: 'main',
+                    cuisine: 'south indian',
+                    dietType: 'veg'
+                },
+                'upma': {
+                    id: 'upma',
+                    name: 'Semolina Upma',
+                    ingredients: {
+                        'semolina': { quantity: 1, unit: 'cups' },
+                        'onion': { quantity: 1, unit: 'pieces' },
+                        'mustard_seeds': { quantity: 1, unit: 'grams' },
+                        'curry_leaves': { quantity: 2, unit: 'grams' },
+                        'turmeric': { quantity: 0.5, unit: 'grams' },
+                        'salt': { quantity: 1, unit: 'grams' },
+                        'oil': { quantity: 15, unit: 'ml' }
+                    },
+                    instructions: [
+                        'Dry roast semolina until aromatic',
+                        'Heat oil, add mustard seeds and curry leaves',
+                        'Add chopped onions and sauté',
+                        'Add 2 cups water, salt and turmeric',
+                        'Slowly add roasted semolina while stirring',
+                        'Cook until water is absorbed'
+                    ],
+                    servings: 3,
+                    prepTime: 25,
                     difficulty: 'easy',
                     category: 'breakfast',
-                    cuisine: 'healthy',
+                    cuisine: 'south indian',
                     dietType: 'veg'
                 },
-                'paneer_curry': {
-                    id: 'paneer_curry',
-                    name: 'Paneer Butter Masala',
+                'fish_curry': {
+                    id: 'fish_curry',
+                    name: 'South Indian Fish Curry',
                     ingredients: {
-                        'paneer': { quantity: 200, unit: 'grams' },
-                        'tomato': { quantity: 3, unit: 'pieces' },
+                        'pomfret': { quantity: 500, unit: 'grams' },
+                        'coconut_milk': { quantity: 200, unit: 'ml' },
+                        'tomato': { quantity: 2, unit: 'pieces' },
                         'onion': { quantity: 1, unit: 'pieces' },
-                        'butter': { quantity: 2, unit: 'grams' },
-                        'milk': { quantity: 50, unit: 'ml' }
+                        'tamarind': { quantity: 10, unit: 'grams' },
+                        'turmeric': { quantity: 1, unit: 'grams' },
+                        'red_chili_powder': { quantity: 2, unit: 'grams' },
+                        'curry_leaves': { quantity: 3, unit: 'grams' },
+                        'coconut_oil': { quantity: 15, unit: 'ml' }
                     },
-                    instructions: ['Prepare tomato base', 'Add paneer cubes', 'Simmer with cream', 'Garnish and serve'],
-                    servings: 2,
-                    prepTime: 35,
+                    instructions: [
+                        'Marinate fish with turmeric and salt',
+                        'Heat coconut oil, fry fish lightly',
+                        'Sauté onions and tomatoes',
+                        'Add spices and tamarind water',
+                        'Add coconut milk and bring to boil',
+                        'Add fried fish and simmer until done'
+                    ],
+                    servings: 4,
+                    prepTime: 40,
                     difficulty: 'medium',
                     category: 'main',
-                    cuisine: 'indian',
-                    dietType: 'veg'
+                    cuisine: 'south indian',
+                    dietType: 'non-veg'
                 }
             };
 
