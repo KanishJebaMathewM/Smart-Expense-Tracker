@@ -966,6 +966,7 @@ class SmartExpenseTracker {
                 // Load nutrition planner data
                 this.inventory = data.inventory || {};
                 this.mealPlans = data.mealPlans || {};
+                this.dailyMeals = data.dailyMeals || {};
                 this.recipes = data.recipes || {};
                 this.shoppingList = data.shoppingList || {};
                 this.nutritionLog = data.nutritionLog || {};
