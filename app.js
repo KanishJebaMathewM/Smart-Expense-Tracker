@@ -1070,6 +1070,7 @@ class SmartExpenseTracker {
                 // Nutrition planner data
                 inventory: this.inventory || {},
                 mealPlans: this.mealPlans || {},
+                dailyMeals: this.dailyMeals || {},
                 recipes: this.recipes || {},
                 shoppingList: this.shoppingList || {},
                 nutritionLog: this.nutritionLog || {},
